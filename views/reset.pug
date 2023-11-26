@@ -1,0 +1,44 @@
+doctype html
+html(land="en")
+    include common/new/header.pug
+    +head("Kids Creative Cards - Forgotten Password" )
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+
+
+    body(style="background-color:white !important;padding-top:3rem")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        script(src="javascript/reset.js")
+        section.product-section(style="margin-top:10px")
+            .container.spad
+                .row
+                    .col-sm-12
+                        if(valid)
+                            form(id="form" action="/", method ="POST")
+                                .card.shadow.mb-4
+                                    .card-body(style="text-align:center")
+                                        h4(style="text-align:center") Reset Password
+                                
+                                        .row(style="margin-top:20px")
+                                            .col-sm-12
+                                                label(for="password") New Password:
+                                                input.form-control(type="password" id="password" required=true)
+                                                p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errors") 
+                                        .row(style="margin-top:20px;margin-bottom:15px;")
+                                            .col-sm-12
+                                                label(for="rePassword") Re-Enter Password:
+                                                input.form-control(type="password" id="rePassword" required=true)
+                                        input(id="email" style="display:none" value=email)
+                                        input(type="submit" value="Send" id="send" ).site-btn
+                        else
+                            h1(style="margin-bottom:20px;text-align:center;width:100%") Invalid Link   
+                            if(expired)
+                                p(style="color:#000; font-size:18px;margin:0px;text-align:center") Your link has expired, please select <a href="/forgottenPassword">Forgotten Password</a> to restart process
+                            else
+                                p(style="color:#000; font-size:18px;margin:0px;text-align:center") This link didn't originate from us. If you need to reset your password, please select <a href="/forgottenPassword">Forgotten Password</a>   
+
+
+    include ./common/new/footer.pug
+    +footer()   

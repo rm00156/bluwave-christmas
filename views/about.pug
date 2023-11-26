@@ -1,0 +1,52 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("About Us")
+    link(href='assets2/css/style.css' rel='stylesheet')    
+    //- link(href='assets/css/theme.brown.min.css' rel='stylesheet')  
+body
+                                               
+    +navbar()
+
+    section#design.bg-light.fp-table.active.fp-completely.mt-6(data-fp-styles='null' data-anchor='services' )
+        
+        .section
+            // Triangles
+            .bg-triangle.bg-triangle-dark.bg-triangle-left.bg-triangle-top
+            .bg-triangle.bg-triangle-dark.bg-triangle-right.bg-triangle-bottom
+            // Content
+            .container          
+                h1.text-center(style="font-size:4.125rem ;font-weight:500") About Us
+                
+                .row.align-items-center
+                    .col-md-12
+                        p.mt-4.text.offset-lg-1.text-center We setup Kids Cards 4 Christmas after receiving numerous requests from Schools and Nurseries locally, using creative skills children have lots of fun designing cards, while raising much needed funds.
+                        p.text.offset-lg-1.text-center.mb-4 Kids Cards 4 Christmas is supported and owned by The Bluwave Group. We have been professionally designing and printing in the UK for over 20 years.Raising funding for your School or Nursery can be both rewarding and fun and we feel very proud that we can contribute to such a worthwhile cause.
+                        p.text.offset-lg-1.text-center.mb-4 You can read more about The Bluwave Group here, feel free to contact us should you have any comments or suggestions about our Christmas Card website and services advertised. Why not register your School or Nursery today and see how easy it is to start raising funds.
+
+                        
+                        // Image
+                        .mb-5.mb-md-0
+                            img.product(src='img/frontcardsnew.png' alt='...' style="width:500px; text-align:center")
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+
+
+
+    <script src="assets2/libs/flickity-fade/flickity-fade.js"></script>
+    <script src="assets2/libs/jquery-parallax.js/parallax.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/jquery.waypoints.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/shortcuts/inview.min.js"></script>
+    <script src="assets2/libs/fullpage.js/vendors/scrolloverflow.min.js"></script>
+    <script src="assets2/libs/fullpage.js/dist/fullpage.min.js"></script>
+    <script src="assets2/libs/highlightjs/highlight.pack.min.js"></script>
+
+    script(src="assets2/js/theme.min.js")
+    script(src="javascript/home.js")  
+    

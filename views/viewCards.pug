@@ -1,0 +1,213 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("View Cards")
+  link(rel="stylesheet" href="css/temp.css")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      //- script(src="javascript/schoolClassDropDown.js")
+      script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+      script(src="javascript/cards.js")
+      //- form(action='/updateCard', method='POST', enctype="multipart/form-data") 
+      div.grid-container
+        div
+          nav
+            ul.list-group(id="list" style="overflow:hidden; overflow-y:scroll;width:100%;height:100%")
+              each card, index in cards
+                li.list-group-item
+                  canvas.canvas(id=index data-path=(user.accountTypeFk == 1 ? card.path : card.previewPath) data-cardId= card.id )
+                  input(type="text" style="display:none" name='cards' value=card.id)
+                  
+        div
+          br
+          br
+          br
+          canvas.canvas(id="mainCanvas") 
+        div
+          .jumbotron        
+            .row
+              .col-sm-12.col-md-12.col-xs-12
+                form(action='/updateCard', method='POST', id="updateCard" enctype="multipart/form-data")
+                  div.formgroup
+                    label.small.mb-1.mt-3 School:
+                    br
+                    select(name="schoolDropDown" id="schoolDropDown" onchange="selectSchool()" ).mt-3.btn.btn-primary 
+                                          option(value=0) All
+                                          each school in schools
+                                            if(schoolKidArray.schoolId == school.id)
+                                              option(id='school' + school.id value='school' + school.id selected="selected") #{school.name}
+                                            else
+                                              option(id='school' + school.id value='school'+school.id) #{school.name}
+                    br
+                    label.small.mb-1.mt-3 Class:
+                    br
+                    select(name='classDropdown' id='classDropdown' ).mt-3.btn.btn-primary 
+                      option(value=0) All
+                        each schoolClass in reece
+                          alert(reece)
+                          if(schoolClass.id == schoolKidArray.classFk)
+                            option(id='class' + schoolClass.id value='class' + schoolClass.id selected="selected") #{schoolClass.name}
+                          else
+                            option(id='class' + schoolClass.id value='class' + schoolClass.id) #{schoolClass.name}
+                    br
+                    label.small.mb-1.mt-3 Name:
+                    input( id="updateName" required=true value=schoolKidArray.name name='name', type='text').form-control 
+                    label.small.mb-1.mt-3 Age:
+                    input( id="updateAge" required=true , value=schoolKidArray.age name='age', type='text' ).form-control 
+                    input( id="schoolCheckBox"  type="checkbox" name="schoolCheckBox")
+                    | Display School
+                    br
+                    input( id="classCheckBox" type="checkbox" name="classCheckBox")
+                    | Display Class
+                    br
+                    input( id="ageCheckBox" type="checkbox" name="ageCheckBox")
+                    | Display Age
+                    br
+                    label.small.mb-1.mt-3 Picture:
+                    input( type="file" name='picture' id='picture')
+                    label.small.mb-1.mt-3 Artwork:
+                    input( type="file" name='artwork' id='artwork')
+                    
+                  
+                    
+                    input(id="selectedCardId" type="text" name="selectedCardId" style="display:none")
+                    input(id="selectedCardIndex" type="text" name="selectedCardIndex" style="display:none" )
+                    input(id="selectedKidId" type="text" name="selectedKidId" style="display:none" )
+                    script(type="text/javascript").
+                      var schoolKidArray = !{JSON.stringify(schoolKidArray)};
+                      var cards = !{JSON.stringify(cards)};
+                      $('#selectedKidId').val(cards[0].kidFk);
+                      $('#selectedCardIndex').val(0);
+                      $('#selectedCardId').val(cards[0].id);
+                      $('#schoolCheckBox').prop('checked', schoolKidArray.displaySchool == 1 ? true : false);
+                      $('#classCheckBox').prop('checked',schoolKidArray.displayClass == 1 ? true : false);
+                      $('#ageCheckBox').prop('checked',schoolKidArray.displayAge == 1 ? true : false);
+      
+                  
+                  input(type="submit" value ="Update Card" ).mt-3.btn.btn-primary
+                  
+              script(type="text/javascript").
+                $('#updateCard').submit(async (e)=>{
+                    e.preventDefault();
+                    var file = $('#picture').prop('files')[0];
+                    var file2 = $('#artwork').prop('files')[0];
+                    var cards = !{JSON.stringify(cards)};
+                    var data = new FormData();
+                    var request = new XMLHttpRequest();
+                    request.responseType = 'json';
+                    data.append('file', $('#picture').prop('files')[0]);
+                    data.append('file2', $('#artwork').prop('files')[0]);
+                    data.append('classDropdown',$('#classDropdown').val());
+                    data.append('selectedCardId',$('#selectedCardId').val());
+                    data.append('selectedCardIndex',$('#selectedCardIndex').val());
+                    data.append('schoolDropdown',$('#schoolDropDown').val());
+                    data.append('schoolCheckBox', $('#schoolCheckBox').is(':checked'));
+                    data.append('classCheckBox', $('#classCheckBox').is(':checked'));
+                    data.append('ageCheckBox', $('#ageCheckBox').is(':checked'));
+                    data.append('name', $('#updateName').val());
+                    data.append('age', $('#updateAge').val());
+                    data.append('selectedKidId',$('#selectedKidId').val());
+
+                    request.addEventListener('load', function(e){
+
+                      var data = request.response;
+                      var user = !{JSON.stringify(user)};
+                      let cardPath = user.accountTypeFk == 1 ? data.path : data.previewPath;
+                      $('#' + data.cardIndex ).attr('data-path', cardPath );
+                      $('#' + data.cardIndex ).trigger('click');
+
+                       console.log(data.cardIndex);
+                    //- console.log(cardPath)
+                     pdfjsLib.getDocument(cardPath).then(doc=>{
+                        
+                        doc.getPage(1).then(page=>{
+
+                          var myCanvas= document.getElementById(data.cardIndex);
+                          var context = myCanvas.getContext("2d");
+                          var firstColumn = document.getElementById("firstColumn");
+                                  // 1 means the original size of the page
+                          var viewport= page.getViewport(250/ page.getViewport(1).width);
+                          page.render({
+                            canvasContext:context,
+                            viewport:viewport
+                        })
+                        })
+                     });
+                    //-       var myCanvas= document.getElementById(data.cardIndex);
+                    //-       var context = myCanvas.getContext("2d");
+                    //-       var firstColumn = document.getElementById("firstColumn");
+                          
+                    //-       // 1 means the original size of the page
+                    //-       var viewport= page.getViewport(250/ page.getViewport(1).width);
+
+                    //- page.render({
+                    //-         canvasContext:context,
+                    //-         viewport:viewport
+                    //-     })
+
+                    //-   });
+                    //-   })
+                    
+                        } )
+                    //- add a progress bar of some sort
+                    request.open('post','/updateCard');
+                    request.send(data);
+                
+
+                })
+      script(type="text/javascript").
+        var cards = !{JSON.stringify(cards)};
+        var user = !{JSON.stringify(user)};
+        let mainCardPath = user.accountTypeFk == 1 ? cards[0].path : cards[0].previewPath;
+        console.log(mainCardPath);
+        pdfjsLib.getDocument(mainCardPath)
+              .then(doc=>{
+          doc.getPage(1).then(page=>{
+                  var myCanvas= document.getElementById("mainCanvas");
+                  var context = myCanvas.getContext("2d");
+                  
+                  // 1 means the original size of the page
+                  
+                  var viewport= page.getViewport(1.4);
+                  myCanvas.height = viewport.height;
+                  myCanvas.width = viewport.width;
+          page.render({
+                  canvasContext:context,
+                  viewport:viewport
+              })
+
+              })
+              });
+        for( let i = 0; i< cards.length; i++ )
+        {
+          $("#" + i).on("click",selectCard);
+          let cardPath = cards[i].path
+          //console.log(cardPath)
+          pdfjsLib.getDocument(cardPath)
+              .then(doc=>{
+          doc.getPage(1).then(page=>{
+                  var myCanvas= document.getElementById(i);
+                  var context = myCanvas.getContext("2d");
+                  var firstColumn = document.getElementById("firstColumn")
+                  
+                  // 1 means the original size of the page
+                  var viewport= page.getViewport(250/ page.getViewport(1).width);
+
+          page.render({
+                  canvasContext:context,
+                  viewport:viewport
+              })
+
+              })
+              })
+        }
+
+        //- const selectCard = function(e)
+        //- {
+        //-     console.log(e);
+        //- }
+          
+    include ./common/footer.pug
+    +footer()  

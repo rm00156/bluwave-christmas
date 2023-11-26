@@ -1,0 +1,166 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Sign Up Organiser")
+
+body 
+    +navbar()
+    section.section.section-top.bg-light
+        // Content
+        .container
+            .row.justify-content-center
+
+                .col-md-10.col-lg-8
+                    .form-styled.bg-white
+                        // Heading
+                        h4.text-center.mb-4
+                            | Sign up as an Organiser
+                        // Subheading
+                        p.text-center.text-muted.mb-5
+                            | Please fill out the form below to sign up.
+                        // Password
+                        form.form-group(id="form" action="/signupOrganiser" method ="post")
+
+                            .row 
+                                .col-sm-6
+                                    label Full Name
+                                    .input-group
+                                        input.form-control( value=(formData != undefined) ? formData.name : '' required=true, name='name', type='text')
+                                .col-sm-6
+                                    label Telephone Number
+                                    .input-group
+                                        input.form-control( required=true, name='telephoneNo', type='text' value=(formData != undefined) ? formData.telephoneNo : '')
+                                    if(errors.telephoneNo)
+                                        p.small.text-danger #{errors.telephoneNo} 
+                            
+                                
+                            .row(style="margin-top:5px") 
+                                .col-sm-6
+                                    label School/ Nursery Name
+                                    .input-group
+                                        input.form-control(required=true, name='school', type='text' value=(formData != undefined) ? formData.school : '')
+                                    if(errors.school)
+                                        p.small.text-danger #{errors.school}
+                                .col-sm-6
+                                    label School/ Nursery Address
+                                    .input-group
+                                        input.form-control(required=true, name='address', type='text' value=(formData != undefined) ? formData.address : '')
+                                    if(errors.address)
+                                        p.small.text-danger #{errors.address}  
+                            
+                            .row(style="margin-top:5px") 
+
+                                .col-sm-6
+                                    label Post Code
+                                    .input-group
+                                        input.form-control(required=true, name='postCode', type='text' value=(formData != undefined) ? formData.postCode : '')
+                                    if(errors && errors.postCode)
+                                        p.small.text-danger #{errors.postCode} 
+
+                                .col-sm-6
+                                    label Email
+                                    .input-group
+                                        input.form-control(required=true, name='email', type='email' value=(formData != undefined) ? formData.email : '')
+                                    if(errors && errors.account)
+                                        p.small.text-danger #{errors.account}
+
+
+                            .row(style="margin-top:5px") 
+                                .col-sm-6
+                                    label Password
+                                    .input-group
+                                        input.form-control(placeholder="Please enter Password", required=true , name='password', type='password' value=(formData != undefined) ? formData.password : '')
+                                    if( errors && errors.password)
+                                        p(id="error").small.text-danger #{errors.password}
+                                .col-sm-6
+                                    label Re-enter Password
+                                    .input-group
+                                        input.form-control(placeholder="Please re-enter Password", value=(formData != undefined) ? formData.rePassword : '' required=true , name='rePassword', type='password' )
+
+                            h5(style="margin-top:10px") Classes
+                            if(errors && errors.classes)
+                                p(id="error").small.text-danger #{errors.classes}
+                            .row(style="margin-top:5px") 
+                                .col-sm-12
+                                    label Average Number of Pupils in each class
+                                    .input-group
+                                        input.form-control(name="numberOfKidsPerClass" required type="number" min=1 max=500 value=(formData != undefined) ? formData.numberOfKidsPerClass : '')  
+                                 
+                                    if(errors && errors.numberOfKidsPerClass)
+                                        p(id="error").small.text-danger #{errors.numberOfKidsPerClass}
+                            #classesRows
+                                if(formData != undefined && formData['classArray[]'] != undefined)
+                                    
+                                    .row(style="margin-top:10px")
+                                        .col-sm-6
+                                            label Class Name
+                                            .input-group
+                                                input.form-control( required=true , name='class1' , type='text' value=formData['class1'])
+                                                input(id="classArray1" name="classArray[]" value=1 style="display:none")
+                                            if(errors && errors["class1"])
+                                                p(id="error").small.text-danger #{errors["class1"]}
+                                        .col-sm-6
+                                            label(style="color:#fff") f
+                                            .input-group
+                                                button#addClassRow.btn.btn-success.mb-2.me-2(type='button' style="width:-webkit-fill-available")
+                                                    |  Add Class 
+                                    each classs in formData['classArray[]']
+                                        if(classs != 1)
+                                            .row(style="margin-top:10px")
+                                                .col-sm-6
+                                                    label Class Name
+                                                    .input-group
+                                                        input.form-control( required=true , name='class' + classs , type='text' value=formData['class' + classs])
+                                                        input(id="classArray" + classs name="classArray[]" value=classs style="display:none")
+                                                    if(errors && errors["class" + classs])
+                                                        p(id="error").small.text-danger #{errors["class" + classs]}
+                                                .col-sm-6
+                                                    label(style="color:#fff") f
+                                                    .input-group
+                                                        button.btn.btn-danger.mb-2.me-2(id="removeClass" + classs type='button' style="width:-webkit-fill-available")
+                                                            |  Remove Class 
+
+                                else
+                                    .row(style="margin-top:10px")
+                                        .col-sm-6
+                                            label Class Name
+                                            .input-group
+                                                input.form-control( required=true , name='class1', type='text' value="")
+                                                input(id="classArray1" name="classArray[]" value="1" style="display:none")
+                                            if(errors && errors.class1)
+                                                p(id="error").small.text-danger #{errors.class1}
+                                        .col-sm-6
+                                            label(style="color:#fff") f
+                                            .input-group
+                                                button#addClassRow.btn.btn-success.mb-2.me-2(type='button' style="width:-webkit-fill-available")
+                                                    |  Add Class
+
+                            
+
+                            .row(style="margin-top:5px") 
+                                .col-sm-12
+                                    label Additional Information
+                                    .input-group
+                                        textarea.form-control(name="additionalInfo", cols="30", rows="10") 
+                                 
+                                
+                            .row(style="margin-top:5px") 
+                                .col-sm-12(style="text-align:center;margin-top:20px")
+                                    .g-recaptcha(data-sitekey="6LdzUtsZAAAAAEf-uA4T9AvVJUfytjMSHcPHRvbw")
+                                    p.small.text-danger(id="captchaError" style="text-align:left;margin-top:5px")
+                                    br
+                                    input.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" type="submit" value="Sign Up")
+                            .row
+                                .col-sm-12(style="text-align:center;margin-top:20px")
+                                    h8.mt-3.mb-0
+                                        | Want to sign up as a parent? #[a(href="/signup" style="color:#f51167") Register as Parent here].    
+                                    br
+                                    h8.mt-3.mb-0
+                                        | Already have an account? #[a(href="/login" style="color:#f51167") Login in here].
+                                                                                    
+    +footer()                             
+    script(src="javascript/new/signupOrganiser.js")
+    script(src="assets2/js/theme.min.js")
+    

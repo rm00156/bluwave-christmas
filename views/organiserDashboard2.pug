@@ -1,0 +1,182 @@
+doctype html
+html(land="en")
+    include ./common/new/header.pug
+    +head("Dashboard")
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+
+    link(rel="stylesheet" href="css/pieProgress.css")
+
+    
+   
+    body(style="background-color:white !important;padding-top:3rem")
+        //- script(src="javascript/viewEditCard.js")   
+        //- script(src="javascript/organiser.js")
+ 
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        
+        section.product-section(style="padding-top:50px")
+            
+            .container
+                .row
+                    .col-sm-12
+                        h2(style="text-align:center") #{school.name}
+                .row
+                    .col-sm-6
+                        .card.shadow.mb-12
+                            .card-header
+                                h6 Progress
+                            .card-body(style="text-align:center")
+                                .row
+                                    .col-sm-12
+                                        div.opChoice(id="purchase"  style="padding-bottom:5px;text-align: center;")
+                                            div.iconHeader
+                                                div.columnBottom
+                                                    div.donut-size( id="statusChart" )
+                                                        div.pie-wrapper(style="!important;")
+                                                            span.label
+                                                                span.num 
+                                                                    h6.currentStatus(style="padding-top:60px") #{statusTypeDetails.statusTypeDetails[statusTypeDetails.reachedStatusCount -1].statusType}
+                                                                    input(style="display:none" id="currentStatus" value=statusTypeDetails.statusTypeDetails[statusTypeDetails.reachedStatusCount -1].statusType)
+                                                                    input(style="display:none" id="statusCount" value=statusTypeDetails.reachedStatusCount)
+                                                            div.pie
+                                                                div.left-side.half-circle(style="border: solid #4B0082")
+                                                                div.right-side.half-circle(style="border: solid #4B0082")
+                                                            div.shadow
+                                .row
+                                    .col-sm-12
+                                        each statusTypeDetail, index in statusTypeDetails.statusTypeDetails
+                                            h8(style=(statusTypeDetail.reached ? "color:green" : "")) #{(index + 1)}. #{statusTypeDetail.statusType} 
+                                            i.fas.fa-check(style=(statusTypeDetail.reached ? "color:green" : "display:none"))
+                                            br
+                                        //- h8(style=(artSent != null) ? "color:green" : "") 2. Artwork Pack Sent 
+                                        //- if(artSent != null)
+                                        //-     i.fas.fa-check(style="color:green")
+                                        //- br
+                                        //- h8(style=(artReceived != null) ? "color:green" : "") 3. Artwork Pack Received 
+                                        //- if(artReceived != null)
+                                        //-     i.fas.fa-check(style="color:green")
+                                        //- br
+                                        //- h8(style=(sampleSent != null) ? "color:green" : "") 4. Samples Sent To School 
+                                        //- if(sampleSent != null)
+                                        //-     i.fas.fa-check(style="color:green")
+                                        //- br
+                                        //- if(deadLineDttm)
+                                        //-     h8(style=(purchaseDeadline != null) ? "color:green" : "") 5. Purchases by #{deadLineDttm} 
+                                        //- else
+                                        //-     h8(style=(purchaseDeadline != null) ? "color:green" : "") 5. Purchase Deadline 
+                                        //- if(purchaseDeadline != null)
+                                        //-     i.fas.fa-check(style="color:green")
+                                        //- input(id="ordered" type="number" value=orderedPercentage style="display:none")
+                                    //- .col-sm-6
+                                        if(printDelayStatus == null)
+                                            h8 6. Printing 
+                                        else
+                                            h8(style="color:green") 6. #{printDelayStatus.type} 
+                                            i.fas.fa-check(style="color:green") 
+                                        br
+                                        h8(style=(delivery != null) ? "color:green" : "") 7. Out For Delivery 
+                                        if(delivery != null)
+                                            i.fas.fa-check(style="color:green")
+                                        br
+                                        h8(style=(response != null) ? "color:green" : "") 8. Waiting For Response 
+                                        if(response != null)
+                                            i.fas.fa-check(style="color:green")
+                                        br
+                                        h8(style=(confirmCharity != null) ? "color:green" : "") 9. Charity Amount Confirmed 
+                                        if(confirmCharity != null)
+                                            i.fas.fa-check(style="color:green")
+                                        br
+                                        h8(style=(sentCharity != null) ? "color:green" : "") 10. Charity Amount Sent 
+                                        if(sentCharity != null)
+                                            i.fas.fa-check(style="color:green")
+                    .col-sm-6
+                        .card.shadow.mb-12
+                            .card-header
+                                h6 Orders
+                            .card-body(style="text-align:center")
+                                div.opChoice(id="purchase"  style="padding-bottom:5px;text-align: center;")
+                                    div.iconHeader
+                                        div.columnBottom
+                                            div.donut-size( id="specificChart" )
+                                                div.pie-wrapper(style="!important")
+                                                    span.label
+                                                        span.num 0
+                                                        span.smaller %
+                                                    div.pie
+                                                        div.left-side.half-circle
+                                                        div.right-side.half-circle
+                                                    div.shadow
+                                .row(style="margin-top:30px")
+                                    .col-sm-12
+                                        h5 #{orderDetails.totalKids} Total Pupils
+                                .row
+                                    .col-sm-12
+                                        h5 #{orderDetails.orderedKidTotal} Pupils Ordered
+                                .row
+                                    .col-sm-12
+                                        if(deadlineDetails.deadLineDttm != '')
+                                            - if(deadlineDetails.daysLeftSign == 'negative')
+                                                h5(style="color:red") #{(deadlineDetails.daysLeft * -1)} Days since purchase deadline passed
+                                            - else if( deadlineDetails.daysLeftSign == 'zero')
+                                                h5(style="color:red") Purchase deadline is Today 
+                                            - else
+                                                h5(style="color:red") #{deadlineDetails.daysLeft} Days till purchase deadline  
+                                        input(id="ordered" type="number" value=orderDetails.orderedPercentage style="display:none")
+                                br
+                                
+                .row(style="margin-top:10px")
+                    .col-sm-3
+                        .card.shadow.mb-4(id="edit"  data-schoolId=school.id)
+                            <!-- Card Header - Dropdown -->
+                            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                                h6.m-0.font-weight-bold.text-primary Edit Details
+                            .card-body(style="cursor:pointer")           
+                                .single-banner
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/generalIMage/cups.jpg"  alt="")
+        
+                                    .inner-text
+                                        h4(id="edit" data-schoolId=school.id) Edit Contact Details     
+                    .col-sm-3
+                        .card.shadow.mb-4(id="edit"  data-schoolId=school.id)
+                            <!-- Card Header - Dropdown -->
+                            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                                h6.m-0.font-weight-bold.text-primary Are you a parent too?
+                            .card-body(style="cursor:pointer")           
+                                .single-banner
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/generalIMage/cups.jpg"  alt="")
+        
+                                    .inner-text
+                                        h4(id="linkKid") My Childs Card
+                    .col-sm-3
+                        .card.shadow.mb-4(id="edit"  data-schoolId=school.id)
+                            <!-- Card Header - Dropdown -->
+                            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                                h6.m-0.font-weight-bold.text-primary School Particpants
+                            .card-body(style="cursor:pointer")           
+                                .single-banner
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/generalIMage/cups.jpg"  alt="")
+        
+                                    .inner-text
+                                        a.nav-link(href="/participants") School Participants
+                        
+                    .col-sm-3
+                        .card.shadow.mb-4(id="edit"  data-schoolId=school.id)
+                            <!-- Card Header - Dropdown -->
+                            .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                                h6.m-0.font-weight-bold.text-primary School Orders
+                            .card-body(style="cursor:pointer")           
+                                .single-banner
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/generalIMage/cups.jpg"  alt="")
+        
+                                    .inner-text
+                                        a.nav-link(href="/orders") School Orders
+                    
+
+                           
+            
+        script(src="javascript/organiserPieChart.js")
+    include ./common/new/footer.pug
+    +footer()                                  

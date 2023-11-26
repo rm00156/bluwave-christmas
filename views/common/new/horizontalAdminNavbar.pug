@@ -1,0 +1,48 @@
+mixin horizontalAdminNavbar(dashboard)
+    <!-- Topbar -->
+        nav.navbar.navbar-expand.navbar-light.bg-teal.topbar.mb-4.static-top.shadow
+            <!-- Sidebar Toggle (Topbar) -->
+            button.btn.btn-link.d-md-none.rounded-circle.mr-3(id="sidebarToggleTop" style="color:white")
+                i.fa.fa-bars
+            .d-sm-flex.align-items-center.justify-content-between
+                h1.h3.mb-0(style="color:white") #{dashboard}
+            ul.navbar-nav.ml-auto
+                //- li.nav-item.dropdown.no-arrow.mx-1
+                    a.nav-link.dropdown-toggle(style="color:white" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
+                        i.fas.fa-envelope.fa-fw
+                        span.badge.badge-danger.badge-counter 10
+                    
+    
+                    .dropdown-list.dropdown-menu.dropdown-menu-right.shadow.animated--grow-in(aria-labelledby="messagesDropdown")
+                        h6.dropdown-header.bg-teal(style="border:none") Message Center
+                        a.dropdown-item.d-flex.align-items-center(href="#")
+                            .dropdown-list-image.mr-3
+                                img.rounded-circle( src="https://source.unsplash.com/fn_BT9fwg_E/60x60" alt="")
+                                .status-indicator.bg-success
+                        
+                            .font-weight-bold
+                                .text-truncate Hi there! I am wondering if you can help me with a problem I've been having
+                                .small.text-gray-500 Emily Fowler · 58m
+                        
+                        a.dropdown-item.text-center.small.text-gray-500(href="#") Read More Messages
+                
+                .topbar-divider.d-none.d-sm-block
+
+                li.nav-item.dropdown.no-arrow
+                    a.nav-link.dropdown-toggle(href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
+                        span.mr-2.d-none.d-lg-inline.small(style="color:white") #{user.name}
+                        i.fas.fa-user(style="color:white")
+                    
+                    <!-- Dropdown - User Information -->
+                    .dropdown-menu.dropdown-menu-right.shadow.animated--grow-in(aria-labelledby="userDropdown")
+                        a.dropdown-item( href="#")
+                            i.fas.fa-user.fa-sm.fa-fw.mr-2.text-gray-400
+                            | Profile
+                        a.dropdown-item(href="#")
+                            i.fas.fa-cogs.fa-sm.fa-fw.mr-2.text-gray-400
+                            | Settings
+                        
+                        .dropdown-divider
+                        a.dropdown-item(href="#" data-toggle="modal" data-target="#logoutModal")    
+                            i.fas.fa-sign-out-alt.fa-sm.fa-fw.mr-2.text-gray-400
+                            | Logout

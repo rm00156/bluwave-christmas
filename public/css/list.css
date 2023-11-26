@@ -1,0 +1,127 @@
+ .service-list {
+    list-style-type: none;
+    margin:20px;
+    padding-left:20px;
+    padding-top:10px;
+    width:90%;
+    display: inline-block;
+    border-style: solid;border-color: black;border-width:1px
+    }
+
+    .service-listNew {
+      list-style-type: none;
+      margin:20px;
+      padding: 20px;
+      width:80%;
+      display: inline-block;
+      border-style: solid;border-color: black;border-width:1px
+      }
+    
+ .center{
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+ }
+
+    .column {
+        float: left;
+        width: 30%;
+      }
+    .column2 {
+        float: left;
+        width: 20%;
+        margin-left:30px;
+      }
+    .column3 {
+        float: left;
+        width: 5%;
+      }
+    
+    .columnx {
+        float: left;
+        width: 75%;
+      }
+      
+      .columnHalf1 {
+        float: left;
+        width: 50%;
+        height: 100vh;
+        background-color: white;
+      }
+
+      .columnHalf2 {
+        float: left;
+        width: 50%;
+        height: 100vh;
+        background-color: lightblue;
+      }
+
+      .linkKids-wrapper {
+        width: 300px;
+        height: 300px;
+        position: relative;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .linkKids-button input[type="submit"] {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+      }
+
+      .input[type="submit"] {
+        position: relative;
+       display: block;
+        margin : 0 auto;
+   }
+
+   .purchaseColumn{
+    float: left;
+    width: 20%;
+    height:40%;
+    border-style: solid;border-color: black;border-width:1px
+   }
+
+   .purchase-wrapper{
+    position: relative;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+   }
+
+   .canvas{
+    position: relative;
+    display: block;
+     margin : 0 auto;
+   }
+
+   h3 {
+    text-align: center;
+   }  
+
+      /* Clear floats after the columns */
+      .row1 {
+        height:50vh;
+        width:100%;
+        background-color: rgba(255, 255, 255, 0.829);
+      }
+
+      .row2 {
+        height:50vh;
+        width:100%;
+        background-color: rgba(255, 255, 255, 0.925);
+      }
+      
+      body, html {
+        height: 100%;
+        width: 100%
+      }
+
+      input[type="submit"]{
+        margin:0 auto;
+        display:block;
+      }

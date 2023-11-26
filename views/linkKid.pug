@@ -1,0 +1,89 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Link Student")
+    link(rel="stylesheet" href="css/kcards_link.css" type="text/css" media="screen")
+    link(rel="stylesheet" href="css/kcards_link_other.css" type="text/css" media="screen")
+    link(rel="stylesheet" href="css/test.css" type="text/css" media="screen")
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                script(src="javascript/linkKids.js")
+                script(src="javascript/jsQR.js")
+                
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+            div
+                div.col-sm-12.offest-md-2.col-md-8
+                    .jumbotron
+                        h2.padOut Link Student
+                        .row
+                            div.col-sm-12.col-md-12.col-xs-12
+                                div.login_register(style="margin-top:10px;")
+                                    div.login(style="width:50%")
+                                        input(id="accountLinkedByAdmin" value=accountLinkedByAdmin style="display:none")
+                                        p.titleLarge(class="textforLink" style="padding:10px 0;color:#fff;") If your sample sheet has a QR Code
+
+                                        
+                                        div.containerR
+                                            div(style="display:none" id="qr")
+                                                div(id="loadingMessage")
+                                                canvas(id="canvas"  hidden)
+                                                div(id="output" hidden)
+                                                    div(id="outputMessage") No QR code detected.
+                                                    div(hidden)
+                                                        b Data:
+                                                            span(id="outputData")
+                                            
+                                            
+                                            button(id="buttonClick" style="height:30%;width:50%") Link with QR Code
+                                    div
+                                        div.login_register
+                                            div.register 
+                                                p.titleLarge(class="textforLink" style="padding:10px 0;color:#fff;") Please fill in form below using the details found <br> on the 'Sample Christmas Card' sheet provided.
+                        
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        label(class="mt-3") Student Name:
+                                                        input.form-control( required=true, id="name"  type='text' value=(name != null) ? name : '' )
+                                                        p.small.text-danger(id="errorName")
+                                                label(class=" mt-3" ) Student Age
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(class="mt-3" style="color:white") Years Old
+                                                        input(class="form-control" required id="age" type="number" value=(age != null) ? age : '') 
+                                                        p.small.text-danger(id="errorAge")
+                                                
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        label(class="mt-3" ) Months Old
+                                                        input(class="form-control" id="month" type="number" value=(month != null) ? month : '')
+
+                                                div.searchItem2
+                                                    div.inputtitle2 
+                                                        label(class="mt-3") Student Reference Code: 
+                                                        input(class="form-control" required id="refCode1" type="text" value=(code != null) ? code : '')
+                                                        input(id="index" style="display:none" value="2")
+                                                        p(class="small text-danger" id="errorCode")  
+
+                                                div.searchItem2
+                                                    div.inputtitle2 
+                                                        input(style="" class="mt-3 btn btn-primary" type="submit" value="Link" id="link")
+                                                        p.small.text-danger(id="errors")
+            script(src="javascript/test.js")
+        include ./common/footer.pug
+        +footer()                                  
+                                        
+                                   
+                                        
+    
+

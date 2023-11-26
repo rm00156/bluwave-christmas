@@ -1,0 +1,80 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head(school.name + " School Details")
+
+body 
+    +navbar()
+    section.section.section-full.section-top.bg-light
+        // Content
+        .container
+            .row.justify-content-center
+
+                .col-md-10.col-lg-8
+                    .form-styled.bg-white
+                        // Heading
+                        h4.text-center.mb-4
+                            | School Details
+                       
+                        .form-group
+                            .row
+                                
+                                .col-sm-6
+                                    
+                                    label Full Name
+                                    .input-group
+                                        input#name.form-control( value=user.name required=true, name='name', type='text')
+                                .col-sm-6
+                                    label Telephone Number
+                                    .input-group
+                                        input#telephoneNo.form-control( required=true, type='text' value=school.number)
+                                        p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorTelephoneNo") 
+
+                            
+                                
+                            .row(style="margin-top:5px") 
+                                .col-sm-6
+                                    label School/ Nursery Name
+                                    .input-group
+                                        input#school.form-control(required=true, type='text' value=school.name)
+
+                                .col-sm-6
+                                    label School/ Nursery Address
+                                    .input-group
+                                        input#address.form-control(required=true, type='text' value=school.address)
+                                        p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorAddress") 
+
+                            
+                            .row(style="margin-top:5px") 
+
+                                .col-sm-6
+                                    label Post Code
+                                    .input-group
+                                        input#postCode.form-control(required=true,  type='text' value=school.postCode)
+                                        p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorPostCode") 
+
+                                .col-sm-6
+                                    label Number Of Kids Per Class
+                                    .input-group
+                                        input#numberOfKidsPerClass.form-control(required=true,  type='text' value=school.numberOfKidsPerClass)
+                                        p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorNumberOfKidsPerClass") 
+
+
+                            .row(style="margin-top:5px") 
+                                .col-sm-12
+                                    label Additional Information
+                                    .input-group
+                                        textarea#additionalInfo.form-control(name="additionalInfo",cols="30", rows="10") #{school.additionalInfo}
+                                 
+                                
+                            .row(style="margin-top:5px") 
+                                .col-sm-12(style="text-align:center;margin-top:20px")
+                                    p#errors.small.text-danger 
+                                    input#updateDetails.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" type="submit" value="Update Details" data-name=user.name data-schoolId= school.id data-address=school.address data-postCode=school.postCode data-number=school.number data-school = school.name data-numberOfKidsPerClass = school.numberOfKidsPerClass data-additionalInfo=school.additionalInfo)
+    +footer()                             
+    script(src="assets2/js/theme.min.js")
+    script( type="text/javascript" src="javascript/editContactDetails.js")
+
+    

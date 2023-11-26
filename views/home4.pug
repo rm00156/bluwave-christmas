@@ -1,0 +1,108 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Login")
+    link(href='assets2/css/style.css' rel='stylesheet')  
+    
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')  
+
+body
+                                               
+    +navbar()
+
+    section.section.bg-light(style="margin-top:2rem")
+        .container
+                
+            .row
+                .col-sm-6
+                    .row.justify-content-center                            
+                        .col-sm-12
+                            .form-styled.bg-white
+                                .row
+                                    .col-sm-12
+                                        h4(style="text-align:center") Login to continue <font style="color:#f51167">Creating</font> your <font style="color:#f51167">Christmas cards</font>
+                        
+                                form(action="/login", method ="POST")
+                                    .mb-4
+                                        div(style="text-align:center")
+                                            h5 Login
+                                            .row
+                                                .col-sm-12
+                                                    img( src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/logiconA2.png"  style="margin-top:20px" alt="Register below if you do not have an account" )
+                                            
+                                            .row(style="margin-top:20px")
+                                                .col-sm-12
+                                                    if(error)
+                                                        p.small.text-danger(style="font-size:9pt") #{error} 
+                                                    if(reset)
+                                                        p.small.text-danger Password has successfully been reset
+                                                    label(for="email") Email
+                                                    .quantity(style="margin-bottom:15px;")
+                                                        .pro-qty(style="width:100% !important")
+                                                            input.form-control(style="width:100% !important;text-align:left;" placeholder='Please enter your email', required=true, name='email', type='email', value=(formData != undefined) ? formData.email : '')
+
+                                            .row(style="margin-top:20px")
+                                                .col-sm-12
+                                                    label(for="password") Password
+                                                    .quantity(style="margin-bottom:15px;")
+                                                        .pro-qty(style="width:100% !important")
+                                                            input.form-control(style="width:100% !important;text-align:left;" placeholder="Enter current password", required=true , name='password', type='password', value=(formData != undefined) ? formData.password : '')
+                                    
+                                            .row
+                                                .col-sm-12
+                                                    a(href="/forgottenPassword" style="margin-bottom:5px;color:#f51167") Forgotten Password?
+                                            .row(style="margin-top:20px")
+                                                .col-sm-12
+                                                    button.btn.btn-outline-primary.btn-block Login
+                                                    input(style="display:none" name="confirm" type="text" value=confirm)
+                .col-sm-6
+                    .row.justify-content-center                           
+                        .col-sm-12
+                            .form-styled.bg-white
+                                .row
+                                    .col-sm-12
+                                        h4(style="text-align:center") Sign up to start <font style="color:#f51167">Creating</font> your <font style="color:#f51167">Christmas cards</font>
+                        
+                                .mb-4
+                                    div(style="text-align:center")
+                                        h5 Register
+                                        .row
+                                            .col-sm-12
+                                                img( src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/regiconA2.png"  style="margin-top:20px" alt="Register below if you do not have an account" )
+                                                //- if(error)
+                                                //-     p.small.text-danger(style="font-size:9pt") #{error} 
+                                        
+                                        .row(style="margin-top:20px")
+                                            .col-sm-12
+                                                div.searchItem2.blockItem
+                                                    div.inputtitle2
+                                                        p.accessHeader(style="margin-bottom:0") 
+                                                            strong <font style="color:#f51167">Parent Sign Up:</font>
+                                                        p(style="margin-bottom:0") If you are a <font style="color:#f51167"><strong>Parent</strong></font> with your Child taking part in an organised scheme or you are an individual who wants to create their own card
+                                                    //- h3(style="color:#f51167") PARENT REGISTRATION NOW CLOSED
+                                                    form(action="/signup" method="get" style="margin-top:10px")
+                                                        input(style="display:none" name="type" value="parent" id="type")
+                                                        button.btn.btn-outline-primary.btn-block Click here
+                                        .row(style="margin-top:20px")
+                                            .container
+                                                .col-sm-12
+                                                    div.inputtitle2
+                                                        p.accessHeader(style="margin-bottom:0")
+                                                            strong <font style="color:#f51167">Nursery/School Organiser Sign Up:</font>
+                                                        p(style="margin-bottom:5px") If you are an <font style="color:#f51167"><strong>Organiser</strong></font> for your nursery/school Christmas card project
+                                                    h3(style="color:#f51167") SCHOOL REGISTRATION NOW CLOSED
+                                                    //- form(action="/signup_organiser" method="get" style="margin-top:10px")
+                                                        button.btn.btn-outline-primary.btn-block Click here       
+
+                    
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+    script(src="assets2/js/theme.min.js")
+    script(src="javascript/home.js")  

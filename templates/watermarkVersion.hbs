@@ -1,0 +1,132 @@
+<style type="text/css">
+
+body {
+    font-family:'Helvetica Neue', Helvetica, Arial, Helvetica, sans-serif;
+    font-weight:200;
+}
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  height: 10%;  /*Should be removed. Only for demonstration  */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+ 
+h3{
+    text-align:center;
+}
+
+.square-container
+{
+    text-align:center;
+}
+
+.square
+{
+    margin: 0%;
+    width:100%;
+    height:525px;
+    display: inline-block;
+}
+
+.square2
+{
+    width:155px;
+    height:155px;
+    margin-top: 25px;
+    display: inline-block;
+    border-style: solid;border-color: black;border-width:1px
+}
+
+.footer
+{
+  position: fixed;
+  left: 25%;
+  bottom: -5%;
+  transform: translate(-50%, -50%);
+  margin-top: 50px;
+}
+
+#container {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+#navi,
+#infoi {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#infoi {
+  z-index: 10;
+}
+</style>
+<html>
+    <body>
+<div class="row">
+    <div id="navi"><div class="column" style="background-color:white;">
+       <div class="square-container">
+        <div class="square2">
+            {{#if displayPicture}}
+                    <img src="{{picture}}" style="width:100%;height:100%;">
+            {{/if}} 
+            </div>
+       </div>
+    <p style="text-align:center;">Design by:</p>
+    <h3>{{name}}</h3>
+    {{#if displayAge }}
+    <h3>Age {{age}} years</h3>
+    {{/if}}  
+    {{#if displaySchool }}
+        <h3>{{school}}</h3>
+    {{/if}}
+
+    {{#if displayClass }}
+    <h3>Class {{class}}</h3>
+    {{/if}}
+
+    
+    <p style="text-align:center;">{{code}}</p> 
+    
+      <div class="square-container">
+            <div class="footer">
+                <p><font style="color:green;font-size:8pt">Printed by Blu</font><font style="color:red;font-size:8pt">wave</font><font style="color:green;font-size:8pt">Ltd, tel: 020 7277 7663</font>
+                <br>
+                <font style="color:green;font-size:8pt">info@</font><font style="color:red;font-size:8pt">kidscards4</font><font style="color:green;font-size:8pt">christmas.com www.</font><font font style="color:red;font-size:8pt">kidscards4</font><font style="color:green;font-size:8pt">christmas.com</font></p>
+                      {{!-- <img src="https://www.barcodesinc.com/generator/image.php?code=bluwave group&style=197&type=C128B&width=219&height=50&xres=1&font=3"> --}}
+            
+            <img src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/logo.gif" style="width:70px;height:25px">
+            </div>
+  
+      </div>
+  </div>
+  <div class="column" style="background-color:white;">
+   
+   <div class="square-container">
+       <div class="square">
+             <img src="{{artwork}}" style="width:100%;height:100%">
+       </div>
+   </div> 
+       </div>
+  </div></div>
+    <div id="infoi">
+  <img src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/watermark/copyright.png" style="width:100%;height:100%">
+</div>
+</div>
+       
+    </body>
+</html>

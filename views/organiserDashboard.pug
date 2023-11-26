@@ -1,0 +1,207 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Dashboard")
+    link(rel="stylesheet" href="css/pieProgress.css")
+    link(rel="stylesheet" href="css/list.css")
+    link(rel="stylesheet" href="css/organiser2.css")
+    link(rel="stylesheet" href="css/kcards10.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    
+   
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards") 
+                script(src="javascript/viewEditCard.js")   
+                script(src="javascript/organiser.js")     
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+            div.mainarea
+                div.contentarea.noPad
+                    div.searchStrip
+                        div.fullWidth
+                            div.extra(id="divTable")
+                                div(id="options_case4")
+                                    div.opChoiceSection(id="s1")
+                                        div.tInfo 
+                                            div(style="height:50px") Registered
+                                            div.circleArea
+                                                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                            div.content
+                                                p #{registered.createdDttm}
+
+                                    div.opChoiceSection(id="s2")
+                                        div.tInfo
+                                            div(style="height:50px") Artwork Pack Sent
+                                            div.circleArea
+                                                if(artSent != null)
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                else
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                            div.content
+                                                if(artSent != null)
+                                                    p #{artSent.createdDttm}
+                                    
+                                    div.opChoiceSection(id="s3")
+                                        div.tInfo 
+                                            div(style="height:50px") Artwork Pack Received
+                                            div.circleArea
+                                                if(artReceived != null)
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                else
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                            div.content
+                                                if(artReceived != null)
+                                                    p #{artReceived.createdDttm}
+
+                                    div.opChoiceSection(id="s4")
+                                        div.tInfo 
+                                            div(style="height:50px") Samples Sent To School
+                                            div.circleArea
+                                                if(sampleSent != null)
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                else
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                            div.content
+                                                if(sampleSent != null)
+                                                    p #{sampleSent.createdDttm}
+                                    
+                                    div.opChoiceSection(id="s5")
+                                        if(deadLineDttm)
+                                            div.tInfo 
+                                                div(style="height:50px") Purchases by #{deadLineDttm}
+                                                div.circleArea
+                                                    if(purchaseDeadline != null)
+                                                        img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                    else
+                                                        img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                                div.content
+                                                    if(purchaseDeadline != null)
+                                                        p #{purchaseDeadline.createdDttm}
+                                        else
+                                            div.tInfo 
+                                                div(style="height:50px") Purchases Deadline
+                                                div.circleArea
+                                                    if(purchaseDeadline != null)
+                                                        img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                    else
+                                                        img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                                div.content
+                                                    if(purchaseDeadline != null)
+                                                        p #{purchaseDeadline.createdDttm}
+
+                                    div.opChoiceSection(id="s5")
+                                        if(printDelayStatus == null)
+                                            div.tInfo 
+                                                div(style="height:50px") Printing
+                                                div.circleArea
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")
+                                                div.content
+                                                    p 
+                                        else
+                                            div.tInfo 
+                                                div(style="height:50px") #{printDelayStatus.type}
+                                                div.circleArea
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                div.content
+                                                    p #{printDelayStatus.createdDttm}
+
+                                    div.opChoiceSection(id="s7")
+                                        div.tInfo 
+                                            div(style="height:50px") Out For Delivery
+                                            div.circleArea
+                                                if(delivery != null)
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                else
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                            div.content
+                                                if(delivery != null)
+                                                    p #{delivery.createdDttm} 
+
+                                    div.opChoiceSection(id="s8")
+                                        div.tInfo 
+                                            div(style="height:50px") Waiting For Response
+                                            div.circleArea
+                                                if(response != null)
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                else
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                            div.content
+                                                if(response != null)
+                                                    p #{response.createdDttm}
+
+                                    div.opChoiceSection(id="s9")
+                                        div.tInfo 
+                                            div(style="height:50px") Charity Amount Confirmed 
+                                            div.circleArea
+                                                if(confirmCharity != null)
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                else
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                            div.content
+                                                if(confirmCharity != null)
+                                                    p #{confirmCharity.createdDttm}  
+
+                                    div.opChoiceSection(id="s10")
+                                        div.tInfo 
+                                            div(style="height:50px") Charity Amount Sent 
+                                            div.circleArea
+                                                if(sentCharity != null)
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/tick.png" style="text-align:center;height:100%;width:100%")
+                                                else
+                                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/timer.png" style="text-align:center;height:100%;width:100%")    
+                                            div.content
+                                                if(sentCharity != null)
+                                                    p #{sentCharity.createdDttm}               
+                    div(id="options_case2")   
+                        div(id="purchase" class="opChoice" style="background:#17aab7;padding-bottom:5px;text-align: center;")
+                            div.iconHeader.noPad
+                                p #{school.name}
+                            
+                            div.wrapOptions
+                                div.c-details(id="contactDetails")
+
+                                    button.infoButton(id="edit" data-schoolId=school.id) Edit Contact Details
+
+                                    div.contact-d_info
+                                        div.iconHeader.noPad
+                                            p Are you a parent too?
+
+                                    button.infoButton(id="linkKid") Link Student
+
+                        div.opChoice(id="purchase"  style="background:#17aab7;padding-bottom:5px;text-align: center;")
+                            div.iconHeader
+                                div.columnBottom
+                                    div.donut-size( id="specificChart" )
+                                        div.pie-wrapper(style="!important")
+                                            span.label
+                                                span.num 0
+                                                span.smaller %
+                                            div.pie
+                                                div.left-side.half-circle
+                                                div.right-side.half-circle
+                                            div.shadow
+                                div(style="margin-top:20px;width:auto;font-size:18px; letter-spacing:3px; text-align:center;color:#fff!important;")        
+                                    p Ordered
+                                    p #{kidTotal} Total Pupils
+                                    p #{orderedKidTotal} Pupils Ordered
+                                    if(deadLineDttm != '')
+                                        - if(daysLeftSign == 'negative')
+                                            h3 #{(daysLeft * -1)} Days since purchase deadline passed
+                                        - else if( daysLeftSign == 'zero')
+                                            h3 Purchase deadline is Today 
+                                        - else
+                                            h3 #{daysLeft} Days till purchase deadline  
+                                    input(id="ordered" type="number" value=orderedPercentage style="display:none")
+    
+            script(src="javascript/organiserPieChart.js")
+        include ./common/footer.pug
+        +footer()                                  

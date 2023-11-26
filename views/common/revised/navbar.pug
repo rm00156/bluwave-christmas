@@ -1,0 +1,86 @@
+mixin navbar()
+    nav.navbar.navbar-expand-xl.navbar-light.fixed-top
+        .container(style="font-color:white")
+            if(user)
+                if(user.accountTypeFk == 1)
+                    a.navbar-brand(href='/adminDashboard')
+                        img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="250px" height="100%" alt="Kids Cards")
+                else if(user.accountTypeFk == 2)
+                    a.navbar-brand(href='/parentDashboard')
+                        img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="250px" height="100%" alt="Kids Cards")
+                else
+                    a.navbar-brand(href='/organiserDashboard')
+                        img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="250px" height="100%" alt="Kids Cards")
+                
+            else 
+                a.navbar-brand(href='/')
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="250px" height="100%" alt="Kids Cards")
+
+            button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbarCollapse' aria-controls='navbarCollapse' aria-expanded='false' aria-label='Toggle navigation')
+                span.navbar-toggler-icon
+
+            #navbarCollapse.collapse.navbar-collapse
+                ul.navbar-nav.ml-auto
+                    if(user)
+
+                        if(user && user.accountTypeFk == 2)
+                            li.nav-item
+                                a.nav-link(href="/parentDashboard") Dashboard
+                            li.nav-item
+                                a.nav-link(href="/linkKids") Link My Childs Card
+                            li.nav-item
+                                a.nav-link(href="/shop") Shop
+                            
+                            li.nav-item
+                                a.nav-link(href="/parentOrders") My Orders
+                        if(user.accountTypeFk == 3)
+                            li.nav-item
+                                a.nav-link(href='/organiserDashboard')
+                                    | Dashboard
+                                    
+                            li.nav-item
+                                a.nav-link(href='/participants')
+                                    | Classes
+                            //- li.nav-item
+                                a.nav-link(href="/orders") School Orders
+                            
+                            li.nav-item
+                                a.nav-link(href="/parentDashboard") Parent
+                            
+                            li.nav-item
+                                a.nav-link(href="/linkKids") Link My Child
+
+                            li.nav-item
+                                a.nav-link(href="/shop") Shop
+                            
+                            li.nav-item
+                                a.nav-link(href="/parentOrders") My Orders
+                        
+                        if(user.accountTypeFk != 1 )
+                            li.nav-item
+                                a.nav-link#basket(href='/basket')
+                                    | Basket (#{basketItemsDetails.basketItems.length})
+                        a.nav-link(href="/logout") Log Out 
+                    else 
+                        li.nav-item.dropdown
+                            a#navbarChristmasProject.nav-link.dropdown-toggle(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+                                | Christmas Projects
+                            .dropdown-menu(aria-labelledby='navbarChristmasProject')
+                                a.dropdown-item#reasonsNav(href='./#reasons')
+                                    | Reasons To Take Part
+                                a.dropdown-item#aboutNav(href='./#about')
+                                    | How it works
+                                a.dropdown-item#productsNav(href='/#products')
+                                    | Products
+                                a.dropdown-item#pricingNav(href='/#pricing')
+                                    | Pricing
+                                a.dropdown-item#designNav(href='/#design')
+                                    | Design Tips
+                                //- a.dropdown-item#faqNav(href='/faqs')
+                                    | FAQs
+                                
+                        li.nav-item
+                            a.nav-link#individualNav(href="/parentOrders") Individual Artwork Projects
+                        
+                        li.nav-item
+                            a.nav-link(href="/login") Login

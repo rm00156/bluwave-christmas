@@ -1,0 +1,54 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Orders")
+    link(href='assets2/css/style.css' rel='stylesheet') 
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')  
+    body
+        +navbar()
+
+        section.section.pb-0
+            .container
+                
+                .row.justify-content-center
+                    
+                    .col-sm-9.mt-5
+                        .form-styled.bg-white.mb-5
+                            .mb-5
+                                // Body
+                                .text-center
+                                    // Title
+                                    h4.card-title.mb-5
+                                        | Order History
+                            
+                                    .row.mb-8(style="margin-top:20px;")
+                                        .col-sm-12(style="text-align:center")
+                                            if(orderHistory.length == 0 )
+                                                p We have no order records for this account.    
+                                                a.btn.btn-outline-primary(href="/shop" style="width:50%;font-size:12px;text-align:center" ) START SHOPPING
+                                            else
+                                                table.table.shadow.mb-12.table-striped.table-sm.dataTable.no-footer( id="searchResultTable"  role="grid" aria-describedby="classes_info")
+                                                    tbody
+                                                        each order in orderHistory
+                                                            tr
+                                                                td(style="text-align:left;padding:10px")
+                                                                    .row
+                                                                        .col-sm-6
+                                                                            h6(style="color:black;font-weight:700;font-size:13px;") Order Number:
+                                                                                span  #{order.orderNumber}
+                                                                            h6(style="color:black;font-weight:700;font-size:13px;") Date Ordered: 
+                                                                                span  #{order.purchaseDttm}
+                                                                            h6(style="color:black;font-weight:700;font-size:13px;") Order Total: 
+                                                                                span  £#{(parseFloat(order.total)).toFixed(2)}
+                                                                        .col-sm-6(style="text-align:center")
+                                                                            a.btn.btn-outline-primary.mb-.orderHistory(href="/parentOrder?orderNumber=" + order.orderNumber  style="width:75%;font-size:12px;text-align:center;" ) View Order
+        +footer()   
+        <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                            
+        <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+        script(src="assets2/js/theme.min.js")

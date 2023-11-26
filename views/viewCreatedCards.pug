@@ -1,0 +1,159 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("View Cards")
+  link(rel="stylesheet" href="css/temp.css")
+  link(rel="stylesheet" href="css/kcards6.css" type="text/css" media="screen" )
+  meta(name="robots" content="index, follow" )
+  meta(name="revisit-after" content="7 days")
+  meta(name="version" content="1.0")
+  meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0")
+  
+  body
+    div.outercontainer
+        header.headertop
+            div.kclogo
+                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+                script(src="javascript/cards.js")
+        div.gapDiv gapDiv
+        
+   
+        div(id="overlay" )
+            div.progress(id="progressBar" )
+                .container
+                    h2 Progress Bar
+                    div.progress(style="height:25px")
+                        div.progress-bar.bg-success.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px") 0%   
+                    h6(style="margin-top:5px") Updating Card for #{schoolKidArray.name} ....
+        .mainarea
+            include common/navbar.pug
+            +navbar(user)
+            .contentarea
+                .headerStrip
+                    div(id="pageTitle" class="headerTitle padOut") #{schoolClass.name}
+                .searchStrip
+                    .fullWidth.fwLeft
+                        .schoolOrdersContainer        
+                            .schoolOrders
+                                .organiserClassColumnContainer
+                                    div(style="height:350px;width:100%")
+                                        canvas.canvas(id="mainCanvas" style="width:100%;height:100%;padding:5px;") 
+                                        .addKidBox
+                                            .addKidContiner
+                                                
+                                                .addKidColumn
+                                                    label.small.mb-1.mt-3 Name:
+                                                    input(id='updateName' required=true, name='name', type='text' value=schoolKidArray.name  style="width:90%").form-control 
+                                                    if(errors && errors.name)
+                                                        p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.name}
+                                                    label.small.mb-1.mt-3 Age:
+                                                    input(id='updateAge' required=true , name='age'  value=schoolKidArray.age  , type='number' min="0" style="width:90%").form-control 
+                                                    //- input(type="text" style="display:none" value=schoolClass.id name="classId" id="classId")
+                                                .addKidColumn
+                                                    label.small.mb-1.mt-3 ArtWork:
+                                                    br
+                                                    input(id='artwork' placeholder="Enter Artwork FileName", required=true , name='artwork', type='file' accept="image/x-png,image/jpeg")  
+                                                    if(errors && errors.artwork)
+                                                        p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.artwork}
+                                                    div
+                                                        table
+                                                            tr(style="border-style:none")
+                                                                td
+                                                                    input(id='schoolCheckBox' name='displaySchool', type='checkBox' checked="true")
+                                                                    | Display School
+                                                                td
+                                                                    input(id='classCheckBox' name='displayClass', type='checkBox' checked="true")
+                                                                    | Display Class
+                                                                td
+                                                                    input(id='ageCheckBox' name='displayAge', type='checkBox' checked="true")
+                                                                    | Display Age  
+                                                    input(id="updateCard" type="submit" data-classId=schoolClass.id value="Update Card").mt-3.btn.btn-primary  
+                                                    input(id="selectedCardId" type="text" name="selectedCardId" style="display:none")
+                                                    input(id="selectedCardIndex" type="text" name="selectedCardIndex" style="display:none" value=selectedCardIndex )
+                                                    input(id="selectedKidId" type="text" name="selectedKidId" style="display:none" )
+                                                    script(type="text/javascript").
+                                                        var schoolKidArray = !{JSON.stringify(schoolKidArray)};
+                                                        var cards = !{JSON.stringify(cards)};
+                                                        var selectedCardIndex = $('#selectedCardIndex').val();
+                                                        console.log(selectedCardIndex);
+                                                        $('#selectedKidId').val((cards[selectedCardIndex]).kidFk);
+                                                        //-   $('#selectedCardIndex').val(0);
+                                                        $('#selectedCardId').val(cards[selectedCardIndex].id);
+                                                        $('#schoolCheckBox').prop('checked', schoolKidArray.displaySchool == 1 ? true : false);
+                                                        $('#classCheckBox').prop('checked',schoolKidArray.displayClass == 1 ? true : false);
+                                                        $('#ageCheckBox').prop('checked',schoolKidArray.displayAge == 1 ? true : false);
+                                            
+                                .organiserPieChartColumn
+                                    div(style="height:100%;margin-left:20%")
+                                        ul.list-group(id="list" style="overflow:hidden; overflow-y:scroll;padding:10px; text-align:center;width:100%;height:100%")
+                                            each card, index in cards
+                                                li.list-group-item
+                                                    canvas.canvas(id=index style="width:100%;height:100%;padding:5px" data-path=(user.accountTypeFk == 1 ? card.path : card.previewPath) data-cardId= card.id data-classId=schoolClass.id )
+                                                    input(type="text" style="display:none" name='cards' value=card.id)
+                                
+                script(type="text/javascript").
+                    var cards = !{JSON.stringify(cards)};
+                    var user = !{JSON.stringify(user)};
+                    var selectedCardIndex = $('#selectedCardIndex').val();
+                    var mainCardPath = user.accountTypeFk == 1 ? cards[selectedCardIndex].path : cards[selectedCardIndex].previewPath;
+                    console.log(mainCardPath);
+                    pdfjsLib.getDocument(mainCardPath)
+                        .then(function(doc){
+                    doc.getPage(1).then(function(page){
+                            var myCanvas= document.getElementById("mainCanvas");
+                            var context = myCanvas.getContext("2d");
+                            
+                            // 1 means the original size of the page
+                            
+                            var viewport= page.getViewport(1.4);
+                            myCanvas.height = viewport.height;
+                            myCanvas.width = viewport.width;
+                    page.render({
+                            canvasContext:context,
+                            viewport:viewport
+                        })
+
+                        })
+                        });
+                    for( var index = 0; index< cards.length; index++ )
+                    {
+                        new Promise(function(resolve,reject){
+                            populateCardGrid(index);
+                        }).then(function(index){
+                            $('#'+index).attr('style', 'width:100%;height:100%;padding:5px');
+                        });
+                    }
+
+                    function populateCardGrid(index)
+                    {
+                        $("#" + index).on("click",selectCard);
+                            var cardPath = cards[index].path
+                            //console.log(cardPath)
+                            pdfjsLib.getDocument(cardPath)
+                                .then(function(doc){
+                            doc.getPage(1).then(function(page){
+                                    console.log(index);
+                                    var myCanvas= document.getElementById(index);
+                                    var context = myCanvas.getContext("2d");
+                                    var firstColumn = document.getElementById("firstColumn")
+                                    
+                                    // 1 means the original size of the page
+                                    var viewport= page.getViewport(300/ page.getViewport(1).width);
+
+                            page.render({
+                                    canvasContext:context,
+                                    viewport:viewport
+                                })
+
+                                })
+                                })
+
+                                return index;
+                    }
+
+          
+    include ./common/footer.pug
+    +footer()  

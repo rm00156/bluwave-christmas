@@ -1,0 +1,62 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Change Organiser for " + school.name)
+    link(rel="stylesheet" href="css/changeOrganiser.css")
+    link(rel="stylesheet" href="css/kcards11.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                    script( type="text/javascript" src="javascript/editContactDetails.js")
+                    script( type="text/javascript" src="javascript/changeOrganiser.js")
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+            section
+                article
+                    div.mainarea(style="background:none!important;text-align:center")
+                        p.titleLarge(style="text-align:center") Change Organiser
+                        p(style="text-align:center") #{school.name}
+                        input(style="display:none" value=user.accountTypeFk id="accountType")
+                        nav.fullWidth.whiteBG        
+                            div.login_register
+                                div(class="register")
+                                    div.searchItem2
+                                        div.inputtitle2
+                                            p Email:
+                                            input.withBorder(type="email" value=school.email id="email")
+                                            p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errors") 
+                        input(type="submit" value="Change Organiser" id="changeOrganiser" data-email=school.email data-schoolId=school.id).mt-3.btn.btn-primary
+
+
+
+
+    //- body
+        header
+            include ./common/navbar.pug
+            +navbar(user)
+        div(id="overlay")
+        div.container
+            div.row
+                .col-sm-12.offest-md-2.col-md-8
+                    .jumbotron
+                        h2.text-center Change Organiser for #{school.name}
+                        .row
+                            .col-sm-12.col-md-12.col-xs-12
+                                label Email:
+                                br
+                                input(type="email" value=school.email id="email").form-control 
+                                p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errors") 
+                                br
+                                input(type="submit" value="Change Organiser" id="changeOrganiser" data-email=school.email data-schoolId=school.id).mt-3.btn.btn-primary
+    include ./common/footer.pug
+    +footer()   

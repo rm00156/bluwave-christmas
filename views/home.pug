@@ -1,0 +1,135 @@
+doctype html
+html(land="en")
+    include common/header.pug
+    +head("Kids Creative Cards - Children's artwork on greeting cards" )
+    title Kids Creative Cards - Children's artwork on greeting cards 
+    meta(name="description" content="Kids Creative Cards is a fundraising enterprise for nurseries and schools")
+    meta( name="keywords" content="greeting cards, Easter fundraising project, kids cards 4 easter, kids cards" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+
+    link(rel="stylesheet" href="css/kcards15b.css" type="text/css" media="screen" )
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+
+    
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                    script(src="javascript/home.js")     
+            div.gapDiv  gapDiv
+
+            section
+                article
+                    div.mainarea(style="background:none!important;")
+                        div(id="appearButton" style="width:80px; height:80px; background:#075F5E; position:fixed; right:20px; top:200px; color:#fff; display: flex; align-items: center; justify-content:center;")
+                            a(style="display:block; color:#fff; padding:20px;" href="#FAQdetails") FAQ's
+                        
+                        div(style="width:80px; height:80px;  position:fixed; right:20px; top:280px;  display: flex; align-items: center; justify-content:center;")
+                            iframe(src="https://www.facebook.com/plugins/share_button.php?href=https%3A%2F%2Fbluwave-christmas.herokuapp.com%2F&layout=button&size=large&appId=312774606254358&width=77&height=28" width="77" height="28" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true" allow="encrypted-media")
+                        
+                        div(style="width:80px; height:30px;  position:fixed; right:20px; top:350px;  display: flex; align-items: center; justify-content:center;")
+                            a(id="twitter" style="height:100%;width:100%")
+                                img( src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/twitter.png" style="height:100%;width:100%")
+                        nav.fullWidth.whiteBG
+                            
+                            div.login_register
+                                div.login
+                                    form(action="/login", method ="POST")
+                                        p.titleLarge Login
+                                        div(style="margin:0 20px;")
+                                            img( src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/logiconA2.png" alt="Register below if you do not have an account" )
+					
+                                        if(error)
+                                            p.small.text-danger(style="font-size:9pt") #{error} 
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                if(reset)
+                                                    p.titleLarge Password has successfully been reset
+                                                p(style="margin-bottom:0") Email:
+                                                input.withBorder(placeholder='Please enter your email', required=true, name='email', type='email', value=(formData != undefined) ? formData.email : '')
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                p(style="margin-bottom:0") Password:
+                                                input.withBorder(placeholder="Enter current password", required=true , name='password', type='password', value=(formData != undefined) ? formData.password : '')
+                                            div(style="margin-top:15px")
+                                                a(href="/forgottenPassword" style="margin-bottom:5px") Forgotten Password?  
+                                        br  
+                                        button.submitto2 Login
+                                div
+                                    div.login_register
+                                        div.register
+                                            p.titleLarge Register
+                                            div(style="margin:0 20px;")
+                                                img( src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/regiconA2.png" alt="Register below if you do not have an account")
+
+                                            div.searchItem2.blockItem
+                                                div.inputtitle2
+                                                    p.accessHeader(style="margin-bottom:0") 
+                                                        strong Parent Sign Up:
+                                                    p(style="margin-bottom:0") If you are a <strong>Parent</strong> with your Child taking part in a nursery/school Christmas card project or want to create and design your own card
+                                                form(action="/signup" method="get")
+                                                    input(style="display:none" name="type" value="parent" id="type")
+                                                    button.submitto2 Click here
+
+                                            div.searchItem2.blockItem
+                                                div.inputtitle2
+                                                    p.accessHeader(style="margin-bottom:0")
+                                                        strong Nursery/School Organiser Sign Up:
+                                                    p(style="margin-bottom:0") If you are an <strong>Organiser</strong> for your nursery/school Christmas card project
+                                                    form(action="/signupOrganiser" method="get")
+                                                        button.submitto2 Click here
+                                            
+        div(id="FAQdetails" style="padding:10px 25%; text-align:left;margin:auto;width:100%; background:#f2f2f2; border-top:1px solid #17aab7;")
+            h1(style="margin-bottom:20px;") Helpful Hints
+            
+            h2(style="margin-top:40px") Login/Register
+		
+            p(style="color:#000; font-size:18px;margin:0px;") <strong>Parents</strong> who want to access your Childs card if they are taking part in a nursery/school Christmas card project, or want to create and design your own card, sign up using <strong>Parent Sign Up</strong>
+            p(style="color:#000; font-size:18px;;margin-bottom:20px;") <strong>Organisers</strong>&nbsp;with a child that has taken part can login using <strong>their original details</strong>
+		
+            h2 FAQs
+            p(style="color:#075F5E; font-size:22px;margin:0px;") What are the recommended web browsers for best experience?
+            p(style="color:#000;font-size:18px;") Mozilla Firefox or Google Chrome
+
+            
+            p(style="color:#075F5E; font-size:22px;margin:0px;height: auto") How is a payment made?
+            p(style="color:#000;font-size:18px;") Online Stripe payment via your sign up account
+            p(style="color:#075F5E; font-size:22px;") What are the different pack options?
+            div
+                div(style="float:left; width:33.3%; margin-bottom:30px;")
+                    div(style="display:block; text-align:center") Standard Pack £6.50
+                    div(style="text-align:center;color:#000; font-size:18px!important;") 
+                        img(style="width:395px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/standard.png" alt="")
+
+                div(style="float:left;width:33.3%; margin-bottom:30px;")
+                    div(style="display:block; text-align:center;") Photo Pack £8.50
+                    div(style="text-align:center;color:#000; font-size:18px!important;") 
+                        img(style="width:420px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/photopack.png" alt="")
+                
+                div(style="float:left;width:33.3%; margin-bottom:30px;")
+                    div(style="display:block; text-align:center;") Calendar £3.50
+                    div(style="text-align:center;color:#000; font-size:18px!important;")
+                        img(style="width:280px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/calendar.png" alt="")
+            
+            
+            
+
+            h2 Delivery
+            p(style="color:#075F5E; font-size:22px;margin:0px;") When will the Christmas Cards be delivered?
+            p(style="color:#000; font-size:18px;;margin:0px;") If <strong>part&nbsp;of a School Project</strong>, cards will be <strong>delivered to your School if purchase was made before your deadline.</strong> Please allow <strong>5 working days</strong> after the schools deadline order date, unless the school have extended/delayed date, in which case allow <strong>8 working days</strong> from the original deadline date.
+            br
+            p(style="color:#000; font-size:18px;margin:0px;") <strong>If not part</strong> of the School project, <strong> please allow 2-3 working days for delivery to your postal address.</strong>
+            br
+            p(style="color:#000; font-size:18px;margin:0px;") <strong>Late orders</strong>
+            p(style="color:#000; font-size:18px;margin:0px;") Please allow <strong>2-3 working days</strong> from placing an order for delivery to your postal address.
+            div(style="height:20px")
+            div(id="backtotop" style="visibility: hidden; width:80px; height:80px; background:#075F5E; position:fixed; right:20px; bottom:50px; color:#fff; display: flex; align-items: center; justify-content:center;")
+                a(style="font-size:12px; display:block; color:#fff; padding:20px 10px;" href="#top") Back to top
+	
+    include common/footer.pug
+    +footer()

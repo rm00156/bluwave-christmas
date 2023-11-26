@@ -1,0 +1,89 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Give Back Amounts")
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <!-- third party css end -->
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div     
+    
+// Begin page
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Give Back Amounts
+                
+                .row
+                    .card
+                        .card-body
+                            
+                            .row.mb-2
+                                table#giveBackTable.table.table-striped.dt-responsive.nowrap.w-100(style="cursor:pointer")
+                                    thead
+                                        tr
+                                        th School
+                                        th Standard Packs 
+                                        th £ Standard Packs 
+                                        th Photo Packs 
+                                        th £ Photo Packs
+                                        th Calendars 
+                                        th £ Calendars
+                                        th £ Total
+                                    tbody
+                                        input#numberOfItems(value=giveBackAmountDetailsForEachSchool.length style="display:none")
+                                        each giveBackAmountDetail, index in giveBackAmountDetailsForEachSchool
+                                            tr(id=index data-schoolNumber=giveBackAmountDetail.schoolNumber)
+                                                td #{giveBackAmountDetail.school}
+                                                    if(giveBackAmountDetail.action == true)
+                                                        br
+                                                        span.badge.bg-danger Amount Confirmed By Customer
+                                                td #{giveBackAmountDetail.standardPackQuantity}
+                                                td £#{giveBackAmountDetail.standardPackGiveBack}
+                                                td #{giveBackAmountDetail.photoPackQuantity}
+                                                td £#{giveBackAmountDetail.photoPackGiveBack}
+                                                if(giveBackAmountDetail.calendarQuantity)
+                                                    td #{giveBackAmountDetail.calendarQuantity}
+                                                else 
+                                                    td 0
+                                                if(giveBackAmountDetail.calendar)
+                                                    td £#{giveBackAmountDetail.calendar}
+                                                else 
+                                                    td £0.00
+                                                td £#{giveBackAmountDetail.giveBackTotal}
+
+                                    
+                                    
+                                        
+
+        
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+
+script(src="assets2/js/adminDashboard.js")
+script(src="javascript/new/giveback.js")

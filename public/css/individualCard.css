@@ -1,0 +1,97 @@
+.columnCard {
+    float: left;
+    width: 66%;
+    height: 92vh ;
+  }
+  
+  .columnEditCard {
+    float: left;
+    width: 25%;
+    height: 92vh;
+    background-color: white;
+  }
+
+  .columnAddToBasket {
+    float: left;
+    width: 33%;
+    height: 92vh;
+    background-color: lightblue;
+  }
+
+  .row1 {
+    height:75%;
+    width:100%;
+  }
+
+  .row2 {
+    padding-top: 5px;
+    height:25%;
+    width:100%;
+  }
+
+  input[type="text"]{
+    width:100%;
+  }
+
+  .column1 {
+    padding:10px;
+    float: left;
+    width: 33%;
+    height: 100%;
+    border-style: solid;border-color: black;border-width:1px
+  }
+  
+  .column2 {
+    padding:10px;
+    float: left;
+    width: 33%;
+    height: 100%;
+    border-style: solid;border-color: black;border-width:1px
+  }
+
+  .column3 {
+    padding:10px;
+    float: left;
+    width: 33%;
+    height: 100%;
+    border-style: solid;border-color: black;border-width:1px
+  }
+
+  .columnSchool {
+    padding:10px;
+    float: left;
+    width: 33%;
+    height: 33%;
+  }
+  
+  .columnClass {
+    padding:10px;
+    float: left;
+    width: 33%;
+    height: 33%;
+  }
+
+  .columnCode {
+    padding:10px;
+    float: left;
+    width: 33%;
+    height: 33%;
+  }
+
+  .package-wrapper {
+    width: 80%;
+    height: 80%;
+    position: relative;
+    left: 50%;
+    top: 10%;
+    transform: translate(-50%, -10%);
+   
+  }
+
+  .packages{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+  }

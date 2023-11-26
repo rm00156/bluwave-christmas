@@ -1,0 +1,94 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Search Orders")
+  link(rel="stylesheet" href="css/search.css")
+  link(rel="stylesheet" href="css/kcards5.css" type="text/css" media="screen" )
+  meta(name="robots" content="index, follow" )
+  meta(name="revisit-after" content="7 days")
+  meta(name="version" content="1.0")
+  meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0")
+  body
+    div.outercontainer
+        header.headertop
+            div.kclogo
+                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+            script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+            script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js")
+            script(src="javascript/searchOrders.js")
+        div.gapDiv
+            gapDiv
+        include ./common/navbar.pug
+        +navbar(user)
+        div.mainarea
+            div.contentarea
+                div(id="headerStrip")
+                    div.headerTitle.padOut Orders
+                div.searchStrip
+                    div.searchItem
+                        div.inputtitle
+                            p Order Number:
+                            input(id="orderNumber" type="text")
+                    div.searchItem
+                        div.inputtitle
+                            p Kid Name:
+                            input(id="name" type="text")
+                    div.searchItem
+                        div.inputtitle
+                            p Kid Code:
+                            input(id="code" type="text")
+                    div.searchItem
+                        div.inputtitle
+                            p School:
+                            input(id="school" type="text")
+                div.searchStrip
+                    div.searchItem
+                        div.inputtitle
+                            p Class:
+                            input(id="class" type="text")
+                    div.searchItem
+                        div.inputtitle
+                            p Date:
+                            input(id="date" type="date")
+                    div.searchItem
+                        div.inputtitle
+                            p Shipped:
+                            input(id="shipped" type="checkBox" style="height:20px")
+                    div.searchItem.statusArea
+                        p(style="color:none!important;") &nbsp;
+                        button.submitto(id="search") Search
+                    
+                    div.searchItem.statusArea
+                        p(style="color:none!important;") &nbsp;
+                        button.submitto(id="clear") Clear
+                div
+                    div.showResultsHeader.padOut Search Results:
+                    div(style="margin-top:20px;padding:10px")
+                        table( id="searchResultTable" class="table table-striped table-bordered table-sm")
+                            col(width="20%")
+                            col(width="20%")
+                            col(width="15%")
+                            col(width="15%")
+                            col(width="15%")
+                            col(width="15%")
+                            //- col(width="10%")
+                            //- col(width="10%")
+                            thead
+                                tr
+                                    th #Order Number
+                                    th Name
+                                    th Kid Code
+                                    th School
+                                    th Class 
+                                    th Date 
+                                    th Order Total
+                                    //- th Shipped
+                                    //- th Shipped Date
+                                    
+                            tbody
+    
+
+        include ./common/footer.pug
+        +footer()  

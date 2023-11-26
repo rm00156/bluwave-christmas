@@ -1,0 +1,42 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Login")
+    link(rel="stylesheet" href="css/kcards.css" type="text/css" media="screen" )
+
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+            div.gapDiv
+                gapDiv    
+        
+            include ./common/navbar.pug
+            +navbar()
+        
+            div.container
+                .row
+                    div(style="width:100%;margin-top:20px")
+                        .jumbotron
+                            h2.text-center Login
+                            .row
+                                .col-sm-12.col-md-12.col-xs-12
+                                    form(action="/login", method ="POST")
+                                        div.formgroup
+                                            label.small.mb-1.mt-3 Email:
+                                            input(placeholder='Please enter your email', required=true, name='email', type='email', value='').form-control 
+                                            label.small.mb-1.mt-3 Password:
+                                            input(placeholder="Enter current password", required=true , name='password', type='password', value='welcome').form-control 
+                                            button.submitto(type="submit" style="margin-top:10px") Log in  
+                                            br
+                                            br
+                                            h8.mt-2.mb-0
+                                                | Forgot your password? #[a(href="/#") Reset here].
+                                            br
+                                            h8.m-0
+                                                | Don't have an account? #[a(href="/signup") Sign up here].
+                                            
+        include ./common/footer.pug
+    +footer()
+

@@ -1,0 +1,73 @@
+html
+    head 
+        link(href='assets2/css/style.css' rel='stylesheet')    
+    body 
+        nav.navbar.navbar-dark.bg-info.mb-5
+            .container
+                a.navbar-brand(href='#') Image Filter
+        .container
+            .row
+                .col-md-8.m-auto
+                    .custom-file.mb-3
+                        input#upload-file.custom-file-input(type='file')
+                        label.custom-file-label(for='upload-file') Choose Image
+                    div(style="width:600px;height:600px")
+                        canvas#canvas(style="width:-webkit-fill-available")
+                    h4.text-center.my-3 Filters
+                    .row.my-4.text-center
+                        .col-md-3
+                            .btn-group.btn-group-sm
+                                button.filter-btn.brightness-remove.btn.btn-info -
+                                button.btn.btn-secondary.btn-disabled(disabled='') Brightness
+                                button.filter-btn.brightness-add.btn.btn-info +
+                        .col-md-3
+                            .btn-group.btn-group-sm
+                                button.filter-btn.contrast-remove.btn.btn-info -
+                                button.btn.btn-secondary.btn-disabled(disabled='') Contrast
+                                button.filter-btn.contrast-add.btn.btn-info +
+                        .col-md-3
+                            .btn-group.btn-group-sm
+                                button.filter-btn.saturation-remove.btn.btn-info -
+                                button.btn.btn-secondary.btn-disabled(disabled='') Saturation
+                                button.filter-btn.saturation-add.btn.btn-info +
+                        .col-md-3
+                            .btn-group.btn-group-sm
+                                button.filter-btn.vibrance-remove.btn.btn-info -
+                                button.btn.btn-secondary.btn-disabled(disabled='') Vibrance
+                                button.filter-btn.vibrance-add.btn.btn-info +
+
+                    // ./row
+                    h4.text-center.my-3 Effects
+                    .row.mb-3
+                        .col-md-3
+                            button.filter-btn.vintage-add.btn.btn-dark.btn-block
+                                | Vintage
+                        .col-md-3
+                            button.filter-btn.lomo-add.btn.btn-dark.btn-block
+                                | Lomo
+                        .col-md-3
+                            button.filter-btn.clarity-add.btn.btn-dark.btn-block
+                                | Clarity
+                        .col-md-3
+                            button.filter-btn.sincity-add.btn.btn-dark.btn-block
+                                | Sin City
+                    .row
+                        .col-md-3
+                            button.filter-btn.crossprocess-add.btn.btn-dark.btn-block
+                                | Cross Process
+                        .col-md-3
+                            button.filter-btn.pinhole-add.btn.btn-dark.btn-block
+                                | Pinhole
+                        .col-md-3
+                            button.filter-btn.nostalgia-add.btn.btn-dark.btn-block
+                                | Nostalgia
+                        .col-md-3
+                            button.filter-btn.hermajesty-add.btn.btn-dark.btn-block
+                                | Her Majesty
+                    .row.mt-5
+                        .col-md-6
+                            button#download-btn.btn.btn-primary.btn-block Download Image
+                        .col-md-6
+                            button#revert-btn.btn.btn-danger.btn-block Remove Filters
+        script(src='assets2/js/caman.full.min.js')
+        script(src='assets2/js/test.js')

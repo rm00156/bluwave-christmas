@@ -1,0 +1,65 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Reset Email Sent")
+    link(href='assets2/css/style.css' rel='stylesheet')    
+
+body
+                                               
+    +navbar()
+    section#design.bg-light.fp-table.active.fp-completely.mt-5(data-fp-styles='null' data-anchor='services' )
+        
+        .section.mt-5
+            // Triangles
+            .bg-triangle.bg-triangle-dark.bg-triangle-left.bg-triangle-top
+            .bg-triangle.bg-triangle-dark.bg-triangle-right.bg-triangle-bottom
+            // Content
+            .container.mt-5.mb-5
+                .row 
+                    .col-sm-12        
+                        h1.text-center(style="font-size:4.125rem ;font-weight:500") Reset Password
+                        if(valid)
+                            form(id="form" action="/", method ="POST")
+                                .card.shadow.mb-4
+                                    .card-body(style="text-align:center")
+                                        h4(style="text-align:center") Reset Password
+                                
+                                        .row(style="margin-top:20px")
+                                            .col-sm-12
+                                                label(for="password") New Password:
+                                                input.form-control(type="password" id="password" required=true)
+                                                p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errors") 
+                                        .row(style="margin-top:20px;margin-bottom:15px;")
+                                            .col-sm-12
+                                                label(for="rePassword") Re-Enter Password:
+                                                input.form-control(type="password" id="rePassword" required=true)
+                                        input(id="email" style="display:none" value=email)
+                                        input.btn.btn-outline-primary.btn-block.mt-5(type="submit" value="Send" id="send" )
+                        else
+                            h1(style="margin-bottom:20px;text-align:center;width:100%") Invalid Link   
+                            if(expired)
+                                p(style="color:#000; font-size:18px;margin:0px;text-align:center") Your link has expired, please select <a href="/forgottenPassword">Forgotten Password</a> to restart process
+                            else
+                                p(style="color:#000; font-size:18px;margin:0px;text-align:center") This link didn't originate from us. If you need to reset your password, please select <a href="/forgottenPassword">Forgotten Password</a>   
+
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+
+
+
+    <script src="assets2/libs/flickity-fade/flickity-fade.js"></script>
+    <script src="assets2/libs/jquery-parallax.js/parallax.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/jquery.waypoints.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/shortcuts/inview.min.js"></script>
+    <script src="assets2/libs/fullpage.js/vendors/scrolloverflow.min.js"></script>
+    <script src="assets2/libs/fullpage.js/dist/fullpage.min.js"></script>
+    <script src="assets2/libs/highlightjs/highlight.pack.min.js"></script>
+
+    script(src="assets2/js/theme.min.js")
+    script(src="javascript/reset.js")

@@ -1,0 +1,29 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Amount Confirmed")
+    link(rel="stylesheet" href="css/kcards5.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    
+   
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                    script( type="text/javascript" src="javascript/charity.js")
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+
+            section
+                article
+                    div.mainarea(style="background:none!important;")
+                        p.titleLarge(style="text-align:center") Thank you for confirming the amount to be returned
+                        p(style="text-align:center") you should receive the payment in the next 3 working days
+                        br

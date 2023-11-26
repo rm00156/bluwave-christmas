@@ -1,0 +1,318 @@
+/*Brand colours are:*/
+
+/*Dark Green: #075F5E*/
+/*Grey: #bcbdc0*/
+/*Lighter Grey:#f1f1f2*/
+/*Dark Cyan: #17aab7*/
+/*Lime Green: #33cc33*/
+
+
+
+/*div{border:1px solid black!important;}*/
+
+/*.nudge{margin-left:-10px;}*/
+#warningMessage{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    color: white;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    height: 30% !important;
+    width:50%;
+    background-color: #17aab7
+  }
+
+  #warningMessage2{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    color: white;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    height: 30% !important;
+    width:50%;
+    background-color: #17aab7
+  }
+
+  #unlinkMessage{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    color: white;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    height: 60% !important;
+    width:50%;
+    background-color: #17aab7
+  }
+
+.dataTables_empty{background:#f1f1f2; padding:10px; color:#000;}
+
+.dataTables_empty:after{content:"Edit"; width:50px; background:#075F5E; display: block;padding:5px; color:#fff;text-align:center; float: right;}
+
+.titleBar{height:30px;}
+
+.pagination{ bottom:20px!important;}
+
+#orderClasses_paginate>ul li{padding:10px 20px; width:50%; float:left;margin-left:-40px!important; display: flex;justify-content:space-around; text-decoration: none; background:#075F5E;}
+
+#orderClasses_paginate>ul li a{color:#fff!important;}
+
+.classesRow{padding-top:10px;margin:40px 0; border-top:1px solid #17aab7;}
+
+.searchShow{display:block!important;}
+
+#classes_filter{display:inline-block;float:right;}
+.contentarea{padding:20px;background: #17aab7; border:20px solid #f1f1f2; color:#fff; font-family: sans-serif;overflow: hidden;}
+
+
+.flexOut{display: flex;}
+
+.statusContainer{
+    margin:auto;
+    width: 100%;
+    height:30%;
+   /* padding-left:20px;
+    padding-right:20px*/
+}
+
+.organiserContent{
+    width:100%;
+    height:92vh
+}
+
+.statusColumns
+{
+    float:left;
+    width:10%;
+    height: 100%;
+    /*border-style: none none solid none;border-color: black;border-width:1px*/
+}
+
+#overlay {
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2;
+    cursor: pointer;
+  }
+
+
+  #overlay2 {
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  #overlay3 {
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  .shippingAddress{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 50px;
+    color: white;
+    transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    height: 80%;
+    width:50%;
+    background-color: white
+  }
+
+p{
+    text-align:center;
+    font-size:9pt
+}
+
+td p{
+    color:black;
+    font-size:inherit;
+}
+
+.columnBottom{
+    margin-top:10px;
+    left:50%;
+    
+}
+
+.columnBottom2{
+    margin-top:10px;
+    float:left;
+    width:50%;
+    height:45%
+}
+
+body, html {
+    height: 100%;
+    width: 100%
+  }
+
+.schoolOrdersContainer{
+    /*padding-left:20px;
+    padding-right:20px*/
+   /* height:90vh;*/
+    width:100%;
+	display: flex;
+	justify-content: space-evenly;
+}
+
+.schoolOrders{
+    float:left;
+    /*height:90%;*/
+   /* width:66.66%;*/
+	 width:67%;
+	 padding-right:20px;
+	
+}
+
+.organiserColumns
+{
+    float:left;
+    width:50%;
+    height:90%; 
+}
+
+.tableContainer
+{
+    float:left;
+    width:100%;
+    height:90%; 
+}
+
+.organiserPieChartColumn{
+    float:left;
+    width:33.33%;
+    /*height:90vh; */
+    /*border-style: none none none solid;border-color: black;border-width:1px*/
+}
+
+.organiserClassColumnContainer{
+    float:left;
+    width:100%;
+    /*height:90%; */
+    padding-right:10px
+}
+
+/* .orderTable{
+    width: 100%;
+    height: 100%;
+  } */
+
+  table{
+   
+    width:100%;
+}
+
+/* tr{
+    border-style:none none solid none; border-color:black;border-width:1px
+} */
+
+/* th{
+    border-style:none solid none none; border-color:none;border-width:1px
+} */
+
+
+input#myInput::-webkit-calendar-picker-indicator { display: none }
+
+input[type=date]::-webkit-inner-spin-button, 
+input[type=date]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+.date-picker-button {
+    background: #8DBF42;
+    color: #fff;
+    position: relative;
+    cursor: pointer;
+    margin-bottom: 10px;
+    border: 2px solid #8DBF42;
+    font-size: 14px;
+    padding: 12px;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -o-border-radius: 3px;
+    width: 300px;
+  }
+  
+  .input-group {
+    position: relative;
+    border: 2px solid #cdd7e1;
+    margin-bottom: 10px;
+    display: block !important;
+    width: 300px;
+    border: none;
+  }
+  
+  .date-picker-button .date-picker-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: 0;
+    background: #8DBF42;
+    border: none;
+    width: 300px;
+    padding-left: 55px;
+  }
+  
+  .fa.fa-angle-down {
+    float: right;
+    color: white;
+    font-size: 20px !important;
+    font-weight: 600;
+    top: 0px !important;
+    position: relative;
+    margin-right: 20px;
+  }
+  
+  .fa-calendar-o {
+    color: white !important;
+    z-index: 1;
+    top: 0px !important;
+    position: relative !important;
+  }
+
+  .columnDeadline{
+      float:left;
+      width:50%;
+      height:wrap-content
+  }
+
+  .columnDeadline{
+      float:left;
+      width:50%;
+      height:wrap-content
+  }

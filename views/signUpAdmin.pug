@@ -1,0 +1,47 @@
+doctype html
+html(land="en")
+    include common/header.pug
+    +head("Sign up")
+    link(rel="stylesheet" href="css/kcards11.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+            div.gapDiv gapDiv  
+            include common/navbar.pug
+            +navbar(user)
+            section
+                article
+                    div.mainarea(style="background:none!important;")
+                        p.titleLarge(style="text-align:center") Sign up Admin
+                        p(style="text-align:center") add a new adminstrator account
+                        br
+                        form(action="/signUpAdmin", method ="POST")
+                            nav.fullWidth.whiteBG
+                                
+                                div.login_register
+                                    div.register
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                p Email:
+                                                input.withBorder(placeholder='Please enter your email', required=true, name='email', type='email' value=(formData != undefined) ? formData.email : '')
+                                                if(errors && errors.email )
+                                                    p.small.text-danger #{errors.email}
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                p Password:
+                                                input.withBorder(placeholder="New Password", required=true , name='password', type='password' value=(formData != undefined) ? formData.password : '')
+                                                if( errors && errors.password)
+                                                    p.small.text-danger #{errors.password}
+                            div(style="text-align:center;margin-top:10px")
+                                button.submitto2 Add New Admin
+
+        include common/footer.pug
+        +footer()

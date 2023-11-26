@@ -1,0 +1,81 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Search Kids")
+    //-   link(rel="stylesheet" href="css/search.css")
+    link(rel="stylesheet" href="css/kcards5.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+                script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+                script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js")
+                script(src="javascript/searchKid.js")
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+            div.mainarea
+                div.contentarea
+                    div(id="headerStrip")
+                        div.headerTitle.padOut Kids
+                    div.searchStrip
+                        div.searchItem
+                            div.inputtitle
+                                p Name:
+                                input(id="name" type="text")
+
+                        div.searchItem
+                            div.inputtitle
+                                p Age:
+                                input(id="age" type="text")
+
+                        div.searchItem
+                            div.inputtitle
+                                p Name of School:
+                                input(id="school" type="text")
+
+                        div.searchItem
+                            div.inputtitle
+                                p Class:
+                                input(id="class" type="text")
+                        
+                    div.searchStrip
+                        div.searchItem
+                            div.inputtitle
+                                p Year:
+                                input(id="year" type="text")
+
+                        div.searchItem
+                            div.inputtitle
+                                p Card Code:
+                                input(id="cardCode" type="text")
+
+                        div.searchItem.statusArea
+                            p(style="color:none!important;") &nbsp;
+                            button.submitto(id="search") Search
+                    
+                        div.searchItem.statusArea
+                            p(style="color:none!important;") &nbsp;
+                            button.submitto(id="clear") Clear
+                    div
+                        div.showResultsHeader.padOut Search Results:
+                        div(style="margin-top:20px;padding:10px")
+                            table( id="searchResultTable" class="table table-striped table-bordered table-sm" )
+                                thead
+                                    tr
+                                        th Name
+                                        th Age
+                                        th School
+                                        th Class 
+                                        th Year 
+                                        th Code
+                                tbody       
+        include ./common/footer.pug 
+        +footer()  

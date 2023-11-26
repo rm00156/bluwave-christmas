@@ -1,0 +1,66 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Confirm Amount")
+    link(rel="stylesheet" href="css/kcards5.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    
+   
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                    script( type="text/javascript" src="javascript/charity.js")
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+            section
+                article
+                    div.mainarea(style="background:none!important;")
+                        if(invalid)
+                            p.titleLarge(style="text-align:center") This is an invalid request
+                            p(style="text-align:center") you have either already confirmed an amount or the school is not at the correct step
+                        else
+                            p.titleLarge(style="text-align:center") Enter Bank Details for 
+                            br
+                            form(id= "form" action="/confirmAmount", method ="POST")
+                                nav.fullWidth.whiteBG
+                                    input(name="school" style="display:none" id="schoolId" )
+                                    div.login_register
+                                        div.login
+                                            p.titleLarge(style="text-align:center") Bank Account Details
+                                            iv.searchItem2
+                                                div.inputtitle2
+                                                    p Fullname Of Account Holder:
+                                                    input(placeholder='Please enter the name of the account holder', pattern='[a-zA-Z- ]+' minlength=1, maxlength=50 ,id="name" required=true, name='name', type='text' value=(formData != undefined) ? formData.name : '')
+                                                    
+                                            div.searchItem2
+                                                div.inputtitle2
+                                                    p Bank Account Number:
+                                                    input(placeholder='Please enter your bank account number', id="bankAcc" minlength=8, maxlength=8  required=true, name='bankAcc', type='text' value=(formData != undefined) ? formData.bankAcc : '')
+                                                    p(id="errorBankAcc").small.text-danger
+                                        div
+                                            div.login_register
+                                                div.register
+                                                    p.titleLarge(style="text-align:center;color:transparent") Bank Account Details
+                                                    div.searchItem2
+                                                        div.inputtitle2
+                                                            p Sort Code:
+                                                            input(placeholder='Please enter your sort code', id="sortCode" required=true, minlength=6, maxlength=6  value=(formData != undefined) ? formData.sortCode : '' name='sortCode', type='text' )
+                                                            p(id="errorSortCode").small.text-danger
+                                                    div.searchItem2
+                                                        div.inputtitle2
+                                                            p Payment Type:
+                                                            select(id="type" name="type")
+                                                                option(value="BACS") BACS
+                                                                option(value="Cheque") Cheque
+                                div(style="text-align:center;margin-top:10px")
+                                    button.submitto2 Submit
+        include ./common/footer.pug
+        +footer()                            

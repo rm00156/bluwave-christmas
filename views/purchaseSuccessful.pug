@@ -1,0 +1,38 @@
+doctype html
+doctype html
+html(land="en")
+    include common/new/header.pug
+    +head("Purchase Successful")
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+    link(rel="stylesheet" href="css/signup.css")   
+    body(style="background-color:white !important;padding-top:3rem")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+    
+        section.product-section(style="margin-top:10px")
+            .container.spad
+                .row
+                    .col-sm-12  
+                        section
+                            article
+                                div.mainarea(style="background:none!important;text-align:center")
+                                    h2(style="margin-bottom:35px") Purchase Successful
+                                    p Thank you for purchasing with us at Bluwave. You will shortly receive an email from us with your order confirmation.
+                                    p Please check you junk mail if you don't see it in you inbox.
+                                    a( href='/parentDashboard') To go back to the dashboard
+                            
+        //- body
+        //-     include common/navbar.pug
+        //-     +navbar(user)
+        //-     div(style="padding:15px")
+        //-         container
+        //-             h1 Purchase Successful
+        //-             p Thank you for purchasing with us at Bluwave. You will shortly receive an email from us with your order confirmation.
+        //-             p Please check you junk mail if you don't see it in you inbox.
+        //-             a(href='/parentDashboard') To go back to the dashboard
+
+
+        include common/new/footer.pug
+        +footer()

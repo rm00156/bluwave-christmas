@@ -1,0 +1,71 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Add Kid")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      script(src="javascript/schoolClassDropDown.js")
+      script(src="javascript/createKids.js")
+      div.container
+        div.row
+            .col-sm-12.offest-md-2.col-md-8
+                .jumbotron
+                    h2.text-center Add Kid
+                    .row
+                        .col-sm-12.col-md-12.col-xs-12
+                            form(action='/addKid', method='POST', enctype="multipart/form-data")
+                                div.formgroup
+                                    label.small.mb-1.mt-3 Name:
+                                    input(id='name' placeholder='Please enter Kids Name', required=true, name='name', type='text').form-control 
+                                    label.small.mb-1.mt-3 Code:
+                                    input(id='code' placeholder="Enter Code", required=true , name='code', type='text').form-control 
+                                    label.small.mb-1.mt-3 Age:
+                                    input(id='age' placeholder="Enter Kids age", required=true , name='age', type='text').form-control 
+                                    label.small.mb-1.mt-3 School:
+                                    br
+                                    select(name='schoolDropdown',id='schoolDropDown' onchange="selectSchool()"  ).mt-3.btn.btn-primary 
+                                        each school in schools
+                                            option(value=school.id) #{school.name}
+                                    br
+                                    label.small.mb-1.mt-3 Year:
+                                    br
+                                    select(name='yearDropdown', id='yearDropdown' ).mt-3.btn.btn-primary 
+                                            each year in years
+                                                option(value=year.id) #{year.year}
+                                    br            
+                                    label.small.mb-1.mt-3 Class:
+                                    br
+                                    select(name='classDropdown',id='classDropdown' ).mt-3.btn.btn-primary 
+                                    br
+                                    //- label.small.mb-1.mt-3 Picture:
+                                    //- br
+                                    //- input(id='picture' placeholder="Enter Picture Filename", required=true , name='picture', type='file')
+                                    br
+                                    label.small.mb-1.mt-3 ArtWork:
+                                    br
+                                    input(id='artwork' placeholder="Enter Artwork FileName", required=true , name='artwork', type='file') 
+                                    br
+                                    br
+                                    div
+                                        table
+                                            tr
+                                                td
+                                                    input(id='displaySchool' name='displaySchool', type='checkBox' checked="true")
+                                                    | Display School
+                                                td
+                                                    input(id='displayClass' name='displayClass', type='checkBox' checked="true")
+                                                    | Display Class
+                                                td
+                                                    input(id='displayAge' name='displayAge', type='checkBox' checked="true")
+                                                    | Display Age
+                                                  
+                                    input(type="submit" value="Add Kid").mt-3.btn.btn-primary   
+    include ./common/footer.pug
+    +footer()                                  
+                                        
+                                   
+                                        
+    
+

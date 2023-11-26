@@ -1,0 +1,13 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Print")
+  link(rel="stylesheet" href="css/print.css")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+    
+    embed(src=samplePath style="width:100%;height:92%")
+    include ./common/footer.pug
+    +footer()  

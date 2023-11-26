@@ -1,0 +1,133 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    head
+        title Kids Creative Cards - Dashboard
+        meta(name="description" content="Kids Creative Cards is a fundraising enterprise for nurseries and schools" )
+        meta(name="keywords" content="greeting cards, Easter fundraising project, kids cards 4 easter, kids cards")
+        meta(name="robots" content="index, follow" )
+        meta(name="revisit-after" content="7 days" )
+        meta(name="version" content="1.0" )
+        meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E" )
+        link(rel="shortcut icon" href="favicon.ico")
+        link(rel="stylesheet" href="css/kcards5.css" type="text/css" media="screen")
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+            
+        //- link(rel="stylesheet" href="css/kcards2.css" type="text/css" media="screen" )
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js")
+        link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous")
+        
+        script(type="text/javascript" src="javascript/dashboard.js")
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+            div.gapDiv gapDiv  
+            include common/navbar.pug
+            +navbar(user)                            
+            section <!--Aftr header-->
+                article
+                    div.mainarea(style="background:none!important; max-width:1200px!important;")
+                        div.searchStrip
+                            div.fullWidth
+                                div.extra(id="divTable" )  
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        if(user.email == 'rmillermcpherson4@gmail.com' || user.email == 'richard@hydeandrowe.co.uk' || user.email == 'eric@thebluwavegroup.com')
+                                            h5 Total Revenue
+                                            h5 £#{totalRevenue}
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                        h5 Total Kids
+                                        h5 #{totalKids}
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        h5 Total Kids with Orders
+                                        h5 #{totalKidsWithOrders}
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                        h5 Total Parent Accounts
+                                        h5 #{totalParentAccounts}
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        if(user.email == 'rmillermcpherson4@gmail.com' || user.email == 'richard@hydeandrowe.co.uk' || user.email == 'eric@thebluwavegroup.com')
+                                            h5 24 hour Revenue
+                                            h5 £#{todayRevenue}
+                        .searchStrip
+                            .fullWidth
+                                div.extra(id="divTable" )  
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                        h5 Total Card Packs Sold
+                                        h5 #{totalCardPacks}
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        h5 Total Calendars Sold
+                                        h5 #{totalCalendarPacks}
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                        h5 Number Of Schools
+                                        h5 #{schoolCount}
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                            
+                               
+                        div.introHeader Let's Get Started. Please select from the following below:                        
+                        nav.fullWidth.whiteBG
+                            div(id="options_case")
+                                div(id="admin" class="opChoice" onmouseover="hoverStateOn1('admin')" onmouseout="hoverStateOff1('admin')")
+                                    div.iconHeader
+                                        p Administrator
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/admin.png" alt="Administrator")
+                                    form(action="/addSchool" method="get")
+                                        button.iconButton
+                                            p Add School 
+                                    form(action="/signUpAdmin" method="get")
+                                        button.iconButton
+                                            p Add New Administrator
+                                div(id="accounts" class="opChoice" onmouseover="hoverStateOn6('accounts')" onmouseout="hoverStateOff6('accounts')")
+                                    div.iconHeader
+                                        p Accounts
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/admin.png" alt="Schools")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                div(id="schools" class="opChoice" onmouseover="hoverStateOn2('schools')" onmouseout="hoverStateOff2('schools')")
+                                    div.iconHeader
+                                        p School
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/schools.png" alt="Schools")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                div(id="classes" class="opChoice" onmouseover="hoverStateOn3('classes')" onmouseout="hoverStateOff3('classes')")
+                                    div.iconHeader
+                                        p Classes
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/classes.png" alt="Classes")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                div(id="kids" class="opChoice" onmouseover="hoverStateOn4('kids')" onmouseout="hoverStateOff4('kids')")
+                                    div.iconHeader
+                                        p Kids
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/child.png" alt="Kids")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                div(id="orders" class="opChoice" onmouseover="hoverStateOn5('orders')" onmouseout="hoverStateOff5('orders')")
+                                    div.iconHeader
+                                        p Orders
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/packages.png" alt="Orders")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                
+                                div(id="ordersNotShipped" class="opChoice" onmouseover="hoverStateOn10('ordersNotShipped')" onmouseout="hoverStateOff10('ordersNotShipped')")
+                                    div.iconHeader
+                                        p Orders Not Shipped
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/packages.png" alt="Orders")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+    include ./common/footer.pug
+    +footer()                         

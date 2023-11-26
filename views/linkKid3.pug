@@ -1,0 +1,95 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Link My Kid To School Class")
+    link(href='assets2/css/style.css' rel='stylesheet')  
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')
+
+body 
+    +navbar()
+    div.text-center(id="overlay")
+        div.progress(id="progressBar" )
+            .container
+                img(src='img/loading2.gif' style="height: -webkit-fill-available; height: 100%")
+
+
+    section.section.section-full.bg-light.mt-2
+        // Content
+        .container
+            .row.justify-content-center
+
+                .col-md-10.col-lg-8
+                    .form-styled.bg-white
+                        // Heading
+                        h4.text-center.mb-4
+                            | Link your child to their School Class
+                        // Subheading
+                        p.text-center
+                            | Please enter the <b>School Code</b> and <b>Class Code</b> found on your instruction form, and then your kids details you wish to appear on the cards
+                        p.text-center.mb-5(style="font-size:10pt") (Only fill the details below if your child has taken part in our School Fundraiser, if not and you still wish to create another card select 'Not Part Of School' button below)
+                        // Password
+                        form#reece.form-group(action='/linkKids' method='post')
+
+                            .row
+                                .col-sm-6
+                                    label School Code <font style="color:red">(*)</font>
+                                    .input-group
+                                        input#schoolCode.form-control(value=(formData != undefined) ? formData.schoolCode : '' required=true, name='schoolCode', type='text')
+                                    p#error.small.text-danger
+                                .col-sm-6
+                                    label Class Code <font style="color:red">(*)</font>
+                                    .input-group
+                                        input#classCode.form-control(value=(formData != undefined) ? formData.classCode : '' required=true, name='classCode', type='text')
+                                    p#error.small.text-danger
+                            .row(style="margin-top:5px")
+                                .col-sm-12
+                                    label Kid Name <font style="color:red">(*)</font>
+                                    .input-group
+                                        input#name.form-control(value=(formData != undefined) ? formData.name : '' required=true, name='name', type='text')
+                                
+                            .row(style="margin-top:5px")
+                                .col-sm-6
+                                    label Kid Age (years) <font style="color:red">(*)</font>
+                                    .input-group
+                                        input#years.form-control(value=(formData != undefined) ? formData.years : '' required=true, name='years', type='number')
+
+                                .col-sm-6
+                                    label Kid Age (months)
+                                    .input-group
+                                        input#months.form-control(value=(formData != undefined) ? formData.months : '' required=false, name='months', type='number')   
+
+                            .row(style="margin-top:5px") 
+                                .col-sm-4(style="text-align:center;margin-top:20px")
+                                    
+                                    input.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" type="submit" value="Link Kid")
+                                .col-sm-4(style="text-align:center;margin-top:20px")
+                                    a(href="/parentDashboard")
+                                        input.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" value="Cancel") 
+
+                                .col-sm-4(style="text-align:center;margin-top:20px")
+                                    input#notPartOfSchool.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" value="Not Part Of School") 
+
+                            input#baskets(style="display:none" value=basket)   
+    +footer()            
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+
+
+
+    <script src="assets2/libs/flickity-fade/flickity-fade.js"></script>
+    <script src="assets2/libs/jquery-parallax.js/parallax.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/jquery.waypoints.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/shortcuts/inview.min.js"></script>
+    <script src="assets2/libs/fullpage.js/vendors/scrolloverflow.min.js"></script>
+    <script src="assets2/libs/fullpage.js/dist/fullpage.min.js"></script>
+    <script src="assets2/libs/highlightjs/highlight.pack.min.js"></script>
+
+    script(src="assets2/js/theme.min.js")                 
+    script(src="javascript/new/linkKid.js")
+    

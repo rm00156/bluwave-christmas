@@ -1,0 +1,260 @@
+.column {
+    float:left;
+    width:25%
+}
+
+.row:after{
+    content:"";
+    display: table;
+    clear:both;
+}
+
+h8
+{
+    font-size:9pt;
+    text-align:center;
+}
+
+
+
+/* .item1 { 
+    grid-area: header; 
+} */
+.item2 { grid-area: menu;
+ }
+.item3 { grid-area: main;
+ }
+.item4 { grid-area: right;
+ }
+
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 18% 62% 20%;
+  /* grid-template-areas:
+    'menu main main main right right'
+    'menu main main main right right'
+    'menu main main main right right'; */
+  grid-gap: 10px;
+   background-color: #2196F3; 
+  padding: 5px;
+  /* height:100vh; */
+}
+
+body, html {
+    height: 100%;
+    width: 100%
+  }
+
+.grid-container > div {
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    padding: 10px 0;
+    font-size: 30px;
+  }
+
+  
+.addKidBox{
+    width: 100%;
+    height: 30%;
+    padding:10px;
+  background-clip: content-box;
+  margin-top: 5px;
+  border: 1px solid black; 
+
+}
+
+.addKidContiner{
+    width: 100%;
+    height: 100%;
+    
+  }
+
+  .addKidColumn{
+      float:left;
+  width: 33.33%;
+  height: 100%;
+  }
+
+  .addKidColumn2{
+    float:left;
+width: 66.66%;
+height: 100%;
+}
+
+  .organiserPieChartColumn{
+    float:left;
+    width:33.33%;
+    height:100%; 
+    border-style: none none none solid;border-color: black;border-width:1px
+}
+
+.organiserClassColumnContainer{
+    float:left;
+    width:66.66%;
+    height:100%; 
+    padding-right:10px
+}
+
+.schoolOrders{
+    padding-top:10px;
+    height:95%;
+}
+
+.schoolOrdersContainer{
+    padding-left:20px;
+    padding-right:20px;
+    height:90%;
+    width:100%;
+}
+
+table{
+    margin-top: 20px;
+    padding-left:10px;
+    padding-right:10px;
+    width:100%;
+}
+
+h1{
+    width:50%;
+    margin-right:0;
+    padding-right:0
+}
+
+.noCard{
+    line-height:100%;
+    width:100%;
+    height:100%;
+    border-style: solid;
+    border-color: black;
+    border-width:1px;
+    text-align:center;
+    position:relative
+}
+
+.noCard h3{
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+.mainCanvas{
+    width:100%;
+    height:100%;
+    padding:5px;
+}
+#overlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2;
+    cursor: pointer;
+  }
+  #overlay25 {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2;
+    cursor: pointer;
+  }
+
+  #overlay2 {
+    position: relative;
+    display: inline-block;
+    width: 50%;
+    height: 100%;
+    cursor: pointer;
+  }
+  
+.reeceContainer{
+    position:relative;
+    background-color: white
+}
+
+.reece-block {
+    position: absolute;
+    height:61% !important;
+    width:58.7% !important;
+    top:1.71%;
+    right:1.19%;
+    /* bottom: 20px;
+    right: 20px; */
+    color: white;
+  }
+
+  #progressBar{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      font-size: 50px;
+      color: white;
+      transform: translate(-50%,-50%);
+      -ms-transform: translate(-50%,-50%);
+      height: 20% !important;
+      width:75%;
+      background-image: linear-gradient(90deg,#075F5E 10%,#20c997 100%);
+    }
+
+    #firstLogin{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-size: 50px;
+        color: white;
+        transform: translate(-50%,-50%);
+        -ms-transform: translate(-50%,-50%);
+        height: 60% !important;
+        width:70%;
+        /* background-image:linear-gradient(180deg,#075F5E 10%,#20c997 100%); */
+      }
+
+    @media screen and (max-width:435px){
+        #progressBar{
+            height:35% !important;
+        }
+        #firstLogin.h3,.containerR{
+            height:50% !important;
+            font-size:10pt;
+        }
+       
+        #option1{
+            height:50% !important;
+        }
+
+        .containerR button{
+            font-size:10pt !important;
+        }
+        }
+
+  
+@media screen and (max-width:400px){
+#progressBar{
+    height:35% !important;
+    }
+}
+@media screen and (max-width:375px){
+    #progressBar{
+        height:40% !important;
+    }   
+}
+
+@media screen and (max-width:350px){
+    #progressBar{
+        height:50% !important;
+    }   
+}

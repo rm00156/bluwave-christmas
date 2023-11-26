@@ -1,0 +1,112 @@
+mixin sidebar()
+    .leftside-menu
+        // LOGO
+        a.logo.text-center.logo-light(href='adminDashboard')
+            span.logo-lg
+                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="90%" height="100%" alt="Kids Cards")
+
+            span.logo-sm
+                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="90%" height="100%" alt="Kids Cards")
+
+            //- a.navbar-brand(id='navbarLogo' href="/dashboardNew")
+                            img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="100%" height="100%" alt="Kids Cards")
+        // LOGO
+        //- a.logo.text-center.logo-dark(href='index.html')
+            span.logo-lg
+                img(src='assets/images/logo-dark.png' alt='' height='16')
+            span.logo-sm
+                img(src='assets/images/logo_sm_dark.png' alt='' height='16')
+        #leftside-menu-container.h-100(data-simplebar='')
+            // - Sidemenu
+            ul.side-nav
+                li.side-nav-title.side-nav-item Navigation
+                li.side-nav-item
+                    a.side-nav-link(href='/adminDashboard')
+                        i.uil-calender
+                        span  Dashboard
+                
+                li.side-nav-item
+                    a.side-nav-link(data-bs-toggle='collapse' href='#sidebarAccounts' aria-expanded='false' aria-controls='sidebarAccounts')
+                        i.mdi.mdi-account
+                        span  Accounts 
+                        //- span.badge.bg-danger.float-end New
+                    #sidebarAccounts.collapse
+                        ul.side-nav-second-level
+                            li
+                                a(href='/new_accounts_admin') View Accounts
+                            li
+                                a(href='/accounts_with_basket_items') Accounts With Items in Basket
+                            li
+                                a(href='/accounts_linked_no_order') Accounts Linked To School No Order
+                            li
+                                a(href='/accounts_linked_uploaded_no_order') Accounts Linked Picture Uploaded No Order
+                                    //- span.badge.bg-danger.float-end New    
+                                
+                li.side-nav-item
+                    a.side-nav-link(href='javascript:void(0)')
+                        i.mdi.mdi-tools
+                        span  Admins
+                li.side-nav-item
+                    a.side-nav-link(data-bs-toggle='collapse' href='#sidebarProducts' aria-expanded='false' aria-controls='sidebarProducts')
+                        i.mdi.mdi-newspaper
+                        //- span.badge.bg-danger.text-white.float-end New
+                        span  Products 
+                    #sidebarProducts.collapse
+                        ul.side-nav-second-level
+                            li
+                                a(href='javascript:void(0)') View Products
+                li.side-nav-item
+                    a.side-nav-link(data-bs-toggle='collapse' href='#sidebarKids' aria-expanded='false' aria-controls='sidebarProducts')
+                        i.mdi.mdi-human-child
+                        //- span.badge.bg-danger.text-white.float-end New
+                        span  Kids 
+                        
+                    #sidebarKids.collapse
+                        ul.side-nav-second-level
+                            li
+                                a(href='/new_kids_admin') View Kids
+                                    
+                li.side-nav-item
+                    a.side-nav-link(data-bs-toggle='collapse' href='#sidebarSchoools' aria-expanded='false' aria-controls='sidebarSchoools')
+                        i.mdi.mdi-school
+                        //- span.badge.bg-danger.text-white.float-end New
+                        span  Schools 
+                    #sidebarSchoools.collapse
+                        ul.side-nav-second-level
+                            li
+                                a(href='/new_schools_admin') View Schools
+                        ul.side-nav-second-level
+                            li
+                                a(href='/kids_linked_to_schools') Schools Taking Part
+                
+                li.side-nav-item
+                    a.side-nav-link(data-bs-toggle='collapse' href='#sidebarOrders' aria-expanded='false' aria-controls='sidebarOrders')
+                        i.mdi.mdi-receipt
+                        //- span.badge.bg-danger.text-white.float-end New
+                        span  Orders
+                        if(ordersNotShipped.length > 0)
+                            span.badge.bg-success.float-end #{ordersNotShipped.length}
+                    #sidebarOrders.collapse
+                        ul.side-nav-second-level
+                            li
+                                a(href='/new_orders_admin') View Orders
+                            li 
+                                a(href='/ordersNotShipped') Orders To Be Shipped
+                                    if(ordersNotShipped.length > 0)
+                                        span.badge.bg-success.float-end #{ordersNotShipped.length}
+
+                li.side-nav-item
+                    a.side-nav-link(href='/give_back')
+                        i.mdi.mdi-currency-gbp
+                        if(schoolsRequiringGiveBackAction.length > 0)
+                            span Give Back Amounts    
+                            span.badge.bg-danger.float-end #{schoolsRequiringGiveBackAction.length}  
+                        else 
+                            span Give Back Amounts 
+                li.side-nav-item
+                    a.side-nav-link(href='/deadlines')
+                        i.mdi.mdi-calendar-clock
+                        span Deadlines
+                    
+            
+        .clearfix

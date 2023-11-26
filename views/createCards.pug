@@ -1,0 +1,62 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Create Cards")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      script(src="javascript/schoolClassDropDown.js")
+      div.container
+        div.row
+            .col-sm-12.offest-md-2.col-md-8
+                .jumbotron
+                    h2.text-center Create Cards
+                    .row
+                        .col-sm-12.col-md-12.col-xs-12
+                            form( method ="POST")
+                                div.formgroup
+                                    label.small.mb-1.mt-3 School:
+                                    br
+                                    select(name="schoolDropDown" id="schoolDropDown" onchange="selectSchool()" ).mt-3.btn.btn-primary 
+                                        option(value=0) All
+                                        each school in schools
+                                            option(value=school.id) #{school.name}
+                                    br   
+                                    label.small.mb-1.mt-3 Year:
+                                    br
+                                    select(name='yearDropdown' id='yearDropdown' ).mt-3.btn.btn-primary 
+                                            each year in years
+                                                option(value=year.id) #{year.year}
+                                    br
+                                    div(id="classKidDiv" style="display:none")
+                                        label.small.mb-1.mt-3 Class:
+                                        br
+                                        select(name='classDropDown' id='classDropdown' onchange="selectClass()" ).mt-3.btn.btn-primary 
+                                        br  
+                                        div(id="kidDiv" style="display:none")                                       
+                                            label.small.mb-1.mt-3 Kids:
+                                            br
+                                            select(name='kidDropdown' id='kidDropdown' ).mt-3.btn.btn-primary 
+                                    input(type="submit" value ="Create Cards" ).mt-3.btn.btn-primary
+                                                                           
+                                    //- select(name='schoolDropdown',id='schoolDropDown' onchange="selectSchool()" style="margin-left:25px" ).mt-3.btn.btn-primary 
+                                    //-     each school in schools
+                                    //-         option(value=school.id) #{school.name}
+                                    //- br
+                                    //- label.small.mb-1.mt-3 Class:
+                                    //- select(name='classDropdown',id='classDropdown'  style="margin-left:25px" ).mt-3.btn.btn-primary 
+                                    //- br
+                                    //- label.small.mb-1.mt-3 Picture:
+                                    //- input(placeholder="Enter Picture Filename", required=true , name='picture', type='text').form-control 
+                                    //- label.small.mb-1.mt-3 ArtWork:
+                                    //- input(placeholder="Enter Artwork FileName", required=true , name='artwork', type='text').form-control 
+    include ./common/footer.pug
+    +footer()  
+                                   
+                                    
+                                        
+                                   
+                                        
+    
+

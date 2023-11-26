@@ -1,0 +1,46 @@
+.resize-drag {
+    /*  */
+    border-radius: 50%;
+    /* padding: 20px; */
+    color: white;
+    font-size: 20px;
+    font-family: sans-serif;
+    /* margin: 30px 20px; */
+    touch-action: none;
+    position: absolute;
+    left:8px;
+    top:8px;
+    
+    width: 120px;
+  
+    /* This makes things *much* easier */
+    box-sizing: border-box;
+  }
+
+  .resize-drag2 {
+    /*  */
+    border-radius: 8px;
+    /* padding: 20px; */
+    color: black;
+    font-size: 20px;
+    font-family: sans-serif;
+    /* margin: 30px 20px; */
+    touch-action: none;
+    position: absolute;
+    left:8px;
+    top:8px;
+    border:none;
+    height: 50px;
+    width: 150px;
+  
+    /* This makes things *much* easier */
+    box-sizing: border-box;
+  }
+  
+  .resize-container {
+    
+    display: inline-block;
+    width: 14.5cm;
+    height: 14.5cm;
+    border: solid;
+  }

@@ -1,0 +1,34 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Purchase Successful")
+    link(href='assets2/css/style.css' rel='stylesheet')    
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')
+body
+                                               
+    +navbar()
+
+    section.section.section-top.bg-light
+        .container
+            .row.justify-content-center                            
+                .col-sm-9
+                    .form-styled.bg-white
+                        .row
+                            .col-sm-12
+                                div.mainarea(style="background:none!important;text-align:center")
+                                    h2(style="margin-bottom:35px") Purchase Successful
+                                    p Thank you for purchasing with us at <a href="http://www.thebluwavegroup.com/" style="color:#f51167">Bluwaves' KidsCard4Christmas</a>. You will shortly receive an email from us with your order confirmation.
+                                    p Please check you junk mail if you don't see it in you inbox.
+                                    a( href='/parentDashboard' style="color:#f51167") To go back to the dashboard
+                            
+                                
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+    script(src="assets2/js/theme.min.js")

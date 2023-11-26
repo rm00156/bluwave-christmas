@@ -1,0 +1,16 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("reece")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar()
+      script(src="javascript/schoolClassDropDown.js")
+      script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+      script(src="javascript/pdf.js")
+
+      form( method="post")  
+        input(type="file" name="reece")
+
+        input(type="submit")

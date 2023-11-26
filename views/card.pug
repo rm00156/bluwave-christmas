@@ -1,0 +1,263 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Cards")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+      script(src="javascript/basket.js")
+      script(src="javascript/package.js")
+      script(src="javascript/viewEditCard.js")
+      link(rel="stylesheet" href="css/individualCard.css")
+    div
+        .columnCard
+            .row1
+                canvas(id="canvas")
+            .row2
+                .column1
+                   label.mb-1.mt-3 Name:
+                    input( id="updateName" required=true value=schoolKidArray.name name='name', type='text' style="width:100%").form-control 
+                    label.mb-1.mt-3 Age:
+                    input( id="updateAge" required=true , value=schoolKidArray.age name='age', type='text' ).form-control 
+                .column2
+                    label School:
+                    br
+                    select(name="schoolDropDown" id="schoolDropDown" onchange="selectSchool()" ).mt-3.btn.btn-primary 
+                                          each school in schools
+                                            if(schoolKidArray.schoolId == school.id)
+                                              option(id='school' + school.id value='school' + school.id selected="selected") #{school.name}
+                                            else
+                                              option(id='school' + school.id value='school'+school.id) #{school.name}
+                    br
+                    
+                    label Class:
+                    br
+                    select(name='classDropdown' id='classDropdown' ).mt-3.btn.btn-primary 
+                        each schoolClass in reece
+                          if(schoolClass.id == schoolKidArray.classFk)
+                            option(id='class' + schoolClass.id value='class' + schoolClass.id selected="selected") #{schoolClass.name}
+                          else
+                            option(id='class' + schoolClass.id value='class' + schoolClass.id) #{schoolClass.name}
+                    
+                    
+                
+                    
+                    
+                .column3
+                    .columnSchool
+                        input( id="schoolCheckBox"  type="checkbox" name="schoolCheckBox")
+                        | Display School
+                    .columnClass
+                        input( id="classCheckBox" type="checkbox" name="classCheckBox")
+                        | Display Class
+                    .columnCode                 
+                        input( id="ageCheckBox" type="checkbox" name="ageCheckBox")
+                        | Display Age
+                    label Picture:    
+                    input( type="file" name='picture' id='picture')
+                    if(user.accountTypeFk==1)
+                        label Artwork:    
+                        input( type="file" name='artwork' id='artwork')
+                    
+                    input(id="selectedCardId" type="text" name="selectedCardId" style="display:none")
+                    input(id="selectedCardIndex" type="text" name="selectedCardIndex" style="display:none" )
+                    input(id="selectedKidId" type="text" name="selectedKidId" style="display:none" )
+                    script(type="text/javascript").
+                      var schoolKidArray = !{JSON.stringify(schoolKidArray)};
+                      var cards = !{JSON.stringify(cards)};
+                      $('#selectedKidId').val(cards[0].kidFk);
+                      $('#selectedCardIndex').val(0);
+                      $('#selectedCardId').val(cards[0].id);
+                      $('#schoolCheckBox').prop('checked', schoolKidArray.displaySchool == 1 ? true : false);
+                      $('#classCheckBox').prop('checked',schoolKidArray.displayClass == 1 ? true : false);
+                      $('#ageCheckBox').prop('checked',schoolKidArray.displayAge == 1 ? true : false);
+                      
+                    br
+                    input(type="submit" id="updateCard" value ="Update Card" onclick="update()" ).mt-3.btn.btn-primary
+                    script(type="text/javascript").
+                        const update = async function(){
+                            console.log('hello');
+                            var file = $('#picture').prop('files')[0];
+                            var file2 = $('#artwork').prop('files')[0];
+                            var cards = !{JSON.stringify(cards)};
+                            var data = new FormData();
+                            var request = new XMLHttpRequest();
+                            request.responseType = 'json';
+                            data.append('file', $('#picture').prop('files')[0]);
+                            data.append('file2', $('#artwork').prop('files')[0]);
+                            data.append('classDropdown',$('#classDropdown').val());
+                            data.append('selectedCardId',$('#selectedCardId').val());
+                            data.append('selectedCardIndex',$('#selectedCardIndex').val());
+                            data.append('schoolDropdown',$('#schoolDropDown').val());
+                            data.append('schoolCheckBox', $('#schoolCheckBox').is(':checked'));
+                            data.append('classCheckBox', $('#classCheckBox').is(':checked'));
+                            data.append('ageCheckBox', $('#ageCheckBox').is(':checked'));
+                            data.append('name', $('#updateName').val());
+                            data.append('age', $('#updateAge').val());
+                            data.append('selectedKidId',$('#selectedKidId').val());
+
+                            request.addEventListener('load', function(e){
+
+                            var data = request.response;
+                            var user = !{JSON.stringify(user)};
+                            let cardPath = user.accountTypeFk == 1 ? data.path : data.previewPath;
+                            $('#' + data.cardIndex ).attr('data-path', cardPath );
+                            $('#' + data.cardIndex ).trigger('click');
+                            $('#path').val(cardPath);
+                            //- $('#samplePath').val(data.samplePath);
+                            console.log(data.cardIndex);
+                            //- console.log(cardPath)
+                            pdfjsLib.getDocument(cardPath).then(doc=>{
+                                
+                                doc.getPage(1).then(page=>{
+
+                                var myCanvas= document.getElementById("canvas");
+                                var context = myCanvas.getContext("2d");
+                                var firstColumn = document.getElementById("firstColumn");
+                                        // 1 means the original size of the page
+                                var viewport= page.getViewport(1250/ page.getViewport(1).width);
+                                page.render({
+                                    canvasContext:context,
+                                    viewport:viewport
+                                })
+                                })
+                            });
+
+                            //- pdfjsLib.getDocument(data.samplePath)
+                            //- .then(doc=>{
+                            //-         doc.getPage(1).then(page=>{
+                            
+                            //- var myCanvas= document.getElementById('canvas2');
+                            //- var context = myCanvas.getContext("2d");
+                        
+                            //- // 1 means the original size of the page
+                            //- var viewport= page.getViewport(450/ page.getViewport(1).width);
+                            //- myCanvas.height = viewport.height;
+                            //- myCanvas.width = viewport.width;
+
+                            //- page.render({
+                            //-         canvasContext:context,
+                            //-         viewport:viewport
+                            //-     })
+
+                            //-     })
+                            //-     })
+                          
+                        } )
+                        //- add a progress bar of some sort
+                        request.open('post','/updateCard');
+                        request.send(data);
+                
+
+                        }
+                    
+
+        //- .columnEditCard
+
+        .columnAddToBasket
+            div.package-wrapper
+                if(user.accountTypeFk == 2)
+                    div.packages
+                        select( id="package" onchange="selectPackage()").mt-3.btn.btn-primary 
+                            each package, index in packages
+                                option(value=package.id data-index=index ) #{package.name}
+                        br
+                        br
+                        
+                        img(src=packages[0].imagePath id="packageImage" style="width:300px;height:300px")
+                        br
+                        label Quantity:
+                        br
+                        input(type="number" min="0" max="10" id="quantity" value=1 style="width:50px" onchange="quantityChange()")
+
+                        h3(id="price" data-price=packages[0].price) Price £#{packages[0].price}     
+                        input(type="submit" id="addTobasket" value="Add to Basket" data-kidId=schoolKidArray.id).mt-3.btn.btn-primary
+                else 
+                    canvas(id="canvas2")
+            if( user.accountTypeFk == 1)
+                div(style="text-align:center")  
+                    //- form(method="GET", action="/printScreen") 
+                    //-     input(type="text" value=cards[0].samplePath name="samplePath" id="samplePath" style="display:none")           
+                    //-     input(id="sampleButton" type="submit" value="Print Sample").mt-3.btn.btn-primary 
+                    //-     br
+                    //- form(method="GET", action="/printScreen") 
+                    //- input(type="text" value=cards[0].path name="path" id="path" style="display:none")
+                    input(id="cardButton" type="submit" data-cardId=cards[0].id value="Print Card").mt-3.btn.btn-primary        
+        script(type="text/javascript").
+            const selectPackage = function()
+            {             
+                var data = {"packageId":$('#package').val() }   
+                $.ajax({
+                    type: "get",
+                    url:"/getPackageWithId",
+                    data:data,
+                    dataType: "json",
+                    success: function(data)
+                    {
+                        var package = data.package;
+
+                        $('#price').text('Price £' + (parseFloat(package.price) * $('#quantity').val() ));
+                        $('#packageImage').attr('src',package.imagePath);
+                        $('#price').attr('data-price', package.price);
+                    }
+                })
+
+                
+            }
+
+        script(type="text/javascript").
+            $('#addTobasket' ).on('click', basket2 );
+                
+            var cards = !{JSON.stringify(cards)};
+            var user = !{JSON.stringify(user)};
+            let cardPath = user.accountTypeFk == 2 ? cards[0].previewPath : cards[0].path;
+            let samplePath = cards[0].samplePath;
+            console.log(cardPath);
+            pdfjsLib.getDocument(cardPath)
+            .then(doc=>{
+                    doc.getPage(1).then(page=>{
+            
+            var myCanvas= document.getElementById('canvas');
+            var context = myCanvas.getContext("2d");
+        
+            // 1 means the original size of the page
+            var viewport= page.getViewport(1250/ page.getViewport(1).width);
+            myCanvas.height = viewport.height;
+            myCanvas.width = viewport.width;
+
+            page.render({
+                    canvasContext:context,
+                    viewport:viewport
+                })
+
+                })
+                })
+            //- pdfjsLib.getDocument(samplePath)
+            //- .then(doc=>{
+            //-         doc.getPage(1).then(page=>{
+            
+            //- var myCanvas= document.getElementById('canvas2');
+            //- var context = myCanvas.getContext("2d");
+        
+            //- // 1 means the original size of the page
+            //- var viewport= page.getViewport(450/ page.getViewport(1).width);
+            //- myCanvas.height = viewport.height;
+            //- myCanvas.width = viewport.width;
+
+            //- page.render({
+            //-         canvasContext:context,
+            //-         viewport:viewport
+            //-     })
+
+            //-     })
+            //-     })
+           
+    include ./common/footer.pug
+    +footer()                                  
+                                        
+                                   
+                                        
+    
+

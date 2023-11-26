@@ -1,0 +1,123 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("School " + school.name)
+  link(rel="stylesheet" href="css/organiser2.css")
+  link(rel="stylesheet" href="css/school.css")
+  link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
+  link(rel="stylesheet" href="css/pieProgress.css")
+  link(rel="stylesheet" href="css/kcards5a.css" type="text/css" media="screen" )
+  meta(name="robots" content="index, follow" )
+  meta(name="revisit-after" content="7 days")
+  meta(name="version" content="1.0")
+  meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0")
+  body
+    div(id="overlay")
+       div.deadline(style="width:30%;text-align:center")
+        div(style="margin-top:10px")
+          h5 Deadline :
+          p(id="deadLineError" style="color:red")
+          div(style="padding-left:30px;padding-right:30px;margin-top:10px")
+            input(id="deadLine" type="date" value=deadLineDttm style="text-align:center;border-style:solid;border-color: black;border-width:1px").form-control  
+            input(id="setDeadLine" type="submit" data-schoolId=school.id value="Set Deadline" style="margin-right:10px").mt-3.btn.btn-primary
+            input(id="cancelDeadline" type="submit" value="Cancel").mt-3.btn.btn-primary         
+    div.outercontainer
+      header.headertop
+          div.kclogo
+              img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+              script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+              script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js")
+              
+      div.gapDiv gapDiv
+      include ./common/navbar.pug
+      +navbar(user)
+      div.mainarea
+        div.contentarea 
+          div.schoolOrdersContainer
+            
+            .schoolOrders
+                .organiserClassColumnContainer
+                  div.searchStrip
+                    div.pageTitle Add Class
+                    div.searchItem
+                      div.inputtitle
+                        p.cn Class Name:
+                        input.nudge(type="text" id="class" )
+                        p.small.text-danger(style="display:none;" id="error" )
+                    div.searchItem.statusArea
+                      button.submitto(id="addClass" data-schoolId=school.id data-yearId=yearId) Add Class                            
+                                
+                  input(style="display:none" id="classSize" value=classTotal)
+                  input(style="display:none" id="orderClassSize" value=classesWithOrders.length)
+                  .tableContainer(style="margin-top:20px;")
+                    h3 Classes
+                    div(id="allClasses")
+                      table( id="classes" style="background:#bcbdc0" class="table table-striped table-sm dataTable no-footer")
+                        thead
+                          tr
+                            th Class
+                            th Year
+                        tbody
+                          each schoolClass, index in classList
+                            tr(id="class"+index data-classid=schoolClass.id)
+                              td #{schoolClass.name}
+                              td #{schoolClass.year}
+                    div(id="classesWithOrders" style="display:none")
+                      table( id="orderClasses" class="table table-striped table-bordered table-sm")
+                        thead
+                          tr
+                            th Class
+                            th Year
+                        tbody
+                          each classesWithOrder, index in classesWithOrders
+                            tr(id="orderClass"+index data-classid=classesWithOrder.id)
+                              td #{classesWithOrder.name}
+                              td #{classesWithOrder.year}  
+
+            .organiserPieChartColumn
+              div(id="headerStrip" style="text-align:center")
+                div.headerTitle.padOut(style="width:100%") #{school.name}
+              h4(id="currentStatus" style="text-align:center;padding-left:10px;margin-top:10px") Current Status : #{school.type}
+
+              div.donut-size( id="specificChart" style="margin-top:20px")
+                div.pie-wrapper
+                    span.label
+                        span.num 0
+                        span.smaller %
+                    div.pie
+                        div.left-side.half-circle
+                        div.right-side.half-circle
+                    div.shadow
+              div(style="text-align:center;margin-top:20px")
+                h6 #{kidTotal} Total Pupils
+                h6 #{orderedKidTotal} Pupils Ordered
+                //- input(type="number" value=daysLeft id="daysLeft" style="display:none")
+                if(deadLineDttm != '')
+                  - if(daysLeftSign == 'negative')
+                      h6 #{(daysLeft * -1)} Days since purchase deadline passed
+                  - else if( daysLeftSign == 'zero')
+                    h6 Purchase deadline is Today 
+                  - else
+                      h6 #{daysLeft} Days till purchase deadline
+                input(id="ordered" type="number" value=orderedPercentage style="display:none")
+
+
+              div(style="text-align:center;margin-top:20px; padding-left:15px;padding-right:15px")
+                if(school.name != 'Individuals')
+                  button.submitto(id="editContactDetails" data-schoolId=school.id) Contact Details
+                  
+                  br
+                  button.submitto(id="deadLineButton" style="margin-top:10px" data-schoolId=school.id ) Set Deadline
+                  br 
+                  each nextStep, index in nextSteps
+                    button.submitto(id="changeStep" + index style= "margin-top:10px" data-schoolid=school.id data-nextTypeId=nextStep.id ) Change status to #{nextStep.type}
+                    br
+
+                
+                button.submitto( id="switchClassOrders" style="margin-top:10px" ) Classes With Orders
+      script(src="javascript/school.js")
+      script(src="javascript/organiserPieChart.js")
+include ./common/footer.pug
++footer()  

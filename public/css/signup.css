@@ -1,0 +1,12 @@
+.column {
+    float: left;
+    width: 50%;
+    padding: 5px;
+    margin-top:20px
+  }
+
+#error{
+    font-size:9pt;
+    margin-bottom:0;
+    color:red;
+}

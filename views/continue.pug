@@ -1,0 +1,38 @@
+doctype html
+html(land="en")
+    include common/header.pug
+    +head("Continue " + school)
+    link(rel="stylesheet" href="css/kcards11.css" type="text/css" media="screen" )
+    link(rel="stylesheet" href="css/signup.css")
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")  
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+            div.gapDiv
+                gapDiv
+            include common/navbar.pug
+            +navbar(user)
+            section
+                article
+                    div.mainarea(style="background:none!important;")
+                        if(errors.length > 0)
+                            p.titleLarge(style="text-align:center") Error
+                            each error in errors
+                                p(style="text-align:center") #{error}  
+                        else  
+                            p.titleLarge(style="text-align:center") Continue
+                            p(style="text-align:center") We will now start the printing process for #{school}
+                            p(style="text-align:center") and we will let you know when the cards are out for delivery
+
+        include ./common/footer.pug
+        +footer()                
+
+                        

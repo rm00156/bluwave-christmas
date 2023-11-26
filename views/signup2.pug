@@ -1,0 +1,86 @@
+doctype html
+html(land="en")
+    include common/new/header.pug
+    +head("Sign up")
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+    link(rel="stylesheet" href="css/signup.css")   
+    body(style="background-color:white !important;padding-top:3rem")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        script(src="https://www.google.com/recaptcha/api.js")
+        script(src="javascript/captcha.js")
+        section.product-section(style="padding-top:50px;padding-left:10px;padding-right:10px")
+            .container.shadow.mb-4(style="padding-top:50px")
+                .row
+                    .col-sm-12
+                        h3(style="text-align:center") Sign up as a parent below
+                        h3(style="text-align:center") if you don't have a parent account
+                form(id="form" action="/signup" method="POST" style="padding-top:50px")
+                    .row
+                        .col-sm-12
+                            input(style="display:none" id="type" name="type" value="parent")
+                            if( errors && errors.invalid)
+                                p(id="error" style="text-align:center").small.text-danger #{errors.invalid}
+                    .row
+                        .col-sm-6
+                            label(for="name") Name
+                            .quantity(style="margin-bottom:15px;")
+                                .pro-qty(style="width:100% !important")
+                                    input(id="name" style="width:100% !important;text-align:left;" placeholder="Please enter your name", required=true , name='name', type='text' value=(formData != undefined) ? formData.name : '')
+                        .col-sm-6
+                            label(for="telephoneNo") Telephone Number
+                            .quantity(style="margin-bottom:15px;")
+                                .pro-qty(style="width:100% !important")
+                                    input(style="width:100% !important;text-align:left;" placeholder="Please enter your phone number", required=true, id="telephoneNo" name='telephoneNo', type='text' value=(formData != undefined) ? formData.telephoneNo : '')
+                            if(errors.telephoneNo)
+                                p.small.text-danger(style="text-align:center;margin-left:0;margin-top:0;font-size:8pt") #{errors.telephoneNo}        
+                    
+                    .row
+                        .col-sm-6
+                            label(for="email") Email
+                            .quantity(style="margin-bottom:15px;")
+                                .pro-qty(style="width:100% !important")
+                                    input( style="width:100% !important;text-align:left;" id="email" placeholder='Please enter your email', required=true, name='email', type='email' value=(formData != undefined) ? formData.email : '')
+                            if(errors && errors.email )
+                                p(id="error").small.text-danger #{errors.email}
+                        .col-sm-6
+                            label(for="reEmail") Re-Enter Email
+                            .quantity(style="margin-bottom:15px;")
+                                .pro-qty(style="width:100% !important")
+                                    input.withBorder( style="width:100% !important;text-align:left;" id="reEmail" placeholder='Please re-enter your email', required=true,  value=(formData != undefined) ? formData.reEmail : '' name='reEmail', type='email' )
+
+                    .row
+                        .col-sm-6
+                            label(for="password") Pasword
+                            .quantity(style="margin-bottom:15px;")
+                                .pro-qty(style="width:100% !important")
+                                    input(style="width:100% !important;text-align:left;" placeholder="Please enter Password", required=true , id="password" name='password', type='password' value=(formData != undefined) ? formData.password : '')
+                            if( errors && errors.password)
+                                p(id="error").small.text-danger #{errors.password}
+                        .col-sm-6
+                            label(for="password") Re-enter Password
+                            .quantity(style="margin-bottom:15px;")
+                                .pro-qty(style="width:100% !important")
+                                    input(style="width:100% !important;text-align:left;" id="rePassword" placeholder="Please re-enter Password", value=(formData != undefined) ? formData.rePassword : '' required=true , name='rePassword', type='password' )
+                    .row
+                        .col-sm-12(style="text-align:center;margin-top:20px")
+                            div(style="text-align:center")
+                                .g-recaptcha(data-sitekey="6LdzUtsZAAAAAEf-uA4T9AvVJUfytjMSHcPHRvbw")
+                                p.small.text-danger(id="captchaError" style="text-align:left;margin-top:5px")
+                                br
+                            input.site-btn(type="submit" value="Sign Up") 
+                    .row
+                        .col-sm-12(style="text-align:center;margin-top:20px")
+                            h8.mt-3.mb-0
+                                | Want to sign up a school? #[a(href="/signupOrganiser") Register School here].    
+                            br
+                            h8.mt-3.mb-0
+                                | Already have an account? #[a(href="/") Login in here].
+                                                                    
+                    
+                        
+    
+        include common/new/footer.pug
+        +footer()

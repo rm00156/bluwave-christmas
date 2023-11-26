@@ -1,0 +1,153 @@
+doctype html
+html(land="en")
+    include common/new/header.pug
+    +head("Kids Cards 4 Christams - Home")
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+    body(style="background-color:white !important;padding-top:3rem")
+        script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+        script(src="https://js.stripe.com/v3/")
+        script(src="javascript/stripe.js"  )
+        script(src="javascript/basket.js")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        div(id="overlay")
+            div.progress(id="progressBar")
+                .container(style="width:100%")
+                    .row
+                        .col-sm-12(style="text-align:center; margin-top: 10px;")
+                            h6(style="color:white") Please link your childs card if your child was part of the 'Christmas Card Scheme' to insure free shipping. Otherwise select continue.
+
+                    .row(style="text-align:center")
+                        .col-sm-6
+                            button.site-btn(id="link") Link Child
+                        .col-sm-6
+                            button.site-btn(id="continue") Continue
+                            
+        div.mainarea(style="background:none!important;")
+            .contentarea
+
+                section.cart-section.spad(id="basketView")
+                    input(style="display:none" id="basketItems" value=basketItems.length)
+                    .container.spad
+                        .row
+                            if(basketItems.length > 0)
+                                .col-lg-8
+                                    .cart-table
+                                        h3 Your Basket
+                                        each basketItem, index in basketItems
+                                            .row(style="border-bottom:2px solid #e1e1e1;padding-bottom:20px;padding-top:20px")
+                                                .col-sm-4
+                                                    canvas.canvas(id='basket'+index style="width:100%;height:100%;padding:5px" data-basketItem=basketItem.id )
+                                                .col-sm-2
+                                                    h4 #{basketItem.packageName}
+                                                    a(href="" id="remove" +index  data-basketItemId=basketItem.id) Remove
+
+                                                .col-sm-3
+                                                    .quantity
+                                                        .pro-qty
+                                                            input(type="number" min="1"  data-index=index data-basketItemId=basketItem.id id="quantity" +index value=basketItem.quantity style="width:40px")
+                                                            
+                                                .col-sm-3
+                                                    h4(id="price"+index) £#{(basketItem.price * basketItem.quantity).toFixed(2)}
+                                        .total-cost
+                                            if(displayShippingSection == true)
+                                                div(style="text-align: left;padding-left: 22px;")
+                                                    h6 Sub-Total
+                                                        span(id="subtotal" data-subtotal=preTotal.toFixed(2)) £#{preTotal.toFixed(2)}
+                                                    h6(id="deliveryName") #{delivery.name} Delivery
+                                                        span £#{delivery.cost}
+                                                    input(style="display:none" value=delivery.id id="deliveryId")
+                                                    input(style="display:none" value=delivery.name id="originalDeliveryName")
+                                                    input(style="display:none" value=delivery.cost id="originalDeliveryCost")
+                                            h6(id="total") Total
+                                                span £#{total.toFixed(2)}
+                                        
+                                .col-lg-4.card-right
+                                    input(style="display:none" id="linkedKids" value=displayParentSection)
+                                    input(style="display:none" id="displayShippingSection" value=(displayShippingSection == true ? 'true' : 'false'))
+                                    if(displayShippingSection == true)
+                                        h3 Shipping Details
+                                        .row
+                                            .col-sm-12
+                                                label(for="fullName") Full Name
+                                                .quantity(style="margin-bottom:15px;")
+                                                    .pro-qty(style="width:100% !important")
+                                                        input(style="width:100% !important;text-align:left;" required=true, id='fullName' name='fullName', type='text' value=(shipping != undefined) ? shipping.fullName : "")
+                                                p.small.text-danger(id="fullNameError" style="color:red;font-size:9pt")
+                                                label(for="addressLine1") Address Line 1
+                                                .quantity(style="margin-bottom:15px;")
+                                                    .pro-qty(style="width:100% !important")
+                                                        input( style="width:100% !important;text-align:left" required=true, id='addressLine1' name='addressLine1', type='text' value=(shipping != undefined) ? shipping.addressLine1 : "")
+                                                p.small.text-danger(id="addressLine1Error" style="color:red;font-size:9pt")
+                                                label(for="addressLine2") Address Line 2
+                                                .quantity(style="margin-bottom:15px;")
+                                                    .pro-qty(style="width:100% !important")
+                                                        input(style="width:100% !important;text-align:left" required=true,id="addressLine2" name='addressLine2', type='text' value=(shipping != undefined) ? shipping.addressLine2 : "")
+                                                p.small.text-danger(id="addressLine2Error" style="color:red;font-size:9pt")
+                                        .row
+                                            .col-sm-6        
+                                                label(for="city") City
+                                                .quantity(style="margin-bottom:15px;")
+                                                    .pro-qty(style="width:100% !important")
+                                                        input(style="width:100% !important;text-align:left" required=true, id="city" name='city', type='text' value=(shipping != undefined) ? shipping.city : "")
+                                                    
+                                            .col-sm-6      
+                                                label(for="postCode") Post Code
+                                                .quantity(style="margin-bottom:15px;")
+                                                    .pro-qty(style="width:100% !important")
+                                                        input(style="width:100% !important;text-align:left" id="postCode" required=true, minlength=7, maxlength=8 name='postCode', type='text' value=(shipping != undefined) ? shipping.postCode : "")
+                                        .row
+                                            .col-sm-12                
+                                                p.small.text-danger(id="cityError" style="color:red;font-size:9pt")
+                                                p.small.text-danger(id="postCodeError" style="color:red;font-size:9pt")
+                                    
+                                        .row
+                                            .col-sm-12
+                                                select.form-control(id="country")
+                                                    each country in countries
+                                                        option(value=country.id) #{country.name}                                
+                                    button.site-btn(id="shipping" data-total=total data-onlyCreateYourOwnCard=(onlyCreateYourOwnCard ? 'true' : 'false')  style="min-height:50px;margin-top:10px") Buy Now
+                                    p.small.text-danger(id="buyError" style="color:red;font-size:9pt")
+                                    input(id="passedDeadline" style="display:none" value=passedDeadline)
+                                    
+                                    a.site-btn.sb-dark(href="/shop") Continue shopping
+                                    <div id="accordion" class="accordion-area">
+
+                                        <div class="panel">
+                                            <div class="panel-header" id="headingThree">
+                                                <button class="panel-link" data-toggle="collapse" data-target="#collapse3" aria-expanded="false" aria-controls="collapse3">shipping &amp; Returns</button>
+                                            </div>
+                                            <div id="collapse3" class="collapse show" aria-labelledby="headingThree" data-parent="#accordion">
+                                                <div class="panel-body">
+                                                    p If 
+                                                        span part&nbsp;of a School Project
+                                                        |, cards will be 
+                                                        span delivered to your School if purchase was made before your deadline. 
+                                                        | Please allow 
+                                                        span 5 working days 
+                                                        | after the schools deadline order date, unless the school have extended/delayed date, in which case allow 
+                                                        span 8 working days 
+                                                        | from the original deadline date.
+                                                    
+                                                    p 
+                                                        span If not part 
+                                                        | of the School project, 
+                                                        span please allow 2-3 working days for delivery to your postal address.
+                                                    
+                                                    p 
+                                                        span Late orders
+                                                    p Please allow 
+                                                        span 2-3 working days 
+                                                        | from placing an order for delivery to your postal address.
+                                                </div>
+                                            </div>
+                                        </div>
+                            else
+                                div(style="text-align:center")
+                                    h2 Basket Empty
+                                    br
+                                    a.site-btn.sb-dark(href="/shop") Continue shopping
+    include ./common/new/footer.pug
+    +footer()    

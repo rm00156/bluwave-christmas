@@ -1,0 +1,213 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Class " + schoolClass.name)
+    link(rel="stylesheet" href="css/print.css")
+    link(rel="stylesheet" href="css/organiser2.css")
+    link(rel="stylesheet" href="css/pieProgress.css")
+    link(rel="stylesheet" href="css/class.css")
+    //- link(rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css")
+    //- link(rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css")
+    link(rel="stylesheet" href="css/kcards5a.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+  
+    body
+        div(id="overlay" )
+            div.progress(id="progressBar" )
+                .container
+                    h2 Progress Bar
+                    div.progress(style="height:25px")
+                        div.progress-bar.bg-success.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px") 0%   
+                    h6(style="margin-top:5px" id="progressText")
+        div(id="overlay2")
+            .editClassName 
+                
+                div(style="padding-left:30px;padding-right:30px;margin-top:10px")
+                    h2 Edit Class Name
+                    p(id="nameError" style="text-align:left;color:red")
+                    input(type="text" id="newClassName" value=schoolClass.name ).form-control
+                    input(id="updateName" type="submit" data-classId=schoolClass.id data-className=schoolClass.name data-schoolId=school.id value="Update Name" style="margin-right:10px").mt-3.btn.btn-primary
+                    input(id="cancel" type="submit" value="Cancel").mt-3.btn.btn-primary         
+        
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+                    script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+                    script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js")
+                
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+            div.mainarea
+                div.contentarea  
+                    div.schoolOrdersContainer
+                        input(type="text" style="display:none" id="className" value=schoolClass.name)
+                        .schoolOrders
+                            .organiserClassColumnContainer
+                                
+                                input(style="display:none" id="kidSize" value=kidTotal)
+                                input(style="display:none" id="displayKid" value="true")
+                                
+                                div
+                                    div.headerTitle.padOut(id='editClassName') #{schoolClass.name}
+                                
+                                form(id="form" action="/")
+                                    .searchStrip
+                                        div.pageTitle  Add Kid
+                                        
+                                        div.searchItem
+                                            div.inputtitle
+                                                p Name:
+                                                input(id='name' required=true, name='name', type='text' ).form-control 
+                                                if(errors && errors.name)
+                                                    p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.name}
+                                        div.searchItem
+                                            div.inputtitle
+                                                p Years Old:
+                                                input(id='age' required=true , name='age', type='number' min="0" ).form-control 
+                                                input(type="text" style="display:none" value=schoolClass.id name="classId" id="classId")
+                                        div.searchItem
+                                            div.inputtitle
+                                                p Months Old:
+                                                input(id='month' required=false , name='month', type='number' min="0" max="11" ).form-control 
+                                                
+                                        div.searchItem
+                                            div.inputtitle
+                                                p Artwork:
+                                                label.stagesButton(  style="width:100%;text-align:center" for="artwork") Browse...
+                                                input(id='artwork' placeholder="Enter Artwork FileName", required=true , name='artwork', type='file' accept="image/x-png,image/jpeg")  
+                                                if(errors && errors.artwork)
+                                                    p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.artwork}
+                                        
+                                    div.searchStrip
+                                        div.searchItem
+                                            div.inputtitle
+                                                p Display School:                           
+                                                input(id='displaySchool' name='displaySchool', type='checkBox' checked="true")
+                                        div.searchItem
+                                            div.inputtitle
+                                                p Display Class:                           
+                                                input(id='displayClass' name='displayClass', type='checkBox' checked="true")
+                                        div.searchItem
+                                            div.inputtitle
+                                                p Display Age:                            
+                                                input(id='displayAge' name='displayAge', type='checkBox' checked="true")
+                                        div.searchItem
+                                            .inputtitle
+                                                button.submitto(id="addKid") Add Kid                            
+                                    
+                                .tableContainer(style="margin-top:20px;")
+                                    h3 Kids       
+                                    div(id="allClasses")
+                                        table( id="kidsTable"  style="background:#bcbdc0"  class="table table-striped table-sm")
+                                            thead
+                                                tr
+                                                    th Name
+                                                    th Years Old
+                                                    th Months Old
+                                                    th Code
+                                                    th Artwork
+                                            tbody
+                                                each kid, index in kidList
+                                                    tr(id="kid"+index data-kidid=kid.id style="cursor:pointer") 
+                                                        td #{kid.name}
+                                                        td #{kid.age}
+                                                        td #{kid.month}
+                                                        td #{kid.code}
+                                                        td 
+                                                            img(src=kid.artwork style="width:100px;height:100px")
+                                        input(type="text" value=kidList.length style="display:none" id="kidList")
+                                div(id="orders" style="height:35%;display:none")
+                                    div(id="headerStrip")
+                                        div.headerTitle.padOut Orders
+                                    div(style="margin-top:20px;padding:10px")
+                                        table( id="orderTable"  class="table table-striped  table-sm")
+                                            col(width="11.11%")
+                                            col(width="11.11%")
+                                            col(width="11.11%")
+                                            col(width="11.11%")
+                                            col(width="11.11%")
+                                            col(width="11.11%")
+                                            col(width="11.11%")
+                                            col(width="11.11%")
+                                            col(width="11.11%")
+                                            thead
+                                                tr
+                                                th Kid Name
+                                                th Kid Code
+                                                th Standard Pack
+                                                th Quantity
+                                                th Photo Pack
+                                                th Quantity
+                                                th Calendar 
+                                                th Quantity
+                                                th £ Total
+                                            tbody
+                                                each orderedKid in orderedKids
+                                                    tr
+                                                        td #{orderedKid.name}
+                                                        td #{orderedKid.code}
+                                                        if(orderedKid.package1 == 1)
+                                                            td(style="text-align:center") &#10004
+                                                        else
+                                                            td(style="text-align:center") &#10006
+                                                        td #{orderedKid.package1Quantity}
+                                                        if(orderedKid.package2 == 1)
+                                                            td(style="text-align:center") &#10004
+                                                        else
+                                                            td(style="text-align:center") &#10006
+                                                        td #{orderedKid.package2Quantity}
+                                                        if(orderedKid.calendar== 1)
+                                                            td(style="text-align:center") &#10004
+                                                        else
+                                                            td(style="text-align:center") &#10006
+                                                        td #{orderedKid.calendarQuantity}
+                                                        td #{(parseFloat(orderedKid.totalCost)).toFixed(2)}
+                        .organiserPieChartColumn
+                                div(id="headerStrip" style="text-align:center")
+                                    div.headerTitle.padOut(style="width:100%") #{school.name}
+                                h4( style="text-align:center;padding-left:10px;margin-top:10px") Current Status : #{currentStatus}
+                                div.donut-size( id="specificChart" style="margin-top:20px")
+                                    div.pie-wrapper
+                                        span.label
+                                            span.num 0
+                                            span.smaller %
+                                        div.pie
+                                            div.left-side.half-circle
+                                            div.right-side.half-circle
+                                        div.shadow
+                                div(style="text-align:center;margin-top:20px")
+                                    h6 #{kidTotal} Total Pupils
+                                    h6 #{orderedKidTotal} Pupils Ordered
+                                    input(id="ordered" type="number" value=orderedPercentage style="display:none")
+                                    if(allCardsCreated)
+                                        h2 All Cards have been Created
+                                    if(schoolClass.proofPath)
+                                        h2 A Proof have been Created
+                                div(style="text-align:center;padding-left:15px;padding-right:15px") 
+                                    p.small.text-danger(id="error" style="color:red") 
+                                    button.submitto( id='createCards' data-classId=schoolClass.id) Create Cards
+                                    br
+                                    button.submitto(id='editCards' style="margin-top:10px" data-classId=schoolClass.id) Edit Cards    
+                                    br
+                                    button.submitto( id='createProof' style="margin-top:10px" data-classId=schoolClass.id data-className=schoolClass.name) Generate Proofs 
+                                    br
+                                    button.submitto(id='generatePrintForm' style="margin-top:10px" data-classId=schoolClass.id data-className=schoolClass.name) Generate Print Form 
+                                    br
+                                    button.submitto(id='viewPurchaseCards' style="margin-top:10px" data-classId=schoolClass.id data-className=schoolClass.name) Generate Purchased Items
+                                    br
+                                    button.submitto( id="kidOrderButton" style="margin-top:10px" ) View Orders
+                                    br
+                                    button.submitto( id="schoolButton" style="margin-top:10px"  data-schoolId=schoolClass.schoolFk) Go To School
+                    
+        
+            script(src="javascript/organiserPieChart.js")   
+            script(src="javascript/class.js") 
+        include ./common/footer.pug
+        +footer()  

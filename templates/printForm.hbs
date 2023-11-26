@@ -1,0 +1,100 @@
+
+<html>
+
+<head>
+<style>
+    p {
+        font-size:9pt;
+		padding:0;
+		margin:0
+    }
+</style>
+</head>
+<body>
+   
+<div style="padding:15px; border-bottom-width:2px;width:100hw;height:93vh">
+  <div style="width:100%;height:10%;text-align:center">	
+		<h1>Print Form</h1>
+		<p style="color:red">* The item item wasn't explicitly linked to this class. However the item is associated to a parent account which has a kid in this class. If this parent account is linked to kids from more than one class you will see this item also in that order print form, so be mindful of that and take note. </p>
+	</div>
+	<div style="width:100%;height:5%;padding:0">
+		<div style="float:left;width:50%;">
+			<h1 style="margin-bottom:0;margin-top:0;margin-top:0">{{className}}</h1>
+		</div>
+        <div style="float:left;width:50%;">
+			<h1 style="margin-bottom:0;margin-top:0;text-align:right;margin-top:0">{{schoolName}}</h1>
+		</div>
+	</div>
+    <h5>Page {{pageNumber}} of {{numberOfPages}}</h5>
+	<div style="width:100%;height:80%;padding:0">
+		<div style="height:5%">
+			<h3>Basket Items</h3>
+		</div>
+		<div style="width:100%;height:95%;">
+			<table style="width:100%;height:300px;padding:10px;">
+				
+					<tr style="height:5%">
+						<td>Picture</td>
+						<td>Kid</td>
+						<td>Package</td>
+						<td>Order Number</td>
+						<td style="text-align:center">Description</td>
+						<td>Quantity</td>
+						<td>£ Cost</td>
+						</tr>	
+
+				{{#each basketItems}}
+						<tr style="height:55px">
+						<td style="width:15%" >
+							{{!-- <div style="width:95px;height:65px;">
+									<img src={{picture}} style="width:100%;height:100%;">
+								</div> --}}
+							</td>
+						<td style="width:30%">
+								<p> {{text1}}</p>
+								<br>
+								{{#if classFk}}
+
+									{{else}}
+										<p style="color:red">*</p>
+								{{/if}}
+							</td>
+							<td style="width:15%">
+								<p>{{productVariant}} - {{product}}</p>
+							</td>
+							<td style="width:15%">
+								<p>{{orderNumber}}</p>
+							</td>
+							{{#if calendar}}
+								<td style="width:25%;font-size:7pt;text-align:center">
+								<p>Orientation: {{orientation}}</p>
+                                <p>Color: {{color}}</p>
+								</td>
+							
+							{{else}}
+								<td style="width:25%;font-size:7pt;text-align:center">
+								<p>Display School: {{displayItem1}}</p>
+                                <p>Display Class: {{displayItem2}}</p>
+                                <p>Display Age: {{displayItem3}}</p>
+								</td>
+							{{/if}}
+							
+							<td style="width:10%">
+								<p>{{quantity}}</p>
+							</td>
+							<td style="width:10%">
+								<p>{{cost}}</p>
+							</td>	
+						</tr>
+                      {{/each}}  
+                        
+                        
+				  
+			</table> 
+			</div>
+	</div>
+	
+</div>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  head
+    meta(charset='utf-8')
+    title="Basket"
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js")
+    link(rel="stylesheet" href="css/organiser2.css")
+    link(rel="stylesheet" href="css/kcards5a.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+  
+  body
+    div.outercontainer
+        header.headertop
+            div.kclogo
+                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+                script(src="https://js.stripe.com/v3/")
+                script(src="javascript/stripe.js"  )
+                script(src="javascript/basket.js")
+                
+        div.gapDiv gapDiv
+        include common/navbar.pug
+        +navbar(user)
+        div.mainarea(style="background:none!important;")
+            .contentarea
+                div(id="shippingView" style="display:none")
+                    p.titleLarge(style="text-align:center") Shipping Details
+                    form(id="ignore")
+                        nav.fullWidth.sb.whiteBG(style="margin-top:5px")
+                        
+                            div.login_register
+                                div.login
+                                    div.searchItem2
+                                        div.inputtitle2
+                                            p Full Name:
+                                            input.withBorder( required=true, id='fullName' name='fullName', type='text' value=(shipping != undefined) ? shipping.fullName : "")
+                                    
+                                    div.searchItem2
+                                        div.inputtitle2
+                                            p Address Line 1:
+                                            input.withBorder( required=true, id='addressLine1' name='addressLine1', type='text' value=(shipping != undefined) ? shipping.addressLine1 : "")
+                                    div.searchItem2
+                                        div.inputtitle2
+                                            p Address Line 2:
+                                            input.withBorder( required=true,id="addressLine2" name='addressLine2', type='text' value=(shipping != undefined) ? shipping.addressLine2 : "")
+                                div
+                                    div.login_register
+                                        div.register
+                                            div.searchItem2
+                                                div.inputtitle2
+                                                    p City:
+                                                    input.withBorder( required=true, id="city" name='city', type='text' value=(shipping != undefined) ? shipping.city : "")
+                                            div.searchItem2
+                                                div.inputtitle2
+                                                    p Post Code:
+                                                    input.withBorder( id="postCode" required=true, minlength=7, maxlength=8 name='postCode', type='text' value=(shipping != undefined) ? shipping.postCode : "")
+                        div(style="text-align:center;margin-top:10px")
+                            button.submitto2(id="continue" data-total=total) Continue
+                    div(style="text-align:center;margin-top:10px;margin-bottom:10px")    
+                        button.submitto2(id="cancel") Cancel
+
+                div.schoolOrdersContainer(id="basketView" style="")
+                    .schoolOrders
+                        .organiserClassColumnContainer
+                            .headerTitle
+                            .searchStrip
+                                .pageTitle Basket
+                                .searchItem
+                                .searchItem.statusArea
+                            
+                            .tableContainer
+                                .allClasses
+                                    h3
+                                    .dataTables_wrapper.dt-bootstrap.no-footer(id="classes_wrapper")
+                                        .row.searchShow
+                                            .dataTables_length(id="classes_length")
+                                                .dataTables_filter(id="classes_filter")
+
+                                    .col-sm-12.col-md-6
+                                        .row.classesRow
+                                            .col-sm-12
+
+
+                                                table(id='basketItemsTable' style="background:#bcbdc0" role="grid" aria-describedby="basketItems_info" )
+                                                    thead  
+                                                        tr(role="row"  class="titleBar")
+                                                            th( class="sorting_asc smallerTextSize" style="width:20%") Item 
+                                                            th(class="sorting smallerTextSize" style="width:20%") Package
+                                                            th(class="sorting_asc smallerTextSize" style="width:20%") Description
+                                                            th(class="sorting smallerTextSize" style="width:12%") Quantity
+                                                            th(class="sorting_asc smallerTextSize" style="width:8%") Price
+                                                            th(class="sorting smallerTextSize" style="width:20%") Remove
+                                                    tbody
+                                                        each basketItem, index in basketItems
+                                                            tr.odd(style="height:100px")
+                                                                td(colspan="1")
+                                                                    div(style="width:100%;height:100%;")
+                                                                        canvas.canvas(id='basket'+index style="width:100%;height:100%;padding:5px" data-basketItem=basketItem.id )
+                                                                td(colspan="1" style="text-align:center")
+                                                                    h6 #{basketItem.packageName}
+                                                                td(colspan="1")
+                                                                    div(style="height:100%;width:100%;text-align:center")  
+                                                                        h6(style="padding:0;margin:0")  Name : #{basketItem.name}
+                                                                        if(basketItem.age !=0 && basketItem.month !=0)
+                                                                            h6(style="padding:0;margin:0") #{basketItem.age} years #{basketItem.month} months
+                                                                        else if( basketItem.age !=0 )
+                                                                            h6(style="padding:0;margin:0") #{basketItem.age} years
+                                                                        else
+                                                                            h6(style="padding:0;margin:0") #{basketItem.month} months
+                                                                        if(basketItem.schoolName != 'Individuals')
+                                                                            h6(style="padding:0;margin:0")  School : #{basketItem.schoolName}
+                                                                            h6(style="padding:0;margin:0")  Class : #{basketItem.className}
+                                                                        if(basketItem.packageName != 'Calendar')
+                                                                            if(basketItem.schoolName != 'Individuals')
+                                                                                h6(style="padding:0;margin:0")  Display School : #{basketItem.displaySchool == 1 ? 'Yes': 'No'}
+                                                                                h6(style="padding:0;margin:0")  Display Class : #{basketItem.displayClass == 1 ? 'Yes': 'No'}
+                                                                            h6(style="padding:0;margin:0")  Display Age : #{basketItem.displayAge == 1 ? 'Yes': 'No'}
+                                                                        else
+                                                                            h6(style="padding:0;margin:0") Orientation : #{basketItem.orientation}
+                                                                            h6(style="padding:0;margin:0") Color : #{basketItem.color}    
+                                                                td(colspan="1" style="text-align:center")
+                                                                    input(type="number" min="1" max="10" data-index=index data-basketItemId=basketItem.id id="quantity" +index value=basketItem.quantity style="width:40px")         
+                                                                td(colspan="1"  style="text-align:center")
+                                                                    h6(id="price"+index) £#{(basketItem.price * basketItem.quantity).toFixed(2)}
+                                                                td(colspan="1"  style="text-align:center")
+                                                                    button.stagesButton( id="remove" +index  data-basketItemId=basketItem.id) Remove
+                                                input(style="display:none" id="basketItems" value=basketItems.length)
+                                        .row
+                                            .col-sm-12.col-md-5
+                                                //- .dataTables_info(id="basketItems_info" role="status" aria-live="polite") Showing 0 to 0 of 0 entries
+                                            .col-sm-12.col-md-7
+                                    
+
+                    .organiserPieChartColumn
+                        div(id="headerStrip" style="text-align:center; height:0px!important;min-height: 0px!important;")
+                        div(style="text-align:center;margin-top:-18px")
+                            button.submitto(id="shipping" data-onlyCreateYourOwnCard=(onlyCreateYourOwnCard ? 'true' : 'false')  style="min-height:50px;") Buy Now
+                            p.small.text-danger(id="buyError" style="color:red;font-size:9pt")
+                            input(id="passedDeadline" style="display:none" value=passedDeadline)
+                        div(style="text-align:center;margin-top:0px;")
+                            h4(style="text-align:center;padding-left:10px;margin-top:10px") Order Summary
+
+                            if(onlyCreateYourOwnCard || (passedDeadline=='true'))
+                                h6 Total: £#{preTotal.toFixed(2)}
+                                h6(style="margin-left:10px") #{delivery.name} Delivery: £#{delivery.cost}
+                                input(style="display:none" value=delivery.id id="deliveryId")
+                            h5(style="margin-left:10px" id="basketTotal") Order Total: £#{total.toFixed(2)}
+    include ./common/footer.pug
+    +footer()    

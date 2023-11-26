@@ -1,0 +1,26 @@
+doctype html
+html(land="en")
+html(land="en")
+    include common/new/header.pug
+    +head("Kids Creative Cards - Reset Email Sent" )
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+
+
+    body(style="background-color:white !important;padding-top:3rem")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        section.product-section(style="margin-top:10px")
+            .container.spad
+                .row
+                    .col-sm-12
+                        div.mainarea(style="background:none!important;text-align:center")
+                            
+                            h1(style="margin-bottom:20px;text-align:center;width:100%") Reset Email Sent
+                            p(style="color:#000; font-size:18px;margin:0px;") Navigate to you email account and make sure to follow the instructions on how to rest your password.
+
+    
+        include ./common/new/footer.pug
+        +footer() 
+                            

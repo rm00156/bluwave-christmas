@@ -1,0 +1,385 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar1.pug
+    include common/revised/footer.pug
+    +head("Home")
+    link(href='assets2/css/style.css' rel='stylesheet')    
+    //- link(href='assets/css/theme.brown.min.css' rel='stylesheet')  
+body
+                                               
+    +navbar()
+
+    section.section.section-top.section-full
+        // Image
+        .bg-cover(style='background-image: url(img/istockphoto-4.jpg);')
+        // Overlay
+        .bg-overlay
+        // Content
+        .container
+            .row.align-items-center.justify-content-center
+                .col-md-7.col-lg-7
+                    // Heading
+                    h1.mb-4.text-white(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='load' style="font-size:4.125rem ;font-weight:700")
+                        | Creative Exciting Fundraising Project
+                    h3.mb-4.text-white(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='load' style="font-size:2.5rem ;font-weight:700")
+                        | Easy and Straight forward to do !
+                    // Subheading
+                    p.mb-5.text-white(data-toggle='animation' data-animation='fadeUp' data-animation-order='2' data-animation-trigger='load' style="font-size:12pt")
+                        | Fundraising card project for schools, nurseries and any groups. Quality Christmas cards produced from your children’s creative artwork to share with family and friends. Using our
+                        | new online system, you can order beautifully finished Christmas cards within minutes.
+                   
+                .col-md-5
+                    // Image
+                    .text-center.px-lg-4.mb-5.mb-md-0.text-white
+                        a(href="/login")
+                            button.button(style="width: -webkit-fit-available;") TAKE PART NOW
+                
+
+    //- section.section.pb-0.bg-light
+    //-     <div class="bg-triangle bg-triangle-dark bg-triangle-top bg-triangle-left"></div>
+        
+    //-     // Content
+    //-     .container
+
+    section#reasons.section.pb-0.mb-8.mt-5
+        // Content
+        h1.text-center.mb-4(style="font-size:4.125rem ;font-weight:500") Reasons to Take part
+        .container
+            .row.align-items-center
+                .col-sm-12.text-center
+                    ul.card-text.list-iconed.text-center
+                        li.list-iconed-item(style="display:block")
+                            | A fun, inclusive activity for children of all ages (or adults!)
+                        li.list-iconed-item(style="display:block")
+                            | Raise much needed funds for your school/nursery/group (Up to 80p per pack)
+                        li.list-iconed-item(style="display:block")
+                            | Easy to link to the National Curriculum objectives
+                        li.list-iconed-item(style="display:block")
+                            | Step-by-Step Guide
+                        li.list-iconed-item(style="display:block")
+                            | Professionally printed high quality Christmas cards to share with friends and family
+       
+
+    section#about.fp-section.bg-light.fp-table.active.fp-completely(data-fp-styles='null' data-anchor='services' style='height: 895px;')
+        .fp-tableCell(style='height: 895px;')
+            .section
+                // Triangles
+                .bg-triangle.bg-triangle-dark.bg-triangle-left.bg-triangle-top
+                .bg-triangle.bg-triangle-dark.bg-triangle-right.bg-triangle-bottom
+                // Content
+                .container
+                    .row.align-items-center.mb-4
+                        .col-md-12
+                            h1.mb-4.text-center(style="font-size:4.125rem ;font-weight:500")
+                                | How it works
+                            // Image
+
+
+                                    
+                            .mb-5.mb-md-0.mb-4
+                                img.img-fluid(src='img/banner.jpeg' alt='...')
+                                img.img-fluid(src='img/sixstepsupdate.jpeg' alt='...')
+                    
+                    .row
+                        .col-md-4
+                            // Item
+                            .text-center.mb-5
+                                // Icon
+                                .text-primary.mb-4.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='fpAfterLoad' style="font-weight:700; font-size:18pt")
+                                    | 1
+                                // Heading
+                                h4.mb-3.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='2' data-animation-trigger='fpAfterLoad')
+                                    | Register
+                                // Content
+                                p.text-muted.mb-0.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='3' data-animation-trigger='fpAfterLoad')
+                                    | Register your organisation, detailing the different classes/groups
+                    
+                        .col-md-4
+                            // Item
+                            .text-center.mb-5
+                                // Icon
+                                .text-primary.mb-4.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='fpAfterLoad' style="font-weight:700; font-size:18pt")
+                                    | 2
+                                // Heading
+                                h4.mb-3.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='2' data-animation-trigger='fpAfterLoad')
+                                    | Starter Pack sent to you
+                                // Content
+                                p.text-muted.mb-0.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='3' data-animation-trigger='fpAfterLoad')
+                                    | Starter pack will be sent to your organisation, which will include a template and instructions
+                        .col-md-4
+                            // Item
+                            .text-center.mb-5
+                                // Icon
+                                .text-primary.mb-4.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='fpAfterLoad' style="font-weight:700; font-size:18pt")
+                                    | 3
+                                // Heading
+                                h4.mb-3.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='2' data-animation-trigger='fpAfterLoad')
+                                    | Parents place order and pay online
+                                // Content
+                                p.text-muted.mb-0.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='3' data-animation-trigger='fpAfterLoad')
+                                    | Parents upload, edit and place their orders
+                    
+
+                        .col-md-4
+                            // Item
+                            .text-center.mb-5
+                                // Icon
+                                .text-primary.mb-4.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='fpAfterLoad' style="font-weight:700; font-size:18pt")
+                                    | 4
+                                // Heading
+                                h4.mb-3.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='2' data-animation-trigger='fpAfterLoad')
+                                    | High Quality Cards Printed
+                                // Content
+                                p.text-muted.mb-0.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='3' data-animation-trigger='fpAfterLoad')
+                                    | All orders placed before the given deadline will be delivered to the organisation free of charge. Any orders placed after this deadline can be delivered to an address of choice and will
+                                    | be subject to a delivery charge.
+                    
+                        .col-md-4
+                            // Item
+                            .text-center.mb-5
+                                // Icon
+                                .text-primary.mb-4.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='fpAfterLoad' style="font-weight:700; font-size:18pt")
+                                    | 5
+                                // Heading
+                                h4.mb-3.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='2' data-animation-trigger='fpAfterLoad')
+                                    | Organiser Receives Order
+                                // Content
+                                p.text-muted.mb-0.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='3' data-animation-trigger='fpAfterLoad')
+                                    | When your organisation receives their packs, you just need to distribute.
+                        .col-md-4
+                            // Item
+                            .text-center.mb-5
+                                // Icon
+                                .text-primary.mb-4.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='fpAfterLoad' style="font-weight:700; font-size:18pt")
+                                    | 6
+                                // Heading
+                                h4.mb-3.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='2' data-animation-trigger='fpAfterLoad')
+                                    | Funds Raised Sent To Organisation
+                                // Content
+                                p.text-muted.mb-0.animate(data-toggle='animation' data-animation='fadeUp' data-animation-order='3' data-animation-trigger='fpAfterLoad')
+                                    | On completion of your orders, communication will be sent to you with details of the funds you have raised. Tick to confirm and funds will be released.
+                    .row
+                        .col-sm-12
+                            h4.text-danger.text-center The final deadline for school registrations is 20th November 2023.
+
+                            h4.text-danger.text-center Youth Groups and Clubs are welcome to register and take part in this fundraising project. 
+                                |  Please ensure that there are more than 30 participants.
+
+    section#products.section.pb-0
+        // Content
+        h1.text-center.mb-4(style="font-size:4.125rem ;font-weight:500") Products
+        .container
+            .row.align-items-center
+                .col-md-6.col-lg-5
+                    // Image
+                    .text-center.mt-3.mb-5.mb-md-0
+                        img.product(src='img/standard.png' alt='...' style="width:500px")
+                .col-md-6.col-lg-4.offset-lg-2
+                    // Heading
+                    h2.mb-4
+                        | Standard Packs
+                    // Content
+                    p.text-muted
+                        | There are 9 cards per pack including envelopes. Standard packs have the Childs design on the front and details on the reverse. Each pack sold raises 70p.
+                    
+
+
+
+    section.section.pb-0
+        // Content
+        .container
+            .row.align-items-center
+                .col-md-6.col-lg-5.offset-lg-1.order-md-2
+                        // Image
+                        .text-center.mt-3.mb-5.mb-md-0
+                            img.product(src='img/photopack.png' alt='...' style="width:500px")
+                .col-md-6.col-lg-4.offset-lg-1.order-md-1
+                        // Heading
+                        h2.mb-4
+                            | Photo Packs
+                        // Content
+                        p.text-muted
+                            | Our most popular choice is our photo pack. With this option, together with their child’s design, parents can log in to our secure portal and use their unique class/group code to link their child’s
+                            | artwork and upload a photo of their choice to be included on the reverse of their cards. Each photo pack sold raises 80p for your organisation.
+                        
+
+    section.section.pb-0
+        // Content
+        
+        .container
+            .row.align-items-center
+                .col-md-6.col-lg-5
+                    // Image
+                    .text-center.mt-3.mb-5.mb-md-0
+                        img.product(src='img/calendar.png' alt='...' style="width:500px")
+                .col-md-6.col-lg-4.offset-lg-2
+                    // Heading
+                    h2.mb-4
+                        | Standard Calendar
+                    // Content
+                    p.text-muted
+                        | Another popular choice is our amazing A3 calendars. Start with a full year to view calendar and personalise it with a photo of your choice. Each calendar sold raises 40p for your organisation.
+                    
+    
+    section.section#pricing
+        <div class="bg-triangle bg-triangle-dark bg-triangle-bottom bg-triangle-right"></div>
+        .container
+            .row
+                .col-md-12
+                    // Title
+                    h1.text-center.mb-4(style="font-size:4.125rem ;font-weight:500") Pricing
+
+                    // Subheading
+                    //- p.text-muted.mb-5
+                        | Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quos voluptatum obcaecati facilis sed, excepturi iste iusto laborum vero cupiditate. Eos explicabo, soluta itaque sequi, aspernatur ad labore ratione quas similique!
+            
+            .row
+            
+                .col-lg-4.mb-2
+                    // Card
+                    .card.card-lg.card-active
+                        // Body
+                        .card-body.text-center
+                            // Title
+                            h4.card-title
+                                | Standard Pack
+                            // Price
+                            h3.card-title.font-weight-normal.text-primary
+                                | £6.99 
+                            // Text
+                            ul.card-text.list-iconed.text-center
+                                li.list-iconed-item(style="display:block")
+                                    | 9 standard cards
+                                li.list-iconed-item(style="display:block")
+                                    | 9 envelopes
+                                li.list-iconed-item(style="display:block")
+                                    | 70p returned back to organisation if part of the scheme
+                .col-lg-4.mb-2
+                    // Card
+                    .card.card-lg.card-active
+                        // Body
+                        .card-body.text-center
+                            // Title
+                            h4.card-title
+                                | Photo Pack
+                            // Price
+                            h3.card-title.font-weight-normal.text-primary
+                                | £7.99 
+                            // Text
+                            ul.card-text.list-iconed.text-center
+                                li.list-iconed-item(style="display:block")
+                                    | 9 photo cards
+                                li.list-iconed-item(style="display:block")
+                                    | 9 envelopes
+                                li.list-iconed-item(style="display:block")
+                                    | 80p returned back to organisation if part of the scheme
+                .col-lg-4.mb-2
+                    // Card
+                    .card.card-lg.card-active
+                        // Body
+                        .card-body.text-center
+                            // Title
+                            h4.card-title
+                                | Standard Calendar
+                            // Price
+                            h3.card-title.font-weight-normal.text-primary
+                                | £3.99
+                            // Text
+                            ul.card-text.list-iconed.text-center
+                                li.list-iconed-item(style="display:block")
+                                    | A3 1 page calendar
+                                
+                                li.list-iconed-item(style="display:block")
+                                    | 40p returned back to organisation if part of the scheme
+    
+    section#design.bg-light.fp-table.active.fp-completely(data-fp-styles='null' data-anchor='services' )
+        
+        .section
+            // Triangles
+            .bg-triangle.bg-triangle-dark.bg-triangle-left.bg-triangle-top
+            .bg-triangle.bg-triangle-dark.bg-triangle-right.bg-triangle-bottom
+            // Content
+            .container          
+                h1.text-center.mb-4(style="font-size:4.125rem ;font-weight:500") Design Tips
+                .row.mb-3
+                    .col-md-12.col-lg-12
+                        .text-center.mt-3.mb-5.mb-md-0
+                            img(src='img/bannerslide01_V1.png' alt='...' style="width:-webkit-fill-available; width: -moz-available;")
+                .row
+                    
+                    .col-md-6.col-lg-6
+                        .card.card-lg.card-active
+                            // Body
+                            .card-body.text-center
+                                // Title
+                                h4.card-title
+                                    | Do's
+                                ul.card-text.list-iconed.text-center
+                                    li.list-iconed-item(style="display:block")
+                                        | Use the template provided (stay within the guidelines)
+                                    li.list-iconed-item(style="display:block")
+                                        | Use any materials you like (felt pens, coloured pencils, paints etc.)
+                                    li.list-iconed-item(style="display:block")
+                                        | Be creative
+                        
+                    .col-md-6.col-lg-6
+                        .card.card-lg.card-active
+                            // Body
+                            .card-body.text-center
+                                // Title
+                                h4.card-title
+                                    | Don't
+                                ul.card-text.list-iconed.text-center
+                                    li.list-iconed-item(style="display:block")
+                                        | Design on anything other than the template provided
+                                    
+                        
+                
+                .row.align-items-center
+                    .col-sm-12
+                        p.mt-4.text.offset-lg-1.text-center Our design tips above are brief and made simple. If there is anything you do not understand or need any further assistance or guidance please contact us.
+                        p.text.offset-lg-1.text-center Please read our <a href="/faqs">FAQs</a> page for more help.
+
+                
+    section.section#individuals
+        <div class="bg-triangle bg-triangle-dark bg-triangle-bottom bg-triangle-right"></div>
+        .container
+            .row
+                .col-md-12
+                    // Title
+                    h1.text-center.mb-4(style="font-size:4.125rem ;font-weight:500") Indidvidual Artwork Projects
+                    
+                    .row.align-items-center
+                        .col-sm-12
+                            p.text.text-center If you are not taking part in the fundraising scheme you can still create your own cards and calendars. 
+                            
+                            p.text.text-center  All orders will be subject to a charge for delivery.
+                            p.text.text-center  Sign up and go to our shop.
+
+                            h4.text-danger.text-center Individuals who would like to create there own card online can do so 
+                                | until the 9th December 2023.
+                    .row 
+                        .col-sm-12.text-center
+                            a(href="/login")
+                                button.button() TAKE PART NOW
+
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+
+
+
+    <script src="assets2/libs/flickity-fade/flickity-fade.js"></script>
+    <script src="assets2/libs/jquery-parallax.js/parallax.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/jquery.waypoints.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/shortcuts/inview.min.js"></script>
+    <script src="assets2/libs/fullpage.js/vendors/scrolloverflow.min.js"></script>
+    <script src="assets2/libs/fullpage.js/dist/fullpage.min.js"></script>
+    <script src="assets2/libs/highlightjs/highlight.pack.min.js"></script>
+
+    script(src="assets2/js/theme.min.js")
+    script(src="javascript/home.js")  

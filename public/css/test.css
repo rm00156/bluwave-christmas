@@ -1,0 +1,62 @@
+
+
+#loadingMessage {
+    text-align: center;
+    padding: 40px;
+    background-color: #eee;
+}
+
+#canvas {
+    width: 100% !important;
+    height:100% !important;
+}
+
+#output {
+    margin-top: 20px;
+    background: #eee;
+    padding: 10px;
+    padding-bottom: 0;
+}
+
+#output div {
+    padding-bottom: 10px;
+    word-wrap: break-word;
+}
+
+#noQRFound {
+    text-align: center;
+}
+
+.containerR {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   
+  }
+  
+  .center {
+    width: 300px;
+    height: 100px;
+    padding: 20px;
+  
+    position: absolute;
+    top: 50%;
+    left: 50%;
+  
+    margin: -25 0 0 -170px;
+  }
+
+  @media screen and (max-width:505px){
+
+	.login{width:100% !important}
+
+}
+
+
+@media screen and (max-width:780px){
+
+	.login{width:100% !important}
+
+}

@@ -1,0 +1,110 @@
+<!doctype html>
+html(lang="en")
+    include common/new/header.pug
+    +head("Kids Cards 4 Christams - Home")
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+    link(href="css/new/carousel.css" rel="stylesheet")
+
+    body(style="background-color:white !important")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        main(role="main")
+            .carousel.slide(id="myCarousel" data-ride="carousel" style="z-index:0")
+                ol.carousel-indicators
+                    li(data-target="#myCarousel" data-slide-to="0" class="active")
+                    li(data-target="#myCarousel" data-slide-to="1")
+                    li(data-target="#myCarousel" data-slide-to="2")
+                    li(data-target="#myCarousel" data-slide-to="3")
+                .carousel-inner
+                    .carousel-item.active
+                        svg.bd-placeholder-img(width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img")
+                            rect(width="100%" height="100%" fill="#20c997")
+                        
+                        .container
+                            .carousel-caption.text-left(style="background-color:rgba(0, 0, 0, 0.5);padding-left:5px")
+                                .row
+                                    .col-sm-6(style="text-align:center")
+                                        img(style="width:395px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/standard.png" alt="")
+                                    .col-sm-6(style="text-align:center")
+                                        img(style="width:395px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/standard.png" alt="")
+                                    
+
+                                h1(style="font-size:2.5rem;color:white") Standard Christmas Cards
+                                p(style="color:white") Simple design with your childs artwork on the front and the back of the card
+                    
+                    .carousel-item
+                        svg.bd-placeholder-img(width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img")
+                            rect(width="100%" height="100%" fill="#20c997")
+                        .container
+                            .carousel-caption.text-left(style="background-color:rgba(0, 0, 0, 0.5);padding-left:5px")
+                                .row
+                                    .col-sm-6(style="text-align:center")
+                                        img(style="width:420px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/photopack.png" alt="")
+                                    .col-sm-6(style="text-align:center")
+                                        img(style="width:420px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/photopack.png" alt="")
+
+                                h1(style="font-size:2.5rem;color:white") Themed Christmas Cards
+                                p(style="color:white") A chance to get creative and apply your childs artwork to the many themed designs we have
+                    
+                    .carousel-item
+                        svg.bd-placeholder-img(width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img")
+                            rect(width="100%" height="100%" fill="#20c997")
+                        .container
+                            .carousel-caption.text-left(style="background-color:rgba(0, 0, 0, 0.5);padding-left:5px")
+                                .row
+                                    .col-sm-12(style="text-align:center")
+                                        img(style="width:280px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/calendar.png" alt="")
+                                    //- .col-sm-6(style="text-align:center")
+                                        img(style="width:280px!important;" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/calendar.png" alt="")
+
+                                h1(style="font-size:2.5rem;color:white") Christmas Calendars
+                                p(style="color:white") Make personalised calendar for next year
+                    
+                    .carousel-item
+                        svg.bd-placeholder-img(width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img")
+                            rect(width="100%" height="100%" fill="#20c997")
+                        .container
+                            .carousel-caption.text-left(style="background-color:rgba(0, 0, 0, 0.5);padding-left:5px")
+                                h1(style="font-size:2.5rem;color:white") Christmas Post Cards
+                                p(style="color:white") Make personalised post cards to send to loved ones far away
+                a.carousel-control-prev(href="#myCarousel" role="button" data-slide="prev")
+                    span.carousel-control-prev-icon( aria-hidden="true")
+                    span.sr-only Previous
+
+                a.carousel-control-next(href="#myCarousel" role="button" data-slide="next")
+                    span.carousel-control-next-icon( aria-hidden="true")
+                    span.sr-only Next
+
+            .container.marketing
+                .row
+                    .col-lg-4
+                        svg.bd-placeholder-img.rounded-circle(width="140" height="140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: 140x140")
+                            rect(width="100%" height="100%" fill="#777")
+                            text(x="50%" y="50%" fill="#777" dy=".3em") 140x140
+                            h2 Fundraise for your nursery or school
+                            p Quality Christmas cards produced from your child's creative artwork to share with families & friends, it's really simple! Using our new online system, we do the paperwork, you receive beautiful finished Christmas cards and raise much needed funds for your school or nursery.
+                            p
+                                a.site-btn(href="#" role="button") View details &raquo;
+
+                    .col-lg-4
+                        svg.bd-placeholder-img.rounded-circle(width="140" height="140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: 140x140")
+                            rect(width="100%" height="100%" fill="#777")
+                            text(x="50%" y="50%" fill="#777" dy=".3em") 140x140
+                            h2 Create memories that last forever
+                            p We give parents the chance to bring their childs artwork design to life and create a professional christmas card, calendar and post card with our design suite and package options.
+                            p
+                                a.site-btn(href="#" role="button") View details &raquo;
+
+                    .col-lg-4
+                        svg.bd-placeholder-img.rounded-circle(width="140" height="140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: 140x140")
+                            rect(width="100%" height="100%" fill="#777")
+                            text(x="50%" y="50%" fill="#777" dy=".3em") 140x140
+                            h2 Not Part of a nursery or school taking part in the fundraising project
+                            p You can create your own professional christmas christmas card, calendar and post card with our design suite and package options.
+                            p
+                                a.site-btn(href="#" role="button") View details &raquo;
+    
+    include common/new/footer.pug
+    +footer()

@@ -1,0 +1,22 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Cards")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+      script(src="javascript/basket.js")
+      script(src="javascript/viewEditCard.js")
+      link(rel="stylesheet" href="css/list.css")
+    div
+        each kid in kids
+            p #{kid.name}
+    include ./common/footer.pug
+    +footer()                                  
+                                        
+                                   
+                                        
+    
+

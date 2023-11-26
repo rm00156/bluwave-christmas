@@ -1,0 +1,39 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Continue")
+    link(href='assets2/css/style.css' rel='stylesheet')    
+
+body
+                                               
+    +navbar()
+
+    section.section.section-top.bg-light
+        .container
+            .row.justify-content-center                            
+                .col-sm-9
+                    .form-styled.bg-white
+                        .row
+                            .col-sm-12
+                                div.mainarea(style="background:none!important;text-align:center")
+                                    
+                                    if(errors.length > 0)
+                                        h2(style="text-align:center") Continue
+                                        each error in errors
+                                            p(style="text-align:center") #{error}  
+                                    else  
+                                        h2(style="text-align:center") Continue
+                                        p(style="text-align:center") We will now start the printing process for #{school}
+                                        p(style="text-align:center") and your items will be out for delivery soon
+
+                            
+                                
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+    script(src="assets2/js/theme.min.js")

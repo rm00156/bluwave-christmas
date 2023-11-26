@@ -1,0 +1,79 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Product Details")
+   
+// Begin page
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Product Details
+                
+                .row
+                    .card
+                        .card-body
+                            .row
+                                .col-lg-6
+                                    // Product image
+                                    a.text-center.d-block.mb-4(href='javascript: void(0);')
+                                        img.img-fluid(src=productDetail.displayImagePath style='max-width: 480px;' alt='Product-img')
+                                    
+                                .col-lg-6
+    
+                                    h3.mt-0
+                                        | #{productDetail.name}
+                                        a.text-muted(href='javascript: void(0);')
+                                        i.mdi.mdi-square-edit-outline.ms-2
+                                    p.mb-1 #{productDetail.productType}
+                                    
+                                    .mt-4
+                                        h6.font-14 #{productDetail.priceType}
+                                        .row 
+                                            .col-sm-6
+                                                h6  #{productDetail.price1Name} (£)
+                                                input.form-control(type="text" value=(parseFloat(productDetail.price1)).toFixed(2))
+                                            
+                                            .col-sm-6
+                                                h6  #{productDetail.price2Name} (£)
+                                                input.form-control(type="text" value=(parseFloat(productDetail.price2)).toFixed(2))
+                                
+                                    .mt-4
+                                        h6.font-14 Description:
+                                        textarea.form-control
+                                            | #{productDetail.description}
+                                
+                                    .mt-4
+                                        h6.font-14 Delivery Options
+                                        .row 
+                                            .col-sm-6
+                                                h6  #{productDetail.option1}
+                                                input.form-control(type="text" value=(parseFloat(productDetail.option1Price)).toFixed(2))
+                                            
+                                            .col-sm-6
+                                                h6  #{productDetail.option2} (£)
+                                                input.form-control(type="text" value=(parseFloat(productDetail.option2Price)).toFixed(2))
+                                 
+                                    
+                                    
+                                        
+
+        
+    +footer()
++setting()
+
++scripts()

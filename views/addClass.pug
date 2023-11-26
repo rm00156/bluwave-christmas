@@ -1,0 +1,37 @@
+doctype html
+html(lang="en")
+  include ./common/header.pug
+  +head("Add Class")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      div.container
+        div.row
+            .col-sm-12.offest-md-2.col-md-8
+                .jumbotron
+                    h2.text-center Add Class
+                    .row
+                        .col-sm-12.col-md-12.col-xs-12
+                            form(action="/createClass", method ="POST")
+                                div.formgroup
+                                    label.small.mb-1.mt-3 School Name:
+                                    br
+                                    select(name='dropdown',id='schoolDropDown' onchange="selectSchool()"  ).mt-3.btn.btn-primary 
+                                        each school in schools
+                                            option(value=school.id) #{school.name}
+                                    br        
+                                    label.small.mb-1.mt-3 School Name:
+                                    br
+                                    select(name='yearDropdown', id='yearDropdown').mt-3.btn.btn-primary 
+                                        each year in years
+                                            option(value=year.id) #{year.year}
+
+                                    br
+                                    label.small.mb-1.mt-3 Class:
+                                    input(placeholder="Enter Class Name", required=true , name='class', type='text').form-control 
+                                    button(type="submit").mt-3.btn.btn-primary Add Class  
+    include ./common/footer.pug
+    +footer()  
+    
+

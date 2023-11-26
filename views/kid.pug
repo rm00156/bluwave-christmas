@@ -1,0 +1,306 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Student")
+  link(rel="stylesheet" href="css/temp.css")
+  link(rel="stylesheet" href="../css/croppie.css")
+  link(rel="stylesheet" href="css/kcards_landscape_cardsBasket.css" type="text/css" media="screen")
+  meta(name="robots" content="index, follow" )
+  meta(name="revisit-after" content="7 days")
+  meta(name="version" content="1.0")
+  meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0")
+  
+  
+
+  body
+    div.outercontainer
+        header.headertop
+            div.kclogo
+                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+                script(src="https://cdn.jsdelivr.net/npm/exif-js")
+                script(src="javascript/croppie.js")
+                script(src="javascript/kid.js")
+                script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+                script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js")
+        div.gapDiv gapDiv
+        include common/navbar.pug
+        +navbar(user)
+        div(id="overlay" )
+            div.progress(id="progressBar" )
+                .container
+                    h2 Progress Bar
+                    div.progress(style="height:25px")
+                        div.progress-bar.bg-success.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px") 0%   
+                    if(selectedPackage != 3 )
+                        h6(style="margin-top:5px") Updating Card for #{kid.name} ....
+                    else
+                        h6(style="margin-top:5px") Generating Calendar for #{kid.name}, this may take a couple moments .... 
+        input(style="display:none" id="selectedPackage" value=selectedPackage)
+        .contentarea.largerarea
+            div(id="headerStrip")
+                div.headerTitle.padOut(id="pageTitle") #{kid.name}
+                div.headersearch.padOut
+
+            div(id="options_case2" style="background:#bcbdc0;display:flex;align-content: center; justify-content: center;")
+                div(id="preview_whole" style="padding-bottom:5px;text-align: center;background:#17aab7;margin:5px 5px 10px 10px; width:100%;")
+                    .outerFrame(style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;min-width:50%;")
+                        input(type="text" style="display:none" id='isPictureUpdated' value=false)
+                        if(calendar)
+                            input(type="text" style="display:none" id="calendar" value=calendar)
+                            input(type="text" style="display:none" id="color" value=color)
+                            input(type="text" style="display:none" id="orientation" value=orientation)
+                            
+                        if(user.accountTypeFk == 1)  
+                            if(selectedPackage != 3 || orientation != "portrait")
+                                canvas.mainCanvas.w100(id="mainCanvas" height="840" width="1189")
+                            else
+                                canvas.mainCanvas.w100.port(id="mainCanvas" height="840" width="1189") 
+                            
+                        else
+                            if(selectedPackage != 3 || orientation != "portrait")
+                                canvas.mainCanvas.w100(id="parentCanvas" height="840" width="1189")
+                            else
+                                canvas.mainCanvas.w100.port(id="parentCanvas" height="840" width="1189") 
+                        div.noCard(id="noCard" style="display:none")
+                            img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/noImage2.png")
+                    if(selectedPackage !=3)
+                        .previewContainerMain(style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                            div(style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;" id="UsersNameContainer")
+                                div(id="UsersName") Edit Kid's Details
+                            div(style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;" id="name_school")
+                                div(id="nameArea" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p Name
+                                    if(card)
+                                        input(id='updateName'  name='name', type='text' value=kid.name) 
+                                        if(errors && errors.name)
+                                            p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.name}
+                                    else
+                                        p #{kid.name}
+                                div(id="ageArea" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;") 
+                                    p Years Old
+                                    if(card)
+                                        input(id='updateAge'  name='age'  value=kid.age  , type='number' min="0")
+                                    else
+                                        p #{kid.age}
+                                div(id="ageArea" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;") 
+                                    p Months Old
+                                    if(card)
+                                        input(id='updateMonth'  name='month'  value=kid.month  , type='number' min="0", max="11")
+                                    else
+                                        p #{kid.month}
+                        .stageContainer(style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                            input(id="accountType" style="display:none" value=user.accountTypeFk)
+                            div(id="name_school" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;background:#17aab7")
+                                if(isCreateYourOwnCard == false)
+                                    div(id="nameArea" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        p Display School 
+                                        if(card)
+                                            input(id='schoolCheckBox' name='displaySchool', type='checkBox')
+                                        else
+                                            input(id='schoolCheckBox' disabled name='displaySchool', type='checkBox' )    
+                                    div(id="nameArea" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        p Display Class 
+                                        if(card)
+                                            input(id='classCheckBox' name='displayClass', type='checkBox' )
+                                        else
+                                            input(id='classCheckBox' disabled name='displayClass', type='checkBox' )
+
+                                div(id="nameArea" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p Display Age
+                                    if(card)
+                                        input(id='ageCheckBox' name='displayAge', type='checkBox' )
+                                    else
+                                        input(id='ageCheckBox' disabled name='displayAge', type='checkBox' )                                 
+                div.changeShape
+                    div.noBG(id="preview_image" style="padding-bottom:5px;text-align: center;background:#17aab7;margin:5px;")    
+                        .outerFrame(style="display:none" id="package2View")
+                            div(style="height:80%;text-align:center;" id='pictureView')
+                            
+                                div(id='page' style="height:700px;width:100%")
+                                    div(id="uploadPictureCrop" style="height:60%;width:100%")
+                                    div(style="margin-top:35px")
+                                        p Crop and rotate image to your liking, and when everything is ok click 'Confirm Picture'
+                                        button.stagesButton2(id="button" data-packageId=selectedPackage data-kidId=kid.id style="margin-right:5px" ) Confirm Picture
+                                        button.stagesButton2(id ="rotate"  data-deg="-90" style="margin-right:5px") Rotate
+                                        button.stagesButton2(id ="cancel" ) Cancel
+    
+                                        //- div
+                                        //-     input(type='submit' id="button" value='Update' data-kidId=kid.id)
+                                        //-     input(type="submit" id ="rotate" value="Rotate" data-deg="-90") 
+                        if(selectedPackage == 1)
+                            div(id="previewContainer" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                div.sectionHeader(style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;") 
+                                    div.singleLine(id="current" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;") Standard Pack: Edit Options
+                            if(card)        
+                                div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p 1. In the 'Edit Kids Detail' section below, 
+                                    | change Kids name and age if applicable,
+                                    | and choose whether 
+                                    if(user.accountTypeFk == 1)
+                                        | to display school, class or age on card
+                                    else
+                                        | to display age on card       
+                                if(user.accountTypeFk == 1 || isCreateYourOwnCard)
+                                    div.stageContainer(id="stage2" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        if(user.accountTypeFk == 1)
+                                            p 2. If you need to change the Artwork for the card, browse for an image
+                                        else
+                                            p 2. Select the artwork you want for the front and back of your card, browse for and image
+                                        label.stagesButton( for="artwork") Browse...
+                                        input(id='artwork' type='file' accept="image/x-png,image/jpeg")
+                                        p.small.text-danger(id="artworkError")
+                                        
+                                    div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        p 3. Click to upload Artwork
+                                        button.stagesButton2(type="submit" id="uploadArtwork") Upload Artwork
+                                                        
+                                    div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        p 4. Click to update card
+                                        button.stagesButton2(id="createUpdateCard" type="submit" data-kidId=kid.id ) #{(card==null ? 'Create Card' : 'Update Card')}
+                                        input(id="card" value=(card == null ? 'null' : card.id)  style="display:none")
+                                        input(id="kid" value=kid.id  style="display:none")
+                                    if(isCreateYourOwnCard)
+                                        div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                            p 5. Adjust quantity of card packages that you
+                                            | wish to purchase and then select add to basket
+                                    if(user.accountTypeFk == 1 )
+                                        div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                            button.stagesButton2(id="generateCard" type="submit" data-kidId=kid.id ) Generate Card
+                                            
+                                else
+                                    div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        p 2. Click to update card
+                                        button.stagesButton2(id="createUpdateCard" type="submit" data-kidId=kid.id ) #{(card==null ? 'Create Card' : 'Update Card')}
+                                        input(id="card" value=(card == null ? 'null' : card.id)  style="display:none")
+                                        input(id="kid" value=kid.id  style="display:none")
+
+                                    div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        p 3. Adjust quantity of card packages that you
+                                        | wish to purchase and then select add to basket                                    
+                                    
+                            else
+                                div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        p 1. Click to update card
+                                        button.stagesButton2(id="createUpdateCard" type="submit" data-kidId=kid.id ) #{(card==null ? 'Create Card' : 'Update Card')}
+                                        input(id="card" value=(card == null ? 'null' : card.id)  style="display:none")
+                                        input(id="kid" value=kid.id  style="display:none")
+                        else if(selectedPackage == 2)
+                            div(id="previewContainer" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                div.sectionHeader(style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    div.singleLine(id="current" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;") Photo Pack: Edit Options
+                            if(card)        
+                                div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p 1. In the 'Edit Kids Detail' section below, 
+                                    | change Kids name and age if applicable,
+                                    | and choose whether
+                                    | to display school, class or age on card 
+                            
+                                div.stageContainer(id="stage2" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p 2. Browse for the image you wish to place on the back of the card
+                                    label.stagesButton( for="picture") Browse...
+                                    input(id='picture' type='file' accept="image/x-png,image/jpeg")
+                                    p.small.text-danger(id="pictureError")
+                                                    
+                                div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p 3. Click to upload Image
+                                    button.stagesButton2(type="submit" id="uploadPicture") Upload Picture
+                                                        
+                                div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p 4. Click to update card
+                                    button.stagesButton2(id="createUpdateCard" type="submit" data-kidId=kid.id ) #{(card==null ? 'Create Card' : 'Update Card')}
+                                    input(id="card" value=(card == null ? 'null' : card.id)  style="display:none")
+                                    input(id="kid" value=kid.id  style="display:none")
+                                
+                                if(user.accountTypeFk == 2)
+                                    div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        p 5.  Adjust quantity of card packages that you
+                                        | wish to purchase and then select add to basket
+                                    
+                                if(user.accountTypeFk == 1 )
+                                    div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                        button.stagesButton2(id="generateCard" type="submit" data-kidId=kid.id ) Generate Card
+
+                            else
+                                div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p 1. Click to update card
+                                    button.stagesButton2(id="createUpdateCard" type="submit" data-kidId=kid.id ) #{(card==null ? 'Create Card' : 'Update Card')}
+                                    input(id="card" value=(card == null ? 'null' : card.id)  style="display:none")
+                                    input(id="kid" value=kid.id  style="display:none")
+                        else if(selectedPackage == 3)
+                            input(id="kid" value=kid.id  style="display:none")
+                            div(id="previewContainer" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                div.sectionHeader(style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    div.singleLine(id="current" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;") Calendar Pack: Edit Options
+                            
+                            div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                p 1. Select the orientation for the calendar
+                                button.stagesButton2(type="submit" id="landscape" data-orientation="landscape" style="margin-right:5px") Landscape
+                                button.stagesButton2(type="submit" id="portrait" data-orientation="portrait") Portrait
+
+                            
+                            div.stageContainer(id="stage2" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                p 2. Select a theme color for your calendar
+                                input(id="green" data-color='green' type="submit" style="width:50px;height:50px;margin:5px!important;background-color:green" value="")
+                                input(id="red" data-color='red' type="submit" style="width:50px;height:50px;margin:5px!important;background-color:#D2232D" value="")
+                                input(id="blue" data-color='blue' type="submit" style="width:50px;height:50px;margin:5px!important;background-color:#00AEEF" value="")
+                                
+                                                
+                            div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                p 3. Browse for picture to add to Calendar
+                                label.stagesButton( for="calendarPic") Browse...
+                                input(id='calendarPic' type='file' accept="image/x-png,image/jpeg")
+                                p.small.text-danger(id="calendarPicError")
+                                //- if(errors && errors.calendarPic)
+                                //-     p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.calendarPic}
+                                
+                            div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                p 3. Click to upload Image
+                                button.stagesButton2(type="submit" id="uploadCalendarPicture") Upload Picture
+                            
+                            div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                p 4. Click to update Calendar
+                                button.stagesButton2(id="updateCalendar" type="submit" data-calendarId=calendar data-kidId=kid.id ) Update Calendar
+
+                            if(user.accountTypeFk == 1 )
+                                div.stageContainer(id="stage3" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    button.stagesButton2(id="generateCalendar" type="submit" data-calendarId=calendar data-kidId=kid.id ) Generate Calendar
+
+                    div(id="pOptions" style="padding-bottom:5px;text-align: center;background:#17aab7;margin:5px;")
+                        div.opChoice.sidePackages(id="packages" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                            div.iconHeader
+                                p 
+                                    a(href="#") Packages
+                            div.wrapOptions
+                                div.iconButton2(id="sItem1" data-packageId=packages[0].id data-kidId=kid.id)
+                                    div.innerOption.shorterHeight
+                                        p Card as Standard
+                            div.iconButton2(id="sItem2" data-packageId=packages[1].id data-kidId=kid.id)
+                                div.innerOption.shorterHeight
+                                    p Card with Photo
+                            div.iconButton2(id="sItem3" data-packageId=packages[2].id data-kidId=kid.id)
+                                div.innerOption.shorterHeight
+                                    p Calendar
+                        if(user.accountTypeFk == 2 || user.accountTypeFk == 3 )
+                            div(style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                div( style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                    p(style="color:white") Quantity
+                                    input(type="number" min="0" max="10" id="quantity" value=1 style="width:50px" data-price=packages[selectedPackage-1].price)
+
+                                div(id="schoolArea" style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;") 
+                                    br
+                                    h3(id="packagePrice" style="color:#fff!important;") Price £#{packages[selectedPackage -1].price}
+                                    if(selectedPackage == 1 || (selectedPackage == 2 && kid.picture != null) || (selectedPackage == 3 && calendarPicture != null))
+                                        button.stageButton2(type="submit" id="addToBasket" data-kidId=kid.id ) Add to Basket
+                    
+        if(user.accountTypeFk != 1)
+            div(id="proceed")
+                div.basketIcon(id="basket2") Basket (#{numberOfBasketItems})
+                div(style="flex-grow:1; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                    p(style="color:#000; font-size:22px;") Subtotal
+                    h3(id="packagePrice2")
+                a.nav-link.coPress(href="/basket") Please proceed to checkout
+        include ./common/footer.pug
+        +footer()  

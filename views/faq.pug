@@ -1,0 +1,71 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("FAQs")
+    link(href='assets2/css/style.css' rel='stylesheet')    
+    //- link(href='assets/css/theme.brown.min.css' rel='stylesheet')  
+body
+                                               
+    +navbar()
+
+    section#design.bg-light.fp-table.active.fp-completely.mt-6(data-fp-styles='null' data-anchor='services' )
+        
+        .section
+            // Triangles
+            .bg-triangle.bg-triangle-dark.bg-triangle-left.bg-triangle-top
+            .bg-triangle.bg-triangle-dark.bg-triangle-right.bg-triangle-bottom
+            // Content
+            .container          
+                h1.text-center(style="font-size:4.125rem ;font-weight:500") FAQs
+                .row.align-items-center
+                    .col-md-12            
+                        p(style="color:#075F5E; font-size:22px;margin:0px;") How do I login or register?
+                    
+                        p(style="color:#000; font-size:18px;margin:0px;") <strong>Parents</strong> who want to access your Childs card if they are taking part in a nursery/school Christmas card project, or want to create and design your own card, sign up using <strong>Parent Sign Up</strong>
+                        p(style="color:#000; font-size:18px;;margin-bottom:20px;") <strong>Organisers</strong>&nbsp;with a child that has taken part can login using <strong>their original details</strong>
+                    
+                        p(style="color:#075F5E; font-size:22px;margin:0px;") What are the recommended web browsers for best experience?
+                        p(style="color:#000;font-size:18px;") Mozilla Firefox or Google Chrome
+
+                        
+                        p(style="color:#075F5E; font-size:22px;margin:0px;height: auto") How is a payment made?
+                        p(style="color:#000;font-size:18px;") Online Stripe payment via your sign up account
+                        
+                        
+                        p(style="color:#075F5E; font-size:22px;margin:0px;") When will the Christmas Cards be delivered?
+                        p(style="color:#000; font-size:18px;;margin:0px;") If <strong>part&nbsp;of a School Project</strong>, cards will be <strong>delivered to your School if purchase was made before your deadline.</strong> Please allow <strong>5 working days</strong> after the schools deadline order date, unless the school have extended/delayed date, in which case allow <strong>8 working days</strong> from the original deadline date.
+                        br
+                        p(style="color:#000; font-size:18px;margin:0px;") <strong>If not part</strong> of the School project, <strong> please allow 2-3 working days for delivery to your postal address.</strong>
+                        br
+                        p(style="color:#000; font-size:18px;margin:0px;") <strong>Late orders</strong>
+                        p(style="color:#000; font-size:18px;margin:0px;") Please allow <strong>2-3 working days</strong> from placing an order for delivery to your postal address.
+
+                        br
+                        p(style="color:#075F5E; font-size:22px;margin:0px;") How do I get more order instruction forms/templates if we run out of them for a class?
+                        p(style="color:#000; font-size:18px;;margin:0px;") In your <strong>Organiser</strong> account, select the <strong>Classes</strong> tab from the top navigation bar. Next select the class you want the order instruction forms/templates for. Once the class has been selected, click <strong>Generate Order Instructions</strong> button to download the pdf file, which you can print out yourself.
+                        br
+                        .img-effect.text-center.mt-3.mb-5.mb-md-0
+                            img.product(src='img/frontcardsnew.png' alt='...' style="width:500px")
+                
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+
+
+
+    <script src="assets2/libs/flickity-fade/flickity-fade.js"></script>
+    <script src="assets2/libs/jquery-parallax.js/parallax.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/jquery.waypoints.min.js"></script>
+    <script src="assets2/libs/waypoints/lib/shortcuts/inview.min.js"></script>
+    <script src="assets2/libs/fullpage.js/vendors/scrolloverflow.min.js"></script>
+    <script src="assets2/libs/fullpage.js/dist/fullpage.min.js"></script>
+    <script src="assets2/libs/highlightjs/highlight.pack.min.js"></script>
+
+    script(src="assets2/js/theme.min.js")
+    script(src="javascript/home.js")  
+    

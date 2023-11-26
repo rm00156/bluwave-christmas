@@ -1,0 +1,93 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head(school.name + " Participants")
+    link(rel="stylesheet" href="css/organiser2.css")
+    link(rel="stylesheet" href="css/pieProgress.css")
+    link(rel="stylesheet" href="css/kcards5a.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+            div.gapDiv gapDiv    
+            include ./common/navbar.pug
+            +navbar(user)
+            input(type="text" value=path style="display:none" id="path")
+            input(style="display:none" id="classSize" value=classTotal)
+
+            div.mainarea(style="background:none!important;")
+                .contentarea
+                    div.schoolOrdersContainer
+                        .schoolOrders
+                            .organiserClassColumnContainer
+                                .headerTitle
+                                .searchStrip
+                                    .pageTitle School Participants
+                                    .searchItem
+                                    .searchItem.statusArea
+                                
+                                .tableContainer(style="margin-top:20px;")
+                                    h3 Classes
+                                    .allClasses
+                                        h3
+                                        .dataTables_wrapper.dt-bootstrap.no-footer(id="classes_wrapper")
+                                            .row.searchShow
+                                                .dataTables_length(id="classes_length")
+                                                    .dataTables_filter(id="classes_filter")
+
+                                        .col-sm-12.col-md-6(style="max-width:100% !important; margin-top:40px")
+                                            .row
+                                                .col-sm-12(style="padding:0")
+                                    
+                                                    table( id="classes" style="background:#bcbdc0" role="grid" aria-describedby="classes_info")
+                                                        thead(style="text-align:center")
+                                                            tr(role="row"  class="titleBar")
+                                                                th(class="sorting_asc smallerTextSize" style="width:50%") Class
+                                                                th(class="sorting_asc smallerTextSize" style="width:50%") Year
+                                                        tbody
+                                                            each schoolClass, index in classList
+                                                                tr(id="participantClass"+index data-classid=schoolClass.id)
+                                                                    td(colspan="1" style="text-align:center") #{schoolClass.name}
+                                                                    td(colspan="1" style="text-align:center") #{schoolClass.year}
+                        .organiserPieChartColumn
+                            div(id="headerStrip" style="text-align:center; height:0px!important;min-height: 0px!important;") 
+
+                            h3( style="text-align:center;padding-left:10px;margin-top:10px") Current Status : #{currentStatus}
+                            
+                            div.donut-size( id="specificChart" )
+                                div.pie-wrapper
+                                    span.label
+                                        span.num 0
+                                        span.smaller %
+                                    div.pie
+                                        div.left-side.half-circle
+                                        div.right-side.half-circle
+                                    div.shadow
+                            
+
+                            div(style="text-align:center;margin-top:20px")
+                                h5 Ordered
+                                h5 #{kidTotal} Total Pupils
+                                h5 #{orderedKidTotal} Pupils Ordered
+                                if(deadLineDttm != '')
+                                    - if(daysLeftSign == 'negative')
+                                        h5 #{(daysLeft * -1)} Days since purchase deadline passed
+                                    - else if( daysLeftSign == 'zero')
+                                        h5 Purchase deadline is Today 
+                                    - else
+                                        h5 #{daysLeft} Days till purchase deadline 
+                                //- input(type="submit" value="Report")
+
+                                input(id="ordered" type="number" value=orderedPercentage style="display:none")
+                                input(id="classTotal" type="number" value=classTotal style="display:none")
+                    script(src="javascript/organiserPieChart.js")
+                    script(src="javascript/organiser.js")
+        include ./common/footer.pug
+        +footer()  

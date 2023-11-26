@@ -1,0 +1,94 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Dashboard")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+     
+      script(src="javascript/viewEditCard.js")
+      link(rel="stylesheet" href="css/list.css")
+    div.grid-container
+    div
+        if(user.accountTypeFk == 1)
+            p ADMIN SCREEN
+        else  
+            
+            if(kids.length == 0 )
+                form(action='/linkKids' method='GET') 
+                    input(type="submit" value="Link Kids").mt-3.btn.btn-primary                                                        
+            else
+                     //- form(action='/viewEditCard', method='GET')
+            div.columnx 
+                each kid, index in kids
+                    ul
+                        li.service-list
+                            .row
+                                div.column
+                                    form(action="/home", method="GET")
+                                        input(type="submit")
+                                            canvas.canvas(id="canvas" + index) 
+                                div.column2
+                                    h3 #{kid.name}
+                                    br
+                                    h3 #{kid.age} Years Old
+                                    br
+                                    h3 #{kid.schoolName}
+                                    br
+                                    h3 Class #{kid.className}
+                                .column2  
+                                    img(src=packages[0].imagePath style="width:200px;height:200px")     
+                                    br  
+                                    select(name="package" id="package"+index ).mt-3.btn.btn-primary 
+                                        each package in packages
+                                            option(value=package.id) #{package.name}
+                                    br
+                                    p Price: £#{packages[0].price}
+                                .column3
+                                    br
+                                    br
+                                    br
+                                    br
+                                    input(type="submit" data-kidId=kid.id data-index=index value="Add To Cart" id="button" + index ).mt-3.btn.btn-primary
+                                
+        script(type="text/javascript").
+            var kids = !{JSON.stringify(kids)};
+
+            for( let i = 0; i< kids.length; i++ )
+            {
+
+                $('#button' + i ).on('click', basket );
+
+                let cardPath = kids[i].path;
+                console.log(cardPath);
+                pdfjsLib.getDocument(cardPath)
+                .then(doc=>{
+                        doc.getPage(1).then(page=>{
+                
+                var myCanvas= document.getElementById('canvas'+i);
+                var context = myCanvas.getContext("2d");
+            //- var firstColumn = document.getElementById("firstColumn")
+            
+            // 1 means the original size of the page
+                var viewport= page.getViewport(500/ page.getViewport(1).width);
+                myCanvas.height = viewport.height;
+                myCanvas.width = viewport.width;
+
+                page.render({
+                        canvasContext:context,
+                        viewport:viewport
+                    })
+
+                    })
+                    })
+                     $("#button" + i).on("click",viewEditCard); 
+            }
+    include ./common/footer.pug
+    +footer()                                  
+                                        
+                                   
+                                        
+    
+

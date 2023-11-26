@@ -1,0 +1,88 @@
+mixin horizontalNavbar(user)
+    header
+        //- .header__top
+        //-     .container
+        //-         .row
+        //-             .col-lg-12.col-md-12
+        //-                 .header__top__left(style="text-align:center")
+        //-                     p FREE SHIPPING FOR ORDERS <b>£50 OR MORE</b>
+        //-                     p(style="font-size:8pt") UK DOMESTIC ONLY
+        nav.navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark-green(style="z-index:1 !important")
+            div(style="width:20%" id="navbarSection")
+                if(user)
+                    if(user.accountTypeFk==2 || user.accountTypeFk == 1)
+                        a.navbar-brand(id='navbarLogo' href="/dashboardNew")
+                            img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="100%" height="100%" alt="Kids Cards")
+                    else if(user.accountTypeFk==3)
+                        a.navbar-brand(id='navbarLogo' href="/organiserDashboard")
+                            img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="100%" height="100%" alt="Kids Cards")
+                    
+                else
+                     a.navbar-brand(id='navbarLogo' href="/")
+                        img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="100%" height="100%" alt="Kids Cards")
+                   
+            button.navbar-toggler(type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation")
+                span.navbar-toggler-icon
+            .collapse.navbar-collapse(id="navbarCollapse")
+                ul.navbar-nav.mr-auto(style="font-weight:500")
+                    if(user && user.accountTypeFk == 1)
+                        li.nav-item.active
+                            a.nav-link(href="/dashboardNew") Dashboard
+                    
+                    else if(user && user.accountTypeFk == 2)
+                        li.nav-item.active
+                            a.nav-link(href="/parentDashboard" disable) Dashboard
+                        li.nav-item.active
+                            a.nav-link(href="/linkKids") Link My Childs Card
+                    
+                    else if(user && user.accountTypeFk == 3)
+                        li.nav-item.active
+                            a.nav-link(href="/organiserDashboard") Dashboard
+                        li.nav-item.active
+                            a.nav-link(href="/participants") School Participants
+                        li.nav-item.active
+                            a.nav-link(href="/orders") School Orders
+                        if(displayParentSection)
+                            li.nav-item.active
+                                a.nav-link(href="/parentDashboard") Parent
+                        li.nav-item.active
+                            a.nav-link(href="/linkKids") Link My Childs Card
+                    
+                    if(user && (user.accountTypeFk ==2 || user.accountTypeFk == 3))
+                        li.nav-item.active
+                            a.nav-link(href="/createYourOwnCard") Create Your Own Card  
+                        li.nav-item.active
+                            a.nav-link(href="/shop?category=New Card Designs") New Cards 
+                        li.nav-item.active
+                            a.nav-link(href="/shop?category=Calendars&orientation=Portrait") Calendars
+                        li.nav-item.active
+                            a.nav-link(href="/orderHistory") Orders
+                        
+                        //- li.nav-item.active
+                        //-     a.nav-link(href="/calendars") Calendars
+                        
+                        //- li.nav-item.active
+                        //-     a.nav-link(href="#") Cups
+                        
+            ul.navbar-nav.px-3
+                if user 
+                    if(user.accountTypeFk == 2 || ( user.accountTypeFk == 3 ))
+                        if numberOfBasketItems != null
+                            liv.nav-item.text-nowrap
+                                a.nav-link(href="/basket" id="basket" style="color:white") Basket (#{numberOfBasketItems})  
+                if(user == null || user == undefined)
+                    li.nav-item.text-nowrap
+                        a.nav-link(href="/" style="color:white") Login
+                    li.nav-item.text-nowrap
+                        a.nav-link(href="/signup" style="color:white") Sign Up
+                else
+                    li.nav-item.text-nowrap
+                        a.nav-link(href="/logout" style="color:white") Log Out
+        //- .row
+            .header__top(style="width: -webkit-fill-available;")
+                .container
+                    .row
+                        .col-lg-12.col-md-12
+                            .header__top__left(style="text-align:center")
+                                p FREE SHIPPING FOR ORDERS <b>£35 OR MORE</b>
+                                p(style="font-size:8pt") UK DOMESTIC ONLY

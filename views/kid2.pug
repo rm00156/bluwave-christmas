@@ -1,0 +1,301 @@
+<!doctype html>
+html(lang="en")
+    include common/new/header.pug
+    +head("Kids Cards 4 Christams - Home")
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+    link(rel="stylesheet" href="../css/croppie.css")
+
+
+    body(style="background-color:white !important;padding-top:3rem")
+        script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+        script(src="https://cdn.jsdelivr.net/npm/exif-js")
+        script(src="javascript/croppie.js")
+        script(src="javascript/kid.js")
+        script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+        script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js")
+        
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        div(id="overlay" )
+            div.progress(id="progressBar" )
+                .container(style="width:100%")
+                    h2 Progress Bar
+                    div.progress(style="height:25px")
+                        div.progress-bar.bg-success.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px") 0%   
+                    if(selectedPackage != 3 )
+                        h6(style="margin-top:5px") Updating Card for #{kid.name} ....
+                    else
+                        h6(style="margin-top:5px") Generating Calendar for #{kid.name}, this may take a couple moments .... 
+        input(style="display:none" id="selectedPackage" value=selectedPackage)
+        input(id="accountType" style="display:none" value=user.accountTypeFk)
+        section.product-section
+            .container
+                .row
+                    .col-lg-8
+                        .row
+                            .col-sm-6.offset-sm-3
+                                a.site-btn(href="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/Template/DownloadTemplate.pdf") Download a template guide to draw on
+                        .product-pic-zoom(style="position: relative; overflow: hidden;padding:10px")
+                            //- if(user.accountTypeFk == 1)  
+                            if(selectedPackage != 3 || orientation != "portrait")
+                                canvas.mainCanvas.w100.shadow.mb-4(id="mainCanvas" height="840" width="1189")
+                            else
+                                canvas.mainCanvas.w100.port.shadow.mb-4(id="mainCanvas" height="840" width="1189") 
+                            
+                            //- else
+                            //-     if(selectedPackage != 3 || orientation != "portrait")
+                            //-         canvas.mainCanvas.w100(id="parentCanvas" height="840" width="1189")
+                            //-     else
+                            //-         canvas.mainCanvas.w100.port(id="parentCanvas" height="840" width="1189")
+                        if(selectedPackage == 1 && (isCreateYourOwnCard || user.accountTypeFk == 1))
+                            .accordion-area
+                                div(id="overlay25")
+                                    div.progress(id="progressBar" )
+                                        .container(style="width:100%; text-align:center; padding-top:10px")
+                                            img(src="img/loading.gif" style="width:100px; height:100px")
+                                            p(style="color:white") Loading
+                                div(id="addPictureSection" style="padding-bottom:10px")
+                                    br
+                                    h4 Add Artwork
+                                    if(card)
+                                        .row
+                                            .col-lg-12
+                                                p Browse for the image you wish to place on the front and back of the card
+                                        .row
+                                            .col-lg-6(style="text-align:center")
+                                                label.site-btn( for="artwork") Browse...
+                                                input(id='artwork' type='file' style="opacity:0" accept="image/x-png,image/jpeg")
+                                                p.small.text-danger(id="pictureError")
+                                            
+                                            .col-lg-6(style="text-align:center")                    
+                                                button.site-btn(type="submit" id="uploadArtwork") Upload Artwork
+                                                                
+                                    else
+                                        div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                            p 1. Click to update card
+                                            button.stagesButton2(id="createUpdateCard" type="submit" data-kidId=kid.id ) #{(card==null ? 'Create Card' : 'Update Card')}
+                                            input(id="card" value=(card == null ? 'null' : card.id)  style="display:none")
+                                            input(id="kid" value=kid.id  style="display:none")
+                                    p#artworkError.small.text-danger
+                                div.changeShape(id="previewSection" style="display:none")
+                                    div.noBG(id="preview_image" style="padding-bottom:5px;text-align: center;margin:5px;")    
+                                        .outerFrame(style="display:none" id="package2View")
+                                            div(style="height:80%;text-align:center;" id='pictureView')
+                                            
+                                                div(id='page' style="height:600px;width:100%")
+                                                    div(id="uploadPictureCrop" style="height:60%;width:100%")
+                                                    div(style="margin-top:35px")
+                                                        p Crop image to your liking, and when everything is ok click 'Confirm Picture'
+                                                        .row
+                                                            .col-lg-4
+                                                                button.site-btn(id="button" data-packageId=selectedPackage data-kidId=kid.id style="margin-right:5px" ) Confirm Picture
+                                                            .col-lg-4(style="padding-top: 10px;")
+                                                                button.site-btn(id ="rotate"  data-deg="-90" style="margin-right:5px") Rotate
+                                                            .col-lg-4(style="padding-top: 10px;")
+                                                                button.site-btn(id ="cancel" ) Cancel
+                        if(selectedPackage == 2)
+                            .accordion-area
+                                div(id="overlay25")
+                                    div.progress(id="progressBar" )
+                                        .container(style="width:100%; text-align:center; padding-top:10px")
+                                            img(src="img/loading.gif" style="width:100px; height:100px")
+                                            p(style="color:white") Loading
+                                div(id="addPictureSection" style="padding-bottom:10px")
+                                    br
+                                    h4 Add Picture
+                                    if(card)
+                                        .row
+                                            .col-lg-12
+                                                p Browse for the image you wish to place on the back of the card
+                                        .row
+                                            .col-lg-6(style="text-align:center")
+                                                label.site-btn( for="picture") Browse...
+                                                input(id='picture' type='file' style="opacity:0" accept="image/x-png,image/jpeg")
+                                                p.small.text-danger(id="pictureError")
+                                            
+                                            .col-lg-6(style="text-align:center")                    
+                                                button.site-btn(type="submit" id="uploadPicture") Upload Picture
+                                                                
+                                    else
+                                        div.stageContainer(id="stage1" style="flex-grow:1;background:#17aab7; margin:0px;padding:2px;min-width:20px;overflow:hidden!important;")
+                                            p 1. Click to update card
+                                            button.stagesButton2(id="createUpdateCard" type="submit" data-kidId=kid.id ) #{(card==null ? 'Create Card' : 'Update Card')}
+                                            input(id="card" value=(card == null ? 'null' : card.id)  style="display:none")
+                                            input(id="kid" value=kid.id  style="display:none")
+                                    p#pictureError.small.text-danger
+                                div.changeShape(id="previewSection" style="display:none")
+                                    div.noBG(id="preview_image" style="padding-bottom:5px;text-align: center;margin:5px;")    
+                                        .outerFrame(style="display:none" id="package2View")
+                                            div(style="height:80%;text-align:center;" id='pictureView')
+                                            
+                                                div(id='page' style="height:600px;width:100%")
+                                                    div(id="uploadPictureCrop" style="height:60%;width:100%")
+                                                    r
+                        div(style="border-top: 2px solid #e1e1e1;padding-bottom:20px")
+                            br
+                            h4 Edit Kid's Details
+                            .row
+                                .col-lg-12
+                                    label(for="name") Name
+                                    br
+                                    if(card)
+                                        .quantity
+                                            .pro-qty(style="width:100% !important")
+                                                input(id='updateName'  name='name', type='text' style="width:100% !important;text-align:left" value=kid.name) 
+                                                if(errors && errors.name)
+                                                    p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.name}
+                                    else
+                                        p #{kid.name}
+                            .row(style="margin-top:5px")
+                                .col-lg-6
+                                    label(for="age" ) Years Old
+                                    br
+                                    if(card)
+                                        .quantity
+                                            .pro-qty(style="width:100% !important")
+                                                input(id='updateAge'  name='age'  value=kid.age  style="width:100% !important;text-align:left" , type='number' min="0")
+                                    else
+                                        p #{kid.age}
+                                .col-lg-6
+                                    label(for="month" ) Months Old
+                                    if(card)
+                                        .quantity
+                                            .pro-qty(style="width:100% !important")
+                                                input(id='updateMonth'  name='month' style="width:100% !important;text-align:left"   value=kid.month  , type='number' min="0", max="11")
+                                    else
+                                        p #{kid.month}
+                            .row(style="margin-top:5px;text-align:center")
+                                if(isCreateYourOwnCard == false)
+                                    .col-lg-4
+                                        label(for="displaySchool") Display School
+                                        br
+                                        if(card)
+                                            input(id='schoolCheckBox' name='displaySchool', type='checkBox')
+                                        else
+                                            input(id='schoolCheckBox' disabled name='displaySchool', type='checkBox' ) 
+                                if(isCreateYourOwnCard == false)
+                                    .col-lg-4
+                                        label(for="diplaClass") Display Class
+                                        br 
+                                        if(card)
+                                            input(id='classCheckBox' name='displayClass', type='checkBox' )
+                                        else
+                                            input(id='classCheckBox' disabled name='displayClass', type='checkBox' )
+                                .col-lg-4
+                                    label(for="displayAge") Display Age
+                                    br
+                                    if(card)
+                                        input(id='ageCheckBox' name='displayAge', type='checkBox' )
+                                    else
+                                        input(id='ageCheckBox' disabled name='displayAge', type='checkBox' )
+                            .row(style="margin-top:5px;text-align:center")
+                                .col-lg-12
+                                    button.site-btn(id="createUpdateCard" type="submit" data-kidId=kid.id ) #{(card==null ? 'Create Card' : 'Update Card')}
+                                    input(id="card" value=(card == null ? 'null' : card.id)  style="display:none")
+                                    input(id="kid" value=kid.id  style="display:none")
+                    
+                        
+                    .col-lg-4.product-details
+                        if(selectedPackage == 1)
+                            h2.p-title Standard Pack
+                        else if(selectedPackage == 2)
+                            h2.p-title Photo Pack
+                        h3.p-price(id="packagePrice") £#{packages[selectedPackage -1].price}
+                        
+                        .fw-size-choose
+                            p Package
+                            
+                            .sc-item(id="sItem1" data-packageId=packages[0].id data-kidId=kid.id)
+                                if(selectedPackage == 1)
+                                    input(type="radio" name="sc" id="xs-size" checked)
+                                else
+                                    input(type="radio" name="sc" id="xs-size" )   
+                                label(for="xs-size") Standard
+                            .sc-item(id="sItem2" data-packageId=packages[1].id data-kidId=kid.id)
+                                if(selectedPackage == 2)
+                                    input(type="radio" name="sc" id="s-size" checked)
+                                else
+                                    input(type="radio" name="sc" id="s-size" )
+                                label(for="s-size") Photo
+                        if(user.accountTypeFk==1)
+                            if(card && selectedPackage == 1)
+                                a.site-btn(href=card.path)  Download Card
+                                a.site-btn(href=kid.artwork style="margin-top:10px") Download Artwork Image
+                                a#createProof.site-btn( style="margin-top:10px;color:white" data-kidId=kid.id) Create Proof
+                                p.small.text-danger#error
+                            else if(card && selectedPackage == 2)
+                                a.site-btn(href=card.package2Path) Download Card
+                                if(kid.picture != null)
+                                    a.site-btn(href=kid.picture style="margin-top:10px") Download Picture Image
+                            a.site-btn( href="/class?id=" + kid.classFk style="margin-top:10px;color:white") Go to Class
+                            if(kid.parentAccountFk != null)
+                                a.site-btn( href="/account?id=" + kid.parentAccountFk style="margin-top:10px;color:white") Go to Parent Account
+
+                        if(user.accountTypeFk == 2 || user.accountTypeFk == 3 )
+                            .quantity
+                                p Quantity
+                                input.pro-qty(type="number" min="1" id="quantity" value=1 style="width:70px" data-price=packages[selectedPackage-1].price)
+
+                            if(selectedPackage == 1 || (selectedPackage == 2 && kid.picture != null) || (selectedPackage == 3 && calendarPicture != null))
+                                button.site-btn(type="submit" id="addToBasket" data-kidId=kid.id ) Add to Basket
+                                p.small.text-danger(id="errorBasket")
+                        <div id="accordion" class="accordion-area">
+                            <div class="panel">
+                                <div class="panel-header" id="headingOne">
+                                    <button class="panel-link active" data-toggle="collapse" data-target="#collapse1" aria-expanded="true" aria-controls="collapse1">information</button>
+                                </div>
+                                <div id="collapse1" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                                    <div class="panel-body">
+                                        <p>Each pack contains 9 copies of the card and 9 envelopes</p>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="panel">
+                                <div class="panel-header" id="headingThree">
+                                    <button class="panel-link" data-toggle="collapse" data-target="#collapse3" aria-expanded="false" aria-controls="collapse3">shipping &amp; Returns</button>
+                                </div>
+                                <div id="collapse3" class="collapse show" aria-labelledby="headingThree" data-parent="#accordion">
+                                    <div class="panel-body">
+                                        p If 
+                                            span part&nbsp;of a School Project
+                                            |, cards will be 
+                                            span delivered to your School if purchase was made before your deadline. 
+                                            | Please allow 
+                                            span 5 working days 
+                                            | after the schools deadline order date, unless the school have extended/delayed date, in which case allow 
+                                            span 8 working days 
+                                            | from the original deadline date.
+                                        
+                                        p 
+                                            span If not part 
+                                            | of the School project, 
+                                            span please allow 2-3 working days for delivery to your postal address.
+                                        
+                                        p 
+                                            span Late orders
+                                        p Please allow 
+                                            span 2-3 working days 
+                                            | from placing an order for delivery to your postal address.
+                                        
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="social-sharing">
+                            <a href=""><i class="fa fa-google-plus"></i></a>
+                            <a href=""><i class="fa fa-pinterest"></i></a>
+                            <a href=""><i class="fa fa-facebook"></i></a>
+                            <a href=""><i class="fa fa-twitter"></i></a>
+                            <a href=""><i class="fa fa-youtube"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        include common/new/footer.pug
+        +footer()

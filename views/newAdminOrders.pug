@@ -1,0 +1,110 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Orders")
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <!-- third party css end -->
+
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div      
+// Begin page
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Orders
+                
+                .row
+                    .card
+                        .card-body
+                            .row.mb-2
+                                .col-xl-9
+                                    .row.gy-2.gx-2.align-items-center.justify-content-xl-start.justify-content-between
+                                        .col-sm-3
+                                            label(for='') Order Number
+                                            input#orderNumber.form-control(type='search')
+                                        
+                                        .col-sm-3
+                                            label(for='kidName') Kid Name
+                                            input#kidName.form-control(type='search')
+                                        
+                                        .col-sm-3
+                                            label(for='kidCode') Kid Code
+                                            input#kidCode.form-control(type='search')
+                                        
+                                        .col-sm-3
+                                            label(for='school') School
+                                            input#school.form-control(type='search') 
+                                        
+                                        .col-sm-3
+                                            label(for='class') Class
+                                            input#class.form-control(type='search')
+                                        
+                                        .col-sm-3
+                                            label(for='fromDt') From Dt
+                                            input#fromDt.form-control(type='date')
+                                        
+                                        .col-sm-3
+                                            label(for='toDt') To Dt
+                                            input#toDt.form-control(type='date')
+                                .col-xl-3
+                                    .text-xl-end.mt-xl-0.mt-2
+                                        button#search.btn.btn-success.mb-2.me-2(type='button')
+                                            |  Search
+                                        
+                                        button#clear.btn.btn-danger.mb-2.me-2(type='button')
+                                            |  Clear
+                                            
+
+                            
+                            .row.mb-2
+                                table#orderTable.table.table-striped.dt-responsive.nowrap.w-100(style="cursor:pointer")
+                                    thead
+                                        tr
+                                        th # Order Number
+                                        th Kid Name
+                                        th Kid Code
+                                        th School
+                                        th Class
+                                        th Purchased Dt
+                                        th Subtotal 
+                                        th Total
+                                    tbody
+                                    
+                                    
+                                        
+
+        
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+
+<!-- third party js ends -->
+
+<!-- demo app -->
+<script src="javascript/new/newOrders.js"></script>
+script(src="assets2/js/adminDashboard.js")

@@ -1,0 +1,91 @@
+doctype html
+html(land="en")
+    include common/header.pug
+    +head("Sign up")
+    link(rel="stylesheet" href="css/kcards11.css" type="text/css" media="screen" )
+    link(rel="stylesheet" href="css/signup.css")
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")    
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+            div.gapDiv
+                gapDiv
+            include common/navbar.pug
+            +navbar()
+            section
+                article
+                    div.mainarea(style="background:none!important;")
+                        p.titleLarge(style="text-align:center") Sign up as a parent below
+                        p(style="text-align:center") if you don't have a parent account
+                        br
+                        form(action="/signup", method ="POST")
+                            div(style="width:50%;margin:auto;")
+                                input(style="display:none" name="type" value="parent")
+                                if( errors && errors.invalid)
+                                    p(id="error" style="text-align:center").small.text-danger #{errors.invalid}
+
+                            nav.fullWidth.whiteBG
+                                
+                                div.login_register
+                                    div.login
+                                        p.titleLarge(style="text-align:center") Emails
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                p Email:
+                                                input.withBorder(placeholder='Please enter your email', required=true, name='email', type='email' value=(formData != undefined) ? formData.email : '')
+                                                if(errors && errors.email )
+                                                    p(id="error").small.text-danger #{errors.email}
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                p Re-enter Email:
+                                                input.withBorder(placeholder='Please re-enter your email', required=true,  value=(formData != undefined) ? formData.reEmail : '' name='reEmail', type='email' )
+                                            
+                                    div
+                                        div.login_register
+                                            div.login
+                                                p.titleLarge Passwords
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p Password:
+                                                        input.withBorder(placeholder="Please enter Password", required=true , name='password', type='password' value=(formData != undefined) ? formData.password : '')
+                                                        if( errors && errors.password)
+                                                            p(id="error").small.text-danger #{errors.password}
+
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p Re-enter Password:
+                                                        input.withBorder(placeholder="Please re-enter Password", value=(formData != undefined) ? formData.rePassword : '' required=true , name='rePassword', type='password' )
+                                    div
+                                        div.login_register
+                                            div.register
+                                                p.titleLarge Contact Details
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p Name:
+                                                        input.withBorder(placeholder="Please enter your name", required=true , name='name', type='text' value=(formData != undefined) ? formData.name : '')
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p Telephone Number:
+                                                        input.withBorder(placeholder="Please enter your phone number", required=true, name='telephoneNo', type='text' value=(formData != undefined) ? formData.telephoneNo : '')
+                                                        if(errors.telephoneNo)
+                                                            p.small.text-danger(style="text-align:center;margin-left:0;margin-top:0;font-size:8pt") #{errors.telephoneNo}        
+                            div(style="text-align:center;margin-top:10px")
+                                button.submitto2 Sign Up
+                                br  
+                                br
+                                h8.mt-3.mb-0
+                                    | Want to sign up a school? #[a(href="/signupOrganiser") Register School here].    
+                                br
+                                h8.mt-3.mb-0
+                                    | Already have an account? #[a(href="/") Login in here].
+            
+        include common/footer.pug
+        +footer()

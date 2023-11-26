@@ -1,0 +1,174 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Parent Dashboard")
+  link(rel="stylesheet" href="css/kcards_landscape_cards.css" type="text/css" media="screen" )
+  link(rel="stylesheet" href="css/organiser.css")
+  link(rel="stylesheet" href="css/temp.css")
+  link(rel="stylesheet" href="css/test.css")
+  link(rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css")
+  meta(name="robots" content="index, follow" )
+  meta(name="revisit-after" content="7 days")
+  meta(name="version" content="1.0")
+  meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0")    
+  body
+    div.outercontainer
+        header.headertop
+            div.kclogo
+                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+            script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+            script(src="javascript/viewEditCard.js")
+            script(src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+            script(src="javascript/parentDashboard.js")
+        div.gapDiv gapDiv
+            
+        .mainarea
+            include ./common/navbar.pug
+            +navbar(user)
+            p(id="userFirstLogin" style="display:none") #{user.firstLoginFl}
+            div(id="overlay")
+                div(id="firstLogin")
+                    .container(style="height:75%")
+                        .col-md-12
+                            h3(style="text-align:center;margin-top:5px") Select Options
+                        .col-md-6(id="option1" style="height:100%;float:left;")
+                            .containerR
+                                button(id="myChildsCard" style="height:40%;width:70%;font-size:15pt;") My Childs Card
+
+                        .col-md-6(id="option1" style="height:100%;float:left;")
+                            .containerR
+                                button(id="continue" style="height:40%;width:70%;font-size:15pt;") Continue
+            .contentarea
+                
+                if(kids.length == 0 )
+                    section <!--Aftr header-->
+                        article
+                            div.mainarea(style=" max-width:1200px!important;text-align:center; height:150px")
+                                p.titleLarge(style="text-align:center") Parent
+                                div(style="width:50%;float:left;background-color:#f1f1f2")
+                                    p(style="text-align:center") Click to Link to your kids card to view and make a purchase
+                                    form(action='/linkKids' method='GET') 
+                                        button.stagesButton Link Student
+                                div.mainarea(style="width:50%;float:left;background-color:#f1f1f2")
+                                    p(style="text-align:center") Click to Create you own card and make a purchase
+                                    form(action='/createYourOwnCard' method='GET')
+                                        button.stagesButton Create a card
+                                
+                else 
+                    .headerStrip
+                        p.titleLarge(style="text-align:center") Select the card below to edit your card(s)
+                        div(id="pageTitle" class="headerTitle padOut") Parent  
+                         
+                    .searchStrip
+                        
+                        .fullWidth.fwLeft
+                            table(id="linkedKidsTable" class="display table table-striped table-sm")
+                                thead(style="background-color:#17aab7!important;color:white;text-align:center")
+                                    tr
+                                        th(style=(user.accountTypeFk == 2 || user.accountTypeFk ==3 ) ? "": "width:30%;text-align:center") Card
+                                        th(style=(user.accountTypeFk == 2 || user.accountTypeFk ==3 ) ? "": "width:35%;text-align:center") Name
+                                        th(style=(user.accountTypeFk == 2 || user.accountTypeFk ==3 ) ? "": "width:35%;text-align:center") Age
+                                        if(user.accountTypeFk == 2 || user.accountTypeFk ==3)
+                                            th School
+                                            th Class
+                                tbody
+                                    each kid, index in kids
+                                        tr(id="row" + index  data-kidId=kid.id)
+                                            td(style=(user.accountTypeFk == 2 || user.accountTypeFk ==3 ) ? "width:30%" : "width:30%")
+                                                div(style="height:100%;width:100%;")
+                                                    canvas.canvas(id="canvas" + index style="width:100%;height:100%;padding:5px")
+                                            td(style=(user.accountTypeFk == 2 || user.accountTypeFk ==3 ) ? "width:25%" :  "width:35%")
+                                                p #{kid.name}
+                                            td(style=(user.accountTypeFk == 2 || user.accountTypeFk ==3) ? "width:10%" : "width:35%")
+                                                if(kid.age !=0 && kid.month !=0)
+                                                    p #{kid.age} years #{kid.month} months
+                                                else if( kid.age !=0 )
+                                                    p #{kid.age} years
+                                                else
+                                                    p #{kid.month} months
+                                            if(user.accountTypeFk == 2 || user.accountTypeFk ==3)
+                                                td(style="width:20%")
+                                                    if(kid.schoolName != "Individuals")
+                                                        p #{kid.schoolName}
+                                                td(style="width:15%")
+                                                    if(kid.className != "Individual Class")
+                                                        p #{kid.className}
+                            input(style="display:none" id="kidTotal" value=kids.length)
+                            input(id="kidTest" style="display:none" value=kidIds)
+            div(id="options_case2" style="background:#17aab7 !important; float:left;width:100%")
+                div(id="packages" class="opChoice")
+                    div.iconHeader()
+                        p
+                            a(href="#") Packages
+                    div.wrapOptions
+                        each package in packages
+                            div.iconButton2
+                                div.innerOption
+                                    p(style="font-size:inherit;") #{package.name} <br> £#{package.price}                 
+                div(id="purchase" class="opChoice")
+                    div.iconHeader
+                        p
+                            a(href="#") Purchase History
+                    
+                    div.wrapOptions
+                        table(style="border:none !important;")
+                            thead
+                                tr(style="color:white;")
+                                    th Date
+                                    th Package
+                                    th Quantity
+                                    th (£) Price
+                                    th (£) Cost
+                            tbody
+                                each purchasedBasketItem in purchasedBasketItems
+                                    tr(style="color:white;")
+                                        - var purchaseDttm = purchasedBasketItem.purchaseDttm;
+                                        - var month = purchaseDttm.getMonth() + 1;
+                                        - month = month < 10 ? '0' + month : month;
+                                        - var days = purchaseDttm.getDate();  
+                                        - days = days <10 ? '0' + days : days;   
+                                        - var years = purchaseDttm.getFullYear();
+                                        - var hours = purchaseDttm.getHours();
+                                        - hours = hours < 10 ? '0' + hours : hours;
+                                        - var minutes = purchaseDttm.getMinutes();
+                                        - minutes = minutes < 10 ? '0' + minutes : minutes;
+                                        - purchaseDttm = years + '-' + month + '-' + days + ' ' + hours + ':' + minutes;
+                                        
+        
+                                        td #{purchaseDttm}
+                                        td #{purchasedBasketItem.name}
+                                        td #{purchasedBasketItem.quantity}
+                                        td #{purchasedBasketItem.price}
+                                        td #{(parseFloat(purchasedBasketItem.cost)).toFixed(2)}
+                                if(totalDelivery > 0)
+                                    tr(style="color:white;")
+                                        td
+                                        td Delivery
+                                        td
+                                        td
+                                        td #{totalDelivery}    
+                            tfoot
+                                tr(style="color:white;")
+                                    td
+                                    td
+                                    td
+                                    td (£) Total
+                                    td #{totalCost}
+                
+                //- div(id="adspace" class="opChoice")
+                //-     div.iconHeader
+                //-         p 
+                //-     img(src="test.jpg" style="height:100%;width;100%;" alt="Packages")
+
+        script(src="javascript/organiserPieChart.js")
+    include ./common/footer.pug
+    +footer()        
+
+
+                                        
+                                   
+                                        
+    
+

@@ -1,0 +1,135 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Classes")
+    link(href='assets2/css/style.css' rel='stylesheet')   
+    link(rel="stylesheet" href="css/pieProgress.css")
+    <link href="assets/css/vendor/britecharts.min.css" rel="stylesheet" type="text/css" />
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+
+body
+    #overlay
+        .section.section-full
+            .container
+                .row.justify-content-center
+                    .col-md-8.col-lg-8
+                        .form-styled.bg-white(style="height:400px")
+                            h3(style="text-align:center") Add New Class
+                            .row(style="margin-top:15px")
+                                .col-sm-12
+                                    label Class Name
+                                    .input-group
+                                        input.form-control#newClass(type='text')
+                                        
+                                    p.small.text-danger#errorClass(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px")
+
+                            .row(style="margin-top:15px") 
+                                .col-sm-6                                                           
+                                    button.btn.btn-outline-primary.btn-block.mt-3#submitNewClass(data-schoolId=school.id) Add New Class
+                                .col-sm-6                                                           
+                                    button.btn.btn-outline-primary.btn-block.mt-3#cancelNewClass Cancel
+
+    #overlay2
+        .section.section-full
+            .container
+                .row.justify-content-center
+                    .col-md-8.col-lg-8
+                        .form-styled.bg-white(style="height:300px")
+                            h3(style="text-align:center") Remove Class
+                            .row(style="margin-top:15px")
+                                .col-sm-12
+                                    p#removeText(style="text-align:center")
+                                    p#errorRemoveClass.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px;text-align:center")
+                            .row(style="margin-top:15px") 
+                                .col-sm-6                                                           
+                                    button.btn.btn-outline-primary.btn-block.mt-3#submitRemoveClass Remove Class
+                                .col-sm-6                                                           
+                                    button.btn.btn-outline-primary.btn-block.mt-3#cancelRemoveClass Cancel
+
+    +navbar()
+    section.section.section-full.section-top.bg-light
+        // Content
+        .container
+            .row 
+                .col-sm-9 
+                    .row
+                        .col-sm-12 
+                            #schoolDetails.card.shadow.mb-12(style="cursor:pointer" data-schoolNumber=school.schoolNumber)
+                                .card-header
+                                    .row 
+                                        .col-sm-6
+                                            h3 #{school.name} Classes
+                                            h5 Code: #{school.schoolNumber}
+                                        .col-sm-6(style="text-align:right")
+                                            if(!statusTypeDetails.statusTypeDetails[1].reached)
+                                                button.btn.btn-outline-primary#addNewClass  Add Class
+                                            
+                                .card-body(style="text-align:center")
+                                    table.table.shadow.mb-12.table-striped.table-sm.dataTable.no-footer( id="classes"  role="grid" aria-describedby="classes_info")
+                                        thead(style="text-align:center")
+                                            tr(role="row"  class="titleBar")
+                                                if(!statusTypeDetails.statusTypeDetails[1].reached)
+                                                    th(class="sorting_asc smallerTextSize" style="width:50%") Class
+                                                    th(class="sorting_asc smallerTextSize" style="width:50%") 
+                                                else 
+                                                    th(class="sorting_asc smallerTextSize" ) Class
+                                        input#numberOfClasses(style='display:none' value=classes.length)
+                                        tbody
+                                            each schoolClass, index in classes
+                                                tr(style="cursor:pointer" )
+                                                    td(colspan="1" style="text-align:center" id='class' + index data-classNumber=schoolClass.classNumber) #{schoolClass.name}
+                                                    if(!statusTypeDetails.statusTypeDetails[1].reached)
+                                                        
+                                                        td(colspan="1" style="text-align:center" id="remove" + index data-className=schoolClass.name data-classId=schoolClass.id) 
+                                                            i.fas.fa-trash-alt
+                                                            |  Remove
+                                                        
+                     
+                            
+                .col-sm-3 
+                    .card.shadow.mb-12(style="cursor:pointer")
+                        .card-header
+                            h6 Order Details
+                        .card-body(style="text-align:center")
+                            .row 
+                                div(dir='ltr')
+                                    .bar-container-horizontal(style='width: 100%;height: 150px;' data-colors='#3688fc,#42d29d,#6c757d,#fa6767,#f9bc0d,#44badc,#e3eaef')
+
+                            .row(style="margin-top:20px")
+                                input#totalKids(style="display:none" value=orderDetails.totalKids)
+                                input#orderCount(style="display:none" value=orderDetails.orderCount)
+                            //- .row
+                                .col-sm-12
+                                    if(deadlineDetails.deadLineDttm != '')
+                                        - if(deadlineDetails.daysLeftSign == 'negative')
+                                            h5(style="color:red") #{(deadlineDetails.daysLeft * -1)} Days since purchase deadline passed
+                                        - else if( deadlineDetails.daysLeftSign == 'zero')
+                                            h5(style="color:red") Purchase deadline is Today 
+                                        - else
+                                            h5(style="color:red") #{deadlineDetails.daysLeft} Days till purchase deadline  
+                                    
+                            
+                    
+
+    +footer()        
+    //- script(src="javascript/organiser.js") 
+    <script src="assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>     
+    <script src="assets/js/vendor/d3.min.js"></script>
+    <script src="assets/js/vendor/britecharts.min.js"></script>
+   
+    <script src="assets/js/pages/demo.britechart.js"></script>                   
+    script(src="javascript/organiserPieChart.js")
+    script(src="assets2/js/theme.min.js")
+    script(src="assets2/js/classes.js")
+    <script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+    <script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+    <script src="assets/js/vendor/dataTables.responsive.min.js"></script>

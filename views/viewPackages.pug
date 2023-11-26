@@ -1,0 +1,24 @@
+doctype html
+html(lang="en")
+  include ./common/header.pug
+  +head("View Packages")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      link(rel="stylesheet" href="css/list.css")
+    div.container
+    div.row
+        .col-sm-12.offest-md-2.col-md-8
+            each package in packages
+                form(action="/" method="post")
+                   ul
+                    li.service-list
+                      img(src=package.imagePath alt="icon" width="300" height="300")
+                      h3 #{package.name}
+                      br
+                      p £#{package.price}
+    include ./common/footer.pug
+    +footer()  
+    
+

@@ -1,0 +1,116 @@
+doctype html
+html(land="en")
+    include common/header.pug
+    +head("Sign up Organiser")
+    link(rel="stylesheet" href="css/kcards15.css" type="text/css" media="screen" )
+    //- slink(rel="stylesheet" href="css/signup.css")
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+            div.gapDiv gapDiv
+            include common/navbar.pug
+            +navbar()
+            section
+                article
+                    div.mainarea(style="background:none!important;")
+                        p.titleLarge(style="text-align:center") Sign up below
+                        br
+                        form(action="/signupOrganiser", method ="POST")
+                            nav.fullWidth.whiteBG
+                                div.login_register
+                                    div.register
+                                        
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                p(style="margin-bottom:0") Name:
+                                                input.withBorder( required=true, name='name', type='text' value=(formData != undefined) ? formData.name : '')
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                p(style="margin-bottom:0") Email:
+                                                input.withBorder(required=true, name='email', type='email' value=(formData != undefined) ? formData.email : '')
+                                                if(errors.email)
+                                                    p.small.text-danger(style="text-align:center;margin-left:0;margin-top:0;font-size:8pt") #{errors.email}
+                                        div.searchItem2
+                                            div.inputtitle2
+                                                p(style="margin-bottom:0") Re-enter Email:
+                                                input.withBorder(required=true, name='reEmail', type='email' value=(formData != undefined) ? formData.reEmail : '')
+                                                
+                                        
+                                    div
+                                        div.login_register
+                                            div.login
+                                                
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") Password:
+                                                        input.withBorder( required=true, name='password', type='password' value=(formData != undefined) ? formData.password : '' )
+                                                        if(errors.password)
+                                                            p.small.text-danger(style="text-align:center;margin-left:0;margin-top:0;font-size:8pt") #{errors.password}
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") Re-enter Password:
+                                                        input.withBorder( required=true, name='rePassword', type='password' value=(formData != undefined) ? formData.rePassword : '' )
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") Telephone Number:
+                                                        input.withBorder( required=true, name='telephoneNo', type='text' value=(formData != undefined) ? formData.telephoneNo : '')
+                                                        if(errors.telephoneNo)
+                                                            p.small.text-danger(style="text-align:center;margin-left:0;margin-top:0;font-size:8pt") #{errors.telephoneNo}                                                          
+                                    div
+                                        div.login_register
+                                            div.register
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") School/ Nursery Name:
+                                                        input.withBorder(required=true, name='school', type='text' value=(formData != undefined) ? formData.school : '')
+                                                        if(errors.school)
+                                                            p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;font-size:8pt") #{errors.school}
+                                                        
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") School/ Nursery Address:
+                                                        input.withBorder( required=true, name='address', type='text' value=(formData != undefined) ? formData.address : '')
+                                                    if(errors.address)
+                                                        p.small.text-danger(style="text-align:center;margin-left:0;margin-top:0;font-size:8pt") #{errors.address}
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") Post Code:
+                                                        input.withBorder( required=true, name='postCode', type='text' value=(formData != undefined) ? formData.postCode : '')
+                                                        if(errors.postCode)
+                                                            p.small.text-danger(style="text-align:center;margin-left:0;margin-top:0;font-size:8pt") #{errors.postCode}                                                
+                                    div
+                                        div.login_register
+                                            div.register
+                                                
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") Average No. of Pupils per class:
+                                                        input.withBorder( required=true, name='pupilsPerClass', type='number' min="0" value=(formData != undefined) ? formData.pupilsPerClass : '')
+
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") Number of classes:
+                                                        input.withBorder( required=true, name='numberOfClasses', type='number' min="0" value=(formData != undefined) ? formData.numberOfClasses : '')           
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        p(style="margin-bottom:0") Additional Information:
+                                                        input.withBorder.min20( required=false, name='additionalInfo', type='text' value=(formData != undefined) ? formData.additionalInfo : '' )                 
+
+                            div(style="text-align:center;")
+                                button.submitto2 Sign Up
+                                br
+                                br
+                                p Want to sign up as a parent? #[a(href="/signup") Register as Parent here].  
+                                p Already have an account? #[a(href="/") Login in here].
+
+        include common/footer.pug
+        +footer()

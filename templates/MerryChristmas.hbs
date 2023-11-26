@@ -1,0 +1,187 @@
+<style >
+    .heightTop{padding-top:40px;}
+
+.kcimage img{width:200px;}
+#last{vertical-align:bottom;background:purple;}
+
+#leftSideCard{width:50%;float: left;}
+#rightSideCard{width:50%; float: right;background:#fff;}
+#leftleft{width:100%;}
+
+td{text-align: center;}
+
+
+/*#leftSideCard,#rightSideCard{background:#fff;}*/
+
+#maintext,#mainBackImage,.credFooter{background:#fff; text-align:center;}
+
+/*.credFooter{position: relative; bottom:0px;background:orange}*/
+#maintext{display: flex; flex-direction: column; position: relative; bottom:0px!important;}
+
+body{font-family:Helvetica, Arial, sans-serif;}
+
+#outercardContainer{width:100%;display: flex}
+#cardContainer{margin:auto!important; background:#fff!important;width:100%!important}
+
+#KCcredit{margin:auto; max-width:200px; background:#17aab7; overflow: hidden;}
+#KCcredit img{width:90%; margin:auto!important;padding:0 2%;}
+
+#footerKC{padding:20px 10px 10px 10px;width:100%;margin-bottom: 0px; min-height:0px;margin:auto; text-align:center; }
+
+
+#cardDetails{padding-top:40px;}
+
+
+.size1{font-size:.8em;}
+.size2{font-size:.8em; font-weight:bold;}
+.size3{font-size:.6em;}
+
+.size1,.size2{margin:2%;}
+
+
+#backImage{width:180px; height:180px; margin:auto; position: relative;}
+
+#backImage img{width:100%!important;}
+
+
+.kcimage{    padding-top: 0;
+    width: 200px;
+    padding-bottom: 0;
+    padding-left: 5px;
+    padding-right: 10px; width:200px; background:#17aab7;}
+
+
+#rightSideCard,#backImage{overflow:hidden; box-sizing:border-box;}
+
+#rightSideCard img{width:100%;height:512px;width:512px!important;}
+
+#rightSideCard {border:10px solid #fff;}
+
+.kclogoCont{width:200px; height:auto;}
+
+
+@media screen and (min-width:998px)and (max-width:1075px){
+	#cardDetails{padding-top:20px;}
+}
+
+@media screen and (min-width:880px)and (max-width:997px){
+	#cardDetails{padding-top:0px;}
+	
+	
+}
+
+@media screen and (min-width:738px) and (max-width:879px){
+#cardDetails{padding-top:0px;font-size:0.9em;}
+	.size3{font-size:0.7em;}
+	.size1, .size2{margin:1%;}
+	.heightTop{padding-top:30px;}
+	
+}
+
+
+@media screen and (max-width:737px){
+#cardDetails{padding-top:0px;font-size:0.7em;}
+		.size3{font-size:0.5em;}
+	.size1, .size2{margin:1%;}
+	.heightTop{padding-top:20px;}
+	.kcimage{padding:0 10px; width:70px; background:#17aab7;}
+	.kcimage img{width:70px;}
+	.size1, .size2,.size3{margin:.5%;}
+	.size3{line-height:.7em;}
+	.kclogoCont{margin-top:10px;}
+	#maintext{padding-bottom:5px;}
+}
+</style>
+<html>
+<head></head>
+
+
+<body>
+	
+	<div id="outercardContainer">
+	<div id="cardContainer">
+	
+<div id="leftleft">
+	
+	<div id="leftSideCard">
+			<table width="100%" class="last" cellpadding="0" cellspacing="0">
+			<tr>
+				<td class="heightTop"></td>
+			</tr>
+		</table>
+		<table valign="bottom" width="100%" class="last" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+			<div id="mainBackImage">
+            <div id="backImage"><img src="{{picture1}}" alt="Back image"></div>
+           
+		</div><!--MAINBACKIMAGE-->
+		</td>
+		</tr>
+	</table>
+		<div id="maintext">
+			<div id="cardDetails" style="height:175px">
+
+<p class="size1">Design by:</p>
+<p class="size2">{{name}}</p>
+{{#if displayAge }}
+	{{#if displayBoth}}
+		<p class="size2">Age {{age}} years {{month}} months</p>
+	{{else if displayYears}}
+		<p class="size2">Age {{age}} years</p>
+	{{else if displayMonths}}
+		<p class="size2">Age {{month}} months</p>
+	{{/if}}
+{{else}}
+<p class="size2"></p>
+{{/if}} 
+{{#if displaySchool }}
+<p class="size2">{{school}}</p>
+{{else}}
+<p class="size2"></p>
+{{/if}}
+{{#if displayClass }}
+<p class="size2">{{class}}</p>
+{{else}}
+<p class="size2"></p>
+{{/if}}
+<p class="size1">{{code}}</p>
+				</div><!--Card details-->
+			</div>	<!--maintext-->
+				</td>
+			</tr>
+		
+				<table width="100%" cellpadding="0" cellspacing="0">
+					<tr>
+					
+					<td valign="bottom">
+					<div style="width:210px;margin:auto;text-align:center;background-color:17aab7">
+
+						<img style="width:200px" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo_small.png" alt="Kids Cards 4 Christmas"></td>
+					</div>
+					</tr>
+					<tr>
+					<td style="padding:10px;" colspan="3">
+					<span style="color:#17aab7" class="size3">Printed by Bluwave Ltd</span> <span style="#075F5E;" class="size3">tel: 020 7277 7663</span><br>
+				<span style="color:#17aab7" class="size3">info@kidscards4christmas.com </span> &nbsp; <span style="#075F5E;" class="size3">www.kidscards4christmas.com</span>
+				
+
+		<!--Image, name, school, credtis-->
+				
+					</td>
+			 
+			</tr>
+		</table><!--LAST-->
+	</div><!--leftsideCard-->
+		
+		<div id="rightSideCard">
+		
+	<img src="{{picture1}}" alt="Main image">
+		</div><!--RightsideCard-->
+				</div><!--LEFTLEFT-->
+	
+	
+	</div><!--cardContainer-->
+			</div><!--outercardContainer-->
+</body>
+</html>

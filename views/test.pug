@@ -1,0 +1,13 @@
+html
+    head
+        link(href="css/resizeDrag.css" rel="stylesheet")
+    body()
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js")
+        script(src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js")
+        script( src="javascript/resizeDrag.js")
+        .resize-container(style="background-image:url(template.jpg);background-position:center;background-repeat:no-repeat;background-size:cover;")
+            
+            //- img(src="template.jpg" style="height:14.5cm;width:14.5cm;")
+            img.resize-drag.draggable(id="image" src="jhene.jpg")
+            input.resize-drag2.draggable(id="name" style="text-align:center;background-color:transparent" type="text" value="Hello")
+        button(id="button")       

@@ -1,0 +1,103 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head("Edit Contact Details for " + school.name)
+    link(rel="stylesheet" href="css/kcards11.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                    script( type="text/javascript" src="javascript/editContactDetails.js")
+
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+            section
+                article
+                    div.mainarea(style="background:none!important;")
+                        p.titleLarge(style="text-align:center") #{school.name}
+                        p(style="text-align:center")  Contact Details
+                        input(style="display:none" value=user.accountTypeFk id="accountType")
+                        nav.fullWidth.whiteBG        
+                            div.login_register
+                                div(class= (user.accountTypeFk == 1) ? "register" : "login")
+                                    div.searchItem2
+                                        div.inputtitle2
+                                            p School:
+                                            input.withBorder(type="text" value=school.name id="name")
+                                            p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorName") 
+
+                                    div.searchItem2
+                                        div.inputtitle2
+                                            p Address:
+                                            input.withBorder(type="text" value=school.address id="address")
+                                            p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorAddress") 
+    
+                                    div.searchItem2
+                                        div.inputtitle2
+                                            p Post Code:
+                                            input.withBorder(type="text" value=school.postCode id="postCode")
+                                            p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorPostCode") 
+                                         
+                                    div.searchItem2
+                                        div.inputtitle2
+                                            p Telephone Number:
+                                            input.withBorder(type="text" value=school.number id="telephoneNo")
+                                            p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorTelephoneNo") 
+                                div
+                                    div.login_register
+                                        div(class= (user.accountTypeFk == 1) ? "login" : "register")
+                                            div.searchItem2
+                                                div.inputtitle2
+                                                    p Email:
+                                                    input.withBorder(type="text" value=school.email, readonly )
+                                                    p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") 
+                                            div.searchItem2
+                                                div.inputtitle2
+                                                    p Number of Pupils per Class:
+                                                    if(user.accountTypeFk == 1)
+                                                        input.withBorder(type="number" value=school.numberOfPupilsPerClass, readonly )
+                                                    else
+                                                        input.withBorder(type="number" value=school.numberOfPupilsPerClass id="numberOfPupils" ) 
+                                                    p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorNumberOfPupils") 
+                                            div.searchItem2
+                                                div.inputtitle2
+                                                    p Number of Classes:
+                                                    if(user.accountTypeFk == 1)
+                                                        input.withBorder(type="number" value=school.numberOfClasses,  readonly )
+                                                    else
+                                                        input.withBorder(type="number" value=school.numberOfClasses id="numberOfClasses" )
+                                                    p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorNumberOfClasses") 
+                                            
+                                            div.searchItem2
+                                                div.inputtitle2
+                                                    p Name:
+                                                    input.withBorder(type="text" value=(account == null) ? '': account.name id="organiserName")
+                                                    p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px" id="errorOrganiserName") 
+
+                                            
+                                
+                                div
+                                    div.login_register
+                                        div.register
+                                            div.searchItem2
+                                                div.inputtitle2
+                                                    input(style="" class="mt-3 btn btn-primary" type="submit" value="Update Details" id="updateDetails" data-name=school.name data-schoolId= school.id data-address=school.address data-postCode=school.postCode data-number=school.number data-numberOfPupils=numberOfPupilsPerClass data-numberOfClasses = school.numberOfClasses data-organiserName = name)
+                                            if(user.accountTypeFk == 1)
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        input(type="submit" style="" value="Change Organiser" id="changeOrganiser" data-schoolId=school.id).mt-3.btn.btn-primary
+                                                div.searchItem2
+                                                    div.inputtitle2
+                                                        input(type="submit" id="goToSchool" value="Go to School" data-schoolId=school.id).mt-3.btn.btn-primary 
+
+    include ./common/footer.pug
+    +footer()  

@@ -1,0 +1,61 @@
+mixin verticalAdminNavbar()
+    ul.navbar-nav.bg-gradient-primary.sidebar.sidebar-dark.accordion(id="accordionSidebar" style="background-image: linear-gradient(180deg,#075F5E 10%,#20c997 100%);")
+        a.sidebar-brand.d-flex.align-items-center.justify-content-center(href="/adminDashboard")
+            
+            .sidebar-brand-text.mx-3
+                a.navbar-brand(id='navbarLogo' href="/adminDashboard")
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="100%" height="100%" alt="Kids Cards") 
+
+        hr.sidebar-divider.my-0
+        li.nav-item.active
+            a.nav-link(href="/dashboardNew")
+                i.fas.fa-fw.fa-tachometer-alt
+                span Dashboard
+        hr.sidebar-divider
+
+        <!-- Heading -->
+        .sidebar-heading Options
+
+        <!-- Nav Item - Pages Collapse Menu -->
+        li.nav-item.active
+            a.nav-link(href="/schoolDashboard")                
+                i.fas.fa-fw.fa-school(style="color:white")
+                span Schools
+            //- .collapse(id="collapseUtilities" aria-labelledby="headingUtilities" data-parent="#accordionSidebar")
+                .bg-white.py-2.collapse-inner.rounded
+                    a.collapse-item(href="#") Add School
+                    a.collapse-item(href="#") Find School
+                    a.collapse-item(href="#") Deadlines
+        
+            li.nav-item.active
+                a.nav-link(href="#")
+                    i.fas.fa-chalkboard
+                    span Classes
+            li.nav-item.active
+                a.nav-link(href="/kidDashboard")
+                    i.fas.fa-child
+                    span Kids
+            li.nav-item.active
+                a.nav-link(href="#")
+                    i.fas.fa-user-circle
+                    span Accounts
+            li.nav-item.active
+                a.nav-link(href="#")
+                    i.fas.fa-tasks
+                    span Tasks
+            li.nav-item.active
+                a.nav-link(href="#")
+                    i.fas.fa-inbox
+                    span Messages
+            li.nav-item.active
+                a.nav-link(href="/templates")
+                    i.fas.fa-file-invoice
+                    span Templates
+            
+            <!-- Divider -->
+            hr.sidebar-divider.d-none.d-md-block
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            .text-center.d-none.d-md-inline
+                button.rounded-circle.border-0(id="sidebarToggle")
+

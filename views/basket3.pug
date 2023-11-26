@@ -1,0 +1,266 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Basket")
+    link(href='assets2/css/style.css' rel='stylesheet') 
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')  
+
+body                                               
+    +navbar().mb-5
+    div(id="overlay")
+        div.progress(id="progressBar" style="height:45% !important")
+            .container(style="width:100%")
+                .row
+                    .col-sm-12(style="text-align:center; margin-top: 10px;")
+                        h6 Enter the <b>School Code</b> and <b>Class Code</b> found on your order instruction form if your child was part of a 'Christmas Card Scheme'. This will mean your card will be delivered to your childs school and you won't have to pay for delivery provided you have ordered before the deadline. This also ensures
+                           |  your items are placed in the correct class for easier collection. If this doesn't apply to you select cancel and proceed to checkout
+
+                .row(style="text-align:center")
+                    .col-md-6
+                        label School Code
+                        .input-group
+                            input#schoolCode.form-control(value=(formData != undefined) ? formData.schoolCode : '' required=true, name='schoolCode', type='text')
+                        p#error.text-danger(style="font-size:8pt")
+                    .col-sm-6
+                        label Class Code
+                        .input-group
+                            input#classCode.form-control(value=(formData != undefined) ? formData.classCode : '' required=true, name='classCode', type='text')
+                        p#error.text-danger(style="font-size:8pt")
+                .row(style="margin-top:5px") 
+                    .col-sm-6(style="text-align:center;margin-top:20px")
+                        input#link.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" type="submit" value="Link Kid")
+                    .col-sm-6(style="text-align:center;margin-top:20px")
+                        input#cancel.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" type="submit" value="Cancel")
+        
+    section.section
+        .container
+            input#displayCalendarsOptions(value=(isDisplayShippingSectionDetail.isDisplayCalendarOptions ? 'true' : 'false') style="display:none")
+            input#displayMessage(value=(isDisplayShippingSectionDetail.displayMessage ? 'true' : 'false') style="display:none")
+            input#displayShippingSection(value=(isDisplayShippingSectionDetail.isDisplayShippingSection ? 'true' : 'false') style="display:none")
+            if(basketItemsDetails.basketItems.length > 0)
+                if(isDisplayShippingSectionDetail.isDisplayShippingSection)
+                    .row
+                        
+                        .col-12.col-md-8
+                            
+                            input#basketItems(style="display:none" value=basketItemsDetails.basketItems.length)
+                            // Heading
+                            h3.mb-5.mt-5
+                                | Basket
+                            each basketItem, index in basketItemsDetails.basketItems
+                                hr.mt-5.mb-4
+                                .row.align-items-center.mb-5.mb-md-4
+                                    
+                                    .col-12.col-md-3.text-center
+                                        canvas.canvas.shadow(id='basket'+index style="width:70%;height:100%;padding:5px" data-basketItem=basketItem.id )
+                                        //- .img-square.mb-4.mb-md-0
+                                        //-     img.img-cover(src=basketItem.picture alt='...')
+                                    .col-12.col-md-2
+                                        // Heading
+                                        h6
+                                            | #{basketItem.productName} - #{basketItem.productVariantName}
+                                        // Text
+                                        p.mb-4.mb-md-0.text-sm.text-muted
+                                            | #{basketItem.text1}
+                                    .col-md-2.col-sm-3
+                                        // Price
+                                        p.mb-0.text-sm.text-muted
+                                            | £#{(parseFloat(basketItem.price)).toFixed(2)}
+                                    .col-md-2.col-sm-3
+                                        input.form-control.form-control-sm(type='number' min='1' data-basketItemId=basketItem.basketItemId data-previous=basketItem.quantity data-index=index data-loggedInUserType=user.accountTypeFk id="quantity" +index value=basketItem.quantity)
+                                    
+                                    .col-md-2.col-sm-3
+                                        input(id="item" + index style="display:none" value=basketItem.productItemId)
+                                        button.btn.btn-outline-primary.mt-3(id="itemButton" + index style="display:none" data-productItemId=basketItem.productItemId) Link To School
+                                    .col-md-1.col-sm-3.mt-3
+                                        // Remove
+                                        .close(id="remove" +index  data-basketItemId=basketItem.id style="color:red")
+                                            | &times;
+                            
+                            hr.mt-5.mb-4
+                            .row.align-items-center
+                                .col
+                                    // Link
+                                    a.btn.btn-outline-primary.button2.mb-5(href='/linkKids' style="width:50%") Create Another Card
+                                    br
+                                    a.btn.btn-outline-primary(href='/shop' style="color:#f5ba4b !important")
+                                        i.fas.fa-angle-left.mr-2
+                                        |  Continue shopping
+                                .col-auto
+                                    // SubTotal
+                                    p.mb-0
+                                        | SubTotal £#{(parseFloat(basketItemsDetails.subTotal)).toFixed(2)}
+                                    
+                                    
+                                    if(isDisplayShippingSectionDetail.isDisplayShippingSection)
+                                        input#deliveryName(value=deliveryOption.option2 style="display:none")
+                                        input#deliveryPrice(value=deliveryOption.option2Price style="display:none")
+                                        input#deliveryOption(value=deliveryOption style="display:none")
+                                        input#subTotal(value=basketItemsDetails.subTotal style="display:none")
+                                        p.mb-0#delivery
+                                            | #{deliveryOption.option2} £#{(parseFloat(deliveryOption.option2Price)).toFixed(2)}    
+                                    else
+                                        input#deliveryName(value=deliveryOption.option1 style="display:none")
+                                        input#deliveryPrice(value=deliveryOption.option1Price style="display:none")
+                                        p.mb-0#delivery
+                                            | #{deliveryOption.option1} £#{(parseFloat(deliveryOption.option1Price)).toFixed(2)}    
+                                    // Total
+                                    h4.mb-0#totalDisplay
+                                        | Total £#{total}
+                            // / .row
+                        .col-md-4
+                            .card.card-active.mb-5.mt-3
+                                // Body
+                                .card-body.text-center
+                                    // Title
+                                    h4.card-title
+                                        | Delivery Details
+                                    
+                                    .row
+                                        .col-sm-12
+                                            label(for="fullName") Full Name
+                                            .quantity(style="margin-bottom:15px;")
+                                                input.form-control(style="width:100% !important;text-align:left;" required=true, id='fullName' name='fullName', type='text' value=(shipping != undefined) ? shipping.fullName : "")
+                                            p.small.text-danger(id="fullNameError" style="color:red;font-size:9pt")
+                                            label(for="addressLine1") Address Line 1
+                                            .quantity(style="margin-bottom:15px;")
+                                                input.form-control( style="width:100% !important;text-align:left" required=true, id='addressLine1' name='addressLine1', type='text' value=(shipping != undefined) ? shipping.addressLine1 : "")
+                                            p.small.text-danger(id="addressLine1Error" style="color:red;font-size:9pt")
+                                            label(for="addressLine2") Address Line 2
+                                            .quantity(style="margin-bottom:15px;")
+                                                input.form-control(style="width:100% !important;text-align:left" required=true,id="addressLine2" name='addressLine2', type='text' value=(shipping != undefined) ? shipping.addressLine2 : "")
+                                            p.small.text-danger(id="addressLine2Error" style="color:red;font-size:9pt")
+                                    .row
+                                        .col-sm-6        
+                                            label(for="city") City
+                                            .quantity(style="margin-bottom:15px;")
+                                                input.form-control(style="width:100% !important;text-align:left" required=true, id="city" name='city', type='text' value=(shipping != undefined) ? shipping.city : "")
+                                                
+                                        .col-sm-6      
+                                            label(for="postCode") Post Code
+                                            .quantity(style="margin-bottom:15px;")
+                                                input.form-control(style="width:100% !important;text-align:left" id="postCode" required=true, minlength=7, maxlength=8 name='postCode', type='text' value=(shipping != undefined) ? shipping.postCode : "")
+                                    .row
+                                        .col-sm-12                
+                                            p.small.text-danger(id="cityError" style="color:red;font-size:9pt")
+                                            p.small.text-danger(id="postCodeError" style="color:red;font-size:9pt")
+                                
+                                    .row.mb-5
+                                        .col-sm-12
+                                            label(for="country") Country
+                                            select.form-control(id="country")
+                                                each country in countries
+                                                    option(value=country.id) #{country.name} 
+                                    button.btn.btn-outline-primary#shipping(data-subTotal=basketItemsDetails.subTotal data-total=total)
+                                        | Proceed to checkout 
+                                        i.fas.fa-arrow-right.ml-2                               
+                                    p.small.text-danger(id="buyError" style="color:red;font-size:9pt")
+
+                else
+                    .row
+                        .col-12.col-md-12
+                            
+                            input#basketItems(style="display:none" value=basketItemsDetails.basketItems.length)
+                            // Heading
+                            input#deliveryName(value=deliveryOption.option1 style="display:none")
+                            input#deliveryPrice(value=deliveryOption.option1Price style="display:none")
+                            
+                            h3.mb-5.mt-5
+                                | Basket
+                            each basketItem, index in basketItemsDetails.basketItems
+                                .row.align-items-center.mb-5.mb-md-4
+                                    .col-12.col-md-3.text-center
+                                        canvas.canvas.shadow(id='basket'+index style="width:50%;height:100%;padding:5px" data-basketItem=basketItem.id )
+                                        
+                                    .col-12.col-md-2
+                                        // Heading
+                                        h4
+                                            | #{basketItem.productName} - #{basketItem.productVariantName}
+                                        // Text
+                                        p.mb-4.mb-md-0.text-sm.text-muted
+                                            | #{basketItem.text1}
+                                    .col-4.col-md-2
+                                        // Price
+                                        p.mb-0.text-sm.text-muted
+                                            | £#{(parseFloat(basketItem.price)).toFixed(2)}
+                                    .col-4.col-md-2
+                                        input.form-control.form-control-sm(type='number' min='1' data-basketItemId=basketItem.basketItemId data-previous=basketItem.quantity data-index=index data-loggedInUserType=user.accountTypeFk  id="quantity" +index value=basketItem.quantity)
+                                    .col-4.col-md-2
+                                        input(id="item" + index style="display:none" value=basketItem.productItemId)
+                                        button.btn.btn-outline-primary.mt-3(id="itemButton" + index style="display:none" data-productItemId=basketItem.productItemId) Link To School
+                                    .col-4.col-md-1
+                                        // Remove
+                                        .close(id="remove" +index  data-basketItemId=basketItem.id)
+                                            | &times;
+                            
+                            hr.mt-5.mb-4
+                            .row.align-items-center
+                                .col
+                                    // Link
+                                    a(href='/shop' style="color:#f5ba4b !important")
+                                        i.fas.fa-angle-left.mr-2
+                                        |  Continue shopping
+                                .col-auto
+                                    // SubTotal
+                                    p.mb-0
+                                        | SubTotal £#{(parseFloat(basketItemsDetails.subTotal)).toFixed(2)}
+                                    if(isDisplayShippingSectionDetail.isDisplayShippingSection)
+                                        p.mb-0
+                                        | #{deliveryOption.option2} £#{(parseFloat(deliveryOption.option2Price)).toFixed(2)}    
+                                    else
+                                        p.mb-0
+                                            | #{deliveryOption.option1} £#{(parseFloat(deliveryOption.option1Price)).toFixed(2)}    
+                                    // Total
+                                    h4.mb-0
+                                        | Total £#{total}
+                            // / .row
+                            hr.mt-4.mb-5
+                            .text-center.mb-5.mb-md-0
+                                // Button
+                                button.btn.btn-outline-primary.mb-3#shipping(data-subTotal=basketItemsDetails.subTotal data-total=total)
+                                    | Proceed to checkout 
+                                    i.fas.fa-arrow-right.ml-2
+                                p.small.text-danger(id="buyError" style="color:red;font-size:9pt")
+
+            else 
+                .row
+                    .col-12 
+                        // Heading
+                        h3.mb-5.mt-5
+                            | Basket
+                        hr.mt-5.mb-4
+                        .row.align-items-center
+                            .col
+                                h1.mb-5 Empty Basket
+                                // Link
+                                a(href='/shop' style="color:#f5ba4b !important")
+                                    i.fas.fa-angle-left.mr-2
+                                    |  Continue shopping
+
+                
+            
+                                    
+                
+                                    
+
+
+
+
+
+
+
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+    script(src="assets2/js/theme.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/exif-js")
+    script(src="https://js.stripe.com/v3/")
+    script(src="javascript/stripe.js"  )
+    script(src="javascript/basket.js")

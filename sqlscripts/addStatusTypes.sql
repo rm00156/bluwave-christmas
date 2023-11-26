@@ -1,0 +1,17 @@
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (1,'Registered',2);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (2,'Artwork Pack Sent to School',3);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (3,'Artwork Pack Received from School',4);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (4,'Artwork Scanned',5);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (5,'Data Entered',6);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (6,'Samples Sent to School',7);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (7,'Purchase Deadline',8);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (8,'Waiting for Customer Response',null);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (9,'Delay',10);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (10,'Printing',11);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (11,'Packing Complete',12);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (12,'Out For Delivery',13);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (13,'Waiting for Charity Contribution Response',14);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (14,'Confirm Charitable Contribution',15);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (15,'Contribution Sent',16);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (16,'Complete',17);
+insert into heroku_c9338ae699a67a0.statusTypes (id, type,nextTypeFk) values (17,'Terminal',null);

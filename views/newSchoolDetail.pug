@@ -1,0 +1,216 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("School Details")
+    link(rel="stylesheet" href="css/pieProgress.css")
+
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/britecharts.min.css" rel="stylesheet" type="text/css" />
+    link(href='assets2/css/style.css' rel='stylesheet') 
+    
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div        
+// Begin page
+#overlay
+    .section.section-full
+        .container
+            .row.justify-content-center(style="margin-top:200px")
+                .col-md-8.col-lg-8
+                    .form-styled.bg-white(style="height:400px")
+                        .container
+                            
+                            .row(style="margin-top:15px")
+                                .col-sm-12
+                                    h3.mt-5(style="text-align:center") Add New Class
+                                    label Class Name
+                                    .input-group
+                                        input.form-control#newClass(type='text')
+                                        
+                                    p.small.text-danger#errorClass(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px")
+
+                            .row(style="margin-top:15px") 
+                                .col-sm-6.text-center                                                           
+                                    button.btn.btn-outline-primary.btn-block.mt-3#submitNewClass(data-schoolId=school.id data-schoolNumber=school.schoolNumber) Add New Class
+                                .col-sm-6.text-center                                                            
+                                    button.btn.btn-outline-primary.btn-block.mt-3#cancelNewClass Cancel
+#overlay4(style="z-index:55")
+    .progress#progressBar
+        .container(style="padding-top:50px")
+            h2(style="color:#3688fc") Processing 
+            div.progress(style="height:25px")
+                div.progress-bar.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px;background-color:#f5ba4b") 0%   
+            h6(style="margin-top:5px" id="progressText")
+#overlay2(style="z-index:55;display:none")
+    .section.section-full
+        .container
+            .row.justify-content-center(style="margin-top:200px")
+
+                .col-md-10.col-lg-10
+                    .form-styled.bg-white(style="overflow-y: scroll;height:300px;margin:50px")
+                        .container(style="justify-content: center;text-align:center;margin-top:50px")
+                            h3 Set Deadline
+                            input.form-control.mt-3#deadLine(type='date' value=(deadLineDttm != '' ? deadLineDttm : ''))
+                            .row 
+                                .col-sm-6 
+                                    button#setDeadLine.btn.btn-success.mt-3.me-2(type='button' data-schoolId=school.id data-schoolNumber=school.schoolNumber)
+                                        | Set Deadline
+                                .col-sm-6
+                                    button#cancelDeadline.btn.btn-danger.mt-3.me-2(type='button')
+                                        | Cancel
+
+#overlay3(style="z-index:55;display:none")
+    .section.section-full
+        .container
+            .row.justify-content-center(style="margin-top:200px")
+
+                .col-md-12
+                    .form-styled.bg-white#overlayStyle(style="overflow-y: scroll;height:200px;margin:50px")
+                        .container(style="justify-content: center;text-align:center;margin-top:50px")
+                            .row 
+                                .col-sm-4 
+                                    button.btn.btn-secondary.mt-3.me-2.nextStep(data-schoolid=school.id data-schoolNumber=school.schoolNumber data-nextTypeFk=6) Move To Delay Step
+                                .col-sm-4
+                                    button.btn.btn-success.mt-3.me-2.nextStep(data-schoolid=school.id data-schoolNumber=school.schoolNumber data-nextTypeFk=7) Move To Printing Step
+                                .col-sm-4
+                                    button.btn.btn-danger.mt-3.me-2#cancelStep Cancel
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title School Details
+                
+                .row
+                    .card
+                        .card-body
+                            .row
+                                .col-lg-3.shadow(style="text-align:center;padding:50px")
+    
+                                    h3.mt-0
+                                        | #{school.name}
+                                        a.text-muted(href='javascript: void(0);')
+                                        i.mdi.mdi-square-edit-outline.ms-2
+                                    //- p.mb-1 #{productDetail.productType}
+                                    
+                                    .mt-4
+                                        h5.font-14 Code #{school.schoolNumber}
+                                        h5.font-14 #{school.address}, #{school.postCode}
+                                        h5.font-14(style="color:green") Current Status : #{school.type}
+                                        a(href="/new_account_details?number=" + school.accountNumber) 
+                                            h5.font-14 Organiser Email : #{school.email}
+                                        h5.font-14 Number of Kids Per Class : #{school.numberOfKidsPerClass}
+                                        a(href="/give_back_details?schoolNumber=" + school.schoolNumber)
+                                            h5.font-14 Give Back Amount: £#{giveBackTotal}
+                                        h5.font-14 Telephone Number: #{school.number}
+                                        h5.font-14 Additional Info: #{school.additionalInfo}
+                                        .row 
+                                            
+                                            h4.header-title.mt-4 Order Details
+                                            div(dir='ltr')
+                                                .bar-container-horizontal(style='width: 100%;height: 150px;' data-colors='#3688fc,#42d29d,#6c757d,#fa6767,#f9bc0d,#44badc,#e3eaef')
+ 
+                                        .row(style="margin-top:20px")
+                                            input#totalKids(style="display:none" value=orderDetails.totalKids)
+                                            input#orderCount(style="display:none" value=orderDetails.orderCount)
+                                            if(deadLineDttm != '')
+                                                - if(daysLeftSign == 'negative')
+                                                    h5(style="color:green") #{(daysLeft * -1)} Days since purchase deadline passed
+                                                - else if( daysLeftSign == 'zero')
+                                                    h5(style="color:green") Purchase deadline is Today 
+                                                - else
+                                                    h5 #{daysLeft} Days till purchase deadline
+                                        .row 
+                                            p#error.text-danger
+                                            button#deadLineButton.btn.btn-success.mb-2.me-2(type='button')
+                                                |  Set Deadline 
+                                            button#changeStep.btn.btn-secondary.mb-2.me-2(type='button' data-schoolid=school.id data-schoolNumber=school.schoolNumber)
+                                                |  Move To Next Step
+                                            button#orderInstruction.btn.btn-danger.mb-2.me-2(type='button' data-schoolid=school.id)
+                                                |  Generate Order Instructions
+                                            input(id="ordered" type="number" value=orderDetails.orderedPercentage style="display:none")
+                                .col-lg-6
+                                    .row.mb-2
+                                        .text-xl-end.mt-xl-0.mt-2
+                                            button#addNewClass.btn.btn-success.mb-2.me-2(type='button')
+                                                |  Add Class
+                                    input(style="display:none" id="classSize" value=classTotal)       
+                                    table#classes.table.table-striped.dt-responsive.nowrap.w-100(style="cursor:pointer")
+                                        thead
+                                            tr
+                                            th Class Name
+                                            th Number Of Kids
+                                            th Year
+                                        tbody
+                                            each schoolClass, index in classList
+                                                tr(id="class"+index data-classnumber=schoolClass.classNumber)
+                                                    td #{schoolClass.name}
+                                                    td #{schoolClass.kidTotal}
+                                                    td #{schoolClass.year}
+                                                        
+                                
+                                .col-sm-3 
+                                    .card.shadow.mb-12
+                                        //- .card-header
+                                            h6 Progress
+                                        .card-body(style="text-align:center")
+                                            .row
+                                                .col-sm-12
+                                                    div.opChoice(id="purchase"  style="padding-bottom:5px;text-align: center;")
+                                                        div.iconHeader
+                                                            div.columnBottom
+                                                                div.donut-size( id="statusChart" )
+                                                                    div.pie-wrapper(style="!important;")
+                                                                        span.label
+                                                                            span.num 
+                                                                                h6.currentStatus(style="padding-top:60px;font-size:9pt") #{school.type}
+                                                                                input(style="display:none" id="currentStatus" value= school.type)
+                                                                                input(style="display:none" id="statusCount" value=typeId)
+                                                                        div.pie
+                                                                            div.left-side.half-circle(style="border: solid #4B0082")
+                                                                            div.right-side.half-circle(style="border: solid #4B0082")
+                                                                        div.shadow
+
+                                            .row
+                                                .col-sm-12
+                                                    each statusTypeDetail, index in statusTypeDetails.statusTypeDetails
+                                                        h8(style=(statusTypeDetail.reached ? "color:green" : "")) #{(index + 1)}. #{statusTypeDetail.statusType} 
+                                                        i.fas.fa-check(style=(statusTypeDetail.reached ? "color:green" : "display:none"))
+                                                        br
+                                        
+
+        
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+script(src="javascript/school.js")
+script(src="javascript/organiserPieChart.js")
+script(src="assets2/js/adminDashboard.js")
+<script src="assets/js/vendor/d3.min.js"></script>
+<script src="assets/js/vendor/britecharts.min.js"></script>
+<!-- third party end -->
+
+<!-- demo:js -->
+<script src="assets/js/pages/demo.britechart.js"></script>

@@ -1,0 +1,192 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Order Details ")
+    link(href='assets2/css/style.css' rel='stylesheet')   
+
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div       
+// Begin page
+#overlay2(style="z-index:55")
+    .progress#progressBar
+        .container(style="padding-top:50px")
+            h2(style="color:#3688fc") Processing 
+            div.progress(style="height:25px")
+                div.progress-bar.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px;background-color:#f5ba4b") 0%   
+            h6(style="margin-top:5px" id="progressText")
+if(user.email == 'rmillermcpherson4@gmail.com')
+    #overlay(style="display:none; z-index:9999")
+        .section.section-full
+            .container(style="padding-top:50px")
+                .row.justify-content-center
+
+                    .col-md-10.col-lg-10
+                        .form-styled.bg-white#overlayBox.text-center(style="overflow-y: scroll;height:250px")
+                            h3(style="color:black; margin-top: 100px") Are you sure you want to update this basket item?
+                            .row 
+                                .col-sm-6 
+                                    button.btn.btn-success#proceed_edit(type="button") Proceed
+                                .col-sm-6 
+                                    button.btn.btn-danger#cancel_edit(type="button") Cancel
+
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Order Details
+                .row
+                    .row.justify-content-center                            
+                        .col-sm-9.account-body
+                            .card-body.mb-5(style="border: 1px solid #f5ba4b")
+                                div(style="padding-bottom:10px;border-bottom: 4px solid #f5ba4b")
+                                    .row 
+                                        .col-sm-6
+                                            h3(style="font-weight:700") Order Number: 
+                                                span #{order[0].orderNumber}
+                                            h6(style="color:black;font-weight:700;font-size:13px;") Date Ordered: 
+                                                span  #{order[0].purchasedDttm}
+                                            h6(style="color:black;font-weight:700;font-size:13px;") Order Total: 
+                                                span  £#{(parseFloat(order[0].total)).toFixed(2)}
+                                            if(order[0].shippedDttm != null)
+                                                h6(style="color:black;font-weight:700;font-size:13px;") Shipped Dttm: 
+                                                    span #{(order[0].shippedDttm)}
+                                            
+                                            input#generateOrderDetails.btn.btn-success.mb-2.me-2(type="submit" data-id=order[0].purchaseBasketId value="Generate Order Details")
+                                            a.btn.btn-danger.mb-2.me-2(href="/new_account_details?number=" + order[0].accountNumber ) Go To Parent Account
+
+                                        .col-sm-6(style="text-align:right")
+                                            if(order[0].shippingAddressFk != null)
+                                                if(order[0].shippedFl == true)
+                                                    img(src="https://www.psdstamps.com/wp-content/uploads/2019/11/shipped-stamp-png.png" width="50%")
+                                                else
+                                                    input#setShipped.btn.btn-success.mb-2.me-2.text-right(style="text-align:right" data-purchaseBasketId=order[0].purchaseBasketId type="submit" value="Set Order To Shipped")
+                                .row(style="margin-top:20px;")
+                                    .col-sm-12
+                                        .card-body(style="border: 1px solid #f5ba4b")
+                                            div(style="padding-bottom:10px;border-bottom: 4px solid #f5ba4b")
+                                                h5(style="font-weight:700") Order Details
+                                            .row(style="margin-top:20px;")
+                                                .col-sm-6
+                                                    div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                        h6(style="font-weight:700;") DELIVERY DETAILS
+                                                    if(order[0].shippingAddressFk != null)
+                                                        div(style="padding-top:10px;padding-left:5px;")
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].fullName}
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].addressLine1}
+                                                            if(order[0].addressLine2 != null)
+                                                                h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].addressLine2}
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].city}
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].postCode}
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].country}
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].phoneNumber}
+                                                    else
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") Collection From School
+
+                                                .col-sm-6
+                                                    div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                        h6(style="font-weight:700;") DELIVERY OPTION
+                                                    div(style="padding-top:10px;padding-left:5px;")
+                                                        if(order[0].shippingAddressFk != null)
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].deliveryName}
+                                                                span  £#{(parseFloat(order[0].deliveryPrice)).toFixed(2)}
+                                                        else
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") £0.00
+
+
+                                            .row(style="margin-top:20px;")
+                                                .col-sm-12
+                                                    div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                        h6(style="font-weight:700;") ITEMS
+                                                    div(style="padding-top:10px;padding-left:5px;")
+                                                        .shopping__cart__table
+                                                            table(style="width:100%")
+                                                                thead
+                                                                    tr(style="background-color: #f5ba4b")
+                                                                        th Product
+                                                                        th Quantity
+                                                                        th Total
+                                                                        th
+                                                                tbody
+                                                                    input#numberOfItems(value=order.length style="display:none")
+                                                                    each orderItem, index in order
+                                                                        tr( style="cursor:pointer")
+                                                                            td(class=index + " product__cart__item" data-productItemNumber=orderItem.productItemNumber)
+                                                                                .product__cart__item__pic(style="width:100px;height:100px;overflow:hidden")
+                                                                                    img(src=orderItem.picture alt='' style="width: -webkit-fill-available;")
+                                                                                .product__cart__item__text
+                                                                                    h6 #{orderItem.basketItemText1}
+                                                                                    h5 £#{orderItem.price}
+                                                                                    h6(style="margin-bottom:0") #{orderItem.productName} - #{orderItem.productVariantName}
+                                                                                    
+                                                                            td(class=index + " quantity__item" data-productItemNumber=orderItem.productItemNumber)
+                                                                                .quantity
+                                                                                    h6 #{orderItem.quantity}
+                                                                            td(class=index + " cart__price" data-productItemNumber=orderItem.productItemNumber) £#{(parseFloat(orderItem.cost)).toFixed(2)}
+                                                                            if(user.email == 'rmillermcpherson4@gmail.com')
+                                                                                td 
+                                                                                    button.btn.btn-success(type="button" id="edit_item" + index  data-productItemNumber=orderItem.productItemNumber data-basketItemId=orderItem.basketItemId ) Edit Item
+                                            .row(style="margin-top:20px;")
+                                                .col-sm-6
+                                                    div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                        h6(style="font-weight:700;") PAYMENT DETAILS
+                                                    div(style="padding-top:10px;padding-left:5px;")
+                                                        //- if(order[0].paymentType == 'Stripe')
+                                                        ul(style="list-style:none")
+                                                            li
+                                                                label
+                                                                    img(src="https://www.boohoo.com/on/demandware.static/-/Sites/default/dw1f80c965/paymenticons/card-icon.svg" style="width:50px;margin-left:5px")
+                                                                    h6(style="float:right; margin-left: 10px") Card
+                                                        //- else
+                                                            ul(style="list-style:none")
+                                                                li
+                                                                    label
+                                                                        img(src="https://www.boohoo.com/on/demandware.static/-/Sites/default/dw0a8b8784/paymenticons/paypal-icon.svg" style="width:50px;margin-left:5px")
+                                                                        h6(style="float:right; margin-left: 10px") Paypal
+                                                
+                                                .col-sm-6
+                                                    div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                        h6(style="font-weight:700;") ORDER TOTAL
+                                                    div(style="padding-top:10px;padding-left:5px;")
+                                                        ul.checkout__total__all(style="border:none")
+                                                            li
+                                                                p Subtotal 
+                                                                    span £#{(parseFloat(order[0].subTotal)).toFixed(2)}
+                                                            li
+                                                                if(order[0].shippingAddressFk != null)
+                                                                    p(style="color:black;font-weight:700;font-size:13px;") #{order[0].deliveryName} 
+                                                                        span £#{(parseFloat(order[0].deliveryPrice)).toFixed(2)}
+                                                                else 
+                                                                    h6(style="color:black;font-size:13px;") Collection From School
+                                                                        span £0.00
+                                                            li(id="total")
+                                                                h6(style="font-weight:700;")
+                                                                    | Total 
+                                                                    span £#{(parseFloat(order[0].total)).toFixed(2)}
+    +footer()                               
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>     
+script(src="assets2/js/adminDashboard.js")   
+script(src="assets2/js/order.js")    

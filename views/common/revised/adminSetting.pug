@@ -1,0 +1,22 @@
+mixin setting()
+    .end-bar
+        .rightbar-title
+            a.end-bar-toggle.float-end(href='javascript:void(0);')
+                i.dripicons-cross.noti-icon
+            h5.m-0 Settings
+        .rightbar-content.h-100(data-simplebar='')
+            .p-3
+                .alert.alert-warning(role='alert')
+                    strong Customize 
+                    |  the overall color scheme, layout width, etc.
+                // Settings
+                h5.mt-3 Color Scheme
+                hr.mt-1
+                .form-check.form-switch.mb-1
+                    input#light-mode-check.form-check-input(type='checkbox' name='color-scheme-mode' value='light' )
+                    label.form-check-label(for='light-mode-check') Light Mode
+                .form-check.form-switch.mb-1
+                    input#dark-mode-check.form-check-input(type='checkbox' name='color-scheme-mode' value='dark' checked='')
+                    label.form-check-label(for='dark-mode-check') Dark Mode
+            
+    .rightbar-overlay

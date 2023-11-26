@@ -1,0 +1,51 @@
+doctype html
+html(land="en")
+    include ./common/new/header.pug
+    +head("Shop")
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+    body(style="background-color:white !important;padding-top:3rem")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        section.category-section.spad(style="padding-top:50px")
+            .container.spad
+                .row
+        
+                    .col-lg-3.order-2.order-lg-1
+                        .filter-widget
+                            h2.fw-title Categories
+                            ul.category-menu
+                                li
+                                    a(href="/shop?category=New Card Designs") New Card Designs
+                                li
+                                    a(href="#") Calendars
+                                    ul.sub-menu
+                                        li
+                                            a(href="/shop?category=Calendars&orientation=Portrait") Portrait 
+                                                span (#{portraitCount})
+                                        li
+                                            a(href="/shop?category=Calendars&orientation=Landscape") Landscape 
+                                                span (#{landscapeCount})
+                                //- li
+                                    a(href="#") Cups
+                    .col-lg-9.order-1.order-lg-2.mb-5.mb-lg-0
+                        h3(id="category") #{category}
+                        .row(style="margin-bottom:20px;margin-top:10px")
+                            
+                            each result, index in categoryResults
+                                .col-lg-4.col-sm-6
+                                    .product-item(id=index style="cursor:pointer" data-productId=result.id)
+                                        .pi-pic
+                                            img.shadow.mb-4(src=result.imagePath)
+                                            
+                                        .pi-text(style="padding-top:0")
+                                            h6 £#{result.price}
+                                            p #{result.name}
+                        input(style="display:none" value=categoryResults.length id="productNumber")
+        <script src="javascript/shop.js"></script>                            
+        <script src="javascript/jquery.slicknav.min.js"></script>
+        <script src="javascript/jquery.nicescroll.min.js"></script>
+        <script src="javascript/main.js"></script> 
+        include ./common/new/footer.pug
+        +footer()     

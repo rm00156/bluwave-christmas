@@ -1,0 +1,99 @@
+doctype html
+html(land="en")
+    include ./common/header.pug
+    +head( (account.name == null ? '' : account.name) + " Account")
+    link(rel="stylesheet" href="css/organiser2.css")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css")
+    link(rel="stylesheet" href="css/pieProgress.css")
+    
+    link(rel="stylesheet" href="css/kcards5a.css" type="text/css" media="screen" )
+    meta(name="robots" content="index, follow" )
+    meta(name="revisit-after" content="7 days")
+    meta(name="version" content="1.0")
+    meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")     
+                    script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+                    script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js")
+                    
+            div.gapDiv gapDiv
+            include ./common/navbar.pug
+            +navbar(user)
+            input(style="display:none" value=kids.length id="kidTotal")
+            input(style="display:none" value=account.id id="accountId")
+        
+            div(id="overlay2" style="display:none" )
+                div(id="warningMessage2")
+                    div(style="padding:10px; text-align:center")
+                        h3(id="areYouSureUnlink")
+                        button.stagesButton(id="unLinkYes" data-accountId=account.id style="width:25%;height:10%;font-size:15pt") Yes
+                        button.stagesButton(id="unLinkNo" style="width:25%;height:10%;font-size:15pt") No
+            
+            div(id="overlay3" style="display:none")
+                div(id="unlinkMessage")
+                    div(style="padding:10px; text-align:center")
+                        h5 Select the kid(s) you wish to unlink from this account
+                        table
+                            each kid, index in kids
+                                tr( style="border-bottom: solid #075F5E")
+                                    td(style="width:10%;")
+                                        input(id='unlink'+index data-kidId=kid.id data-kidName=kid.name style="width:20px;height:20px" , type='checkBox' checked="true")
+
+                                    td(style="width:90%;")
+                                        p(style="color:white;font-size:12pt") #{kid.name}
+                        button.stagesButton(id="unLinkOk" data-accountId=account.id style="width:25%;height:10%;font-size:15pt") Ok
+                        button.stagesButton(id="unLinkCancel" style="width:25%;height:10%;font-size:15pt") Cancel
+            
+            div.mainarea
+                div.contentarea 
+                    div.schoolOrdersContainer
+                        
+                        .schoolOrders
+                            .organiserClassColumnContainer
+                            div.searchStrip
+                                div.pageTitle(style="width:100%")
+                                    if(account.name)
+                                        h3 #{account.name}
+                                    else
+                                        h3 No name available
+                                    h4 Account Type: #{accountType}
+                                    h4 Telephone number: #{account.telephoneNumber}
+                                    h4 Email: #{account.email}
+                                    h4 Sign Up Date: #{account.createdAt}
+                                
+                                
+
+                        .organiserPieChartColumn
+                            if(account.accountTypeFk != 1)
+                                
+                                div(id="headerStrip" style="text-align:center")
+                                    div.headerTitle.padOut(style="width:100%;font-size:20pt !important") Linked Kids
+                                div(style="text-align:center;margin-top:10px;background-color:#bcbdc0")
+                                    each kid in kids
+                                        h6
+                                            a(style="color:white" href="/kid?id=" + kid.id) #{kid.name}
+                                div(id="headerStrip" style="text-align:center")
+                                    div.headerTitle.padOut(style="width:100%;font-size:20pt !important") Orders
+                                div(style="text-align:center;margin-top:10px;background-color:#bcbdc0")
+                                    each order in orders
+                                        h6
+                                            a(style="color:white" href="/order?id="+ order.id) Order No. blu - #{order.id}
+                                
+                                div(style="text-align:center;margin-top:10px")
+                                    button.stagesButton(id="linkKids" data-accountId=account.id style="width:80%") Link Kid
+                                    if(kids.length > 0)
+                                        button.stagesButton(id="unlinkKid" data-accountId=account.id style="width:80%") Unlink Kid
+
+                            else
+                                div(id="headerStrip" style="text-align:center")
+                                    div.headerTitle.padOut(style="width:100%;font-size:20pt !important") TO-DO
+                    
+            script(src="javascript/account.js")
+            script(src="javascript/organiserPieChart.js")
+    include ./common/footer.pug
+    +footer()  

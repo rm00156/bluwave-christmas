@@ -1,0 +1,113 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:700);
+
+
+#percent{
+    display: block;
+    width: 160px;
+    border: 1px solid blue;
+    border-radius: 5px;
+    margin: 50px auto 20px;
+    padding: 10px;
+    color: #1ABC9C;
+    font-family: 'Lato, Tahoma, Geneva, sans-serif';
+    font-size: 35px;
+    text-align: center;
+}
+#donut{
+    display: block;
+    margin: 0px auto;
+    color: #1ABC9C;
+    font-size: 20px;
+    text-align: center;
+}
+p{
+    max-width: 600px;
+    margin: 12px auto;
+    font-weight: normal;
+    font-family: sans-serif;
+}
+code{
+    background: yellow;
+    border: 1px solid rgb(221, 221, 221);
+    border-radius: 3px;
+    padding: 0px 4px;
+}
+
+
+.donut-size
+{
+    font-size: 12em
+}
+
+.pie-wrapper
+{
+    position: relative;
+    width: 1em;
+    height: 1em;
+    margin: 0px auto;
+
+}
+
+.pie-wrapper .right-side{
+        transform: rotate(0deg)
+}
+.pie-wrapper .label{
+        position: absolute;
+        top: 0.52em;
+        right: 0.4em;
+        bottom: 0.4em;
+        left: 0.4em;
+        display: block;
+        background: none;
+        border-radius: 50%;
+        color: black;
+        font-size: 0.25em;
+        line-height: 2.6em;
+        text-align: center;
+        cursor: default;
+        z-index: 0;
+}
+.pie-wrapper .smaller
+{
+        padding-bottom: 20px;
+        color: black;
+        font-size: .45em;
+        vertical-align: super;
+    }
+
+.pie-wrapper .pie{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    clip: rect(0, 1em, 1em, 0.5em)
+}
+
+.pie-wrapper .half-circle{
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        border: 0.1em solid  #1ABC9C;;
+        border-radius: 50%;
+        clip: rect(0em, 0.5em, 1em, 0em);
+}
+
+.pie-wrapper .shadow{
+        width: 100%;
+        height: 100%;
+        border: 0.1em solid lightgrey;
+        border-radius: 50%;
+}
+
+.pie-wrapper .pie
+{
+position: absolute;
+top: 0px;
+left: 0px;
+width: 100%;
+height: 100%;
+clip: rect(0, 1em, 1em, 0.5em)
+}

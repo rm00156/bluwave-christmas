@@ -1,0 +1,369 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Product ")
+    link(href='assets2/css/style.css' rel='stylesheet')    
+    link(href='css/croppie.css' rel='stylesheet')  
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')    
+
+body
+    +navbar()
+    #overlay2
+        .progress#progressBar
+            .container(style="padding-top:50px")
+                h2 Processing 
+                div.progress(style="height:25px")
+                    div.progress-bar.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px;background-color:#f5ba4b") 0%   
+                h6(style="margin-top:5px" id="progressText")
+    #overlay
+        .section.section-full
+            .container
+                .row.justify-content-center
+
+                    .col-md-10.col-lg-10
+                        .form-styled.bg-white#overlayBox(style="overflow-y: scroll;height:650px")
+                            div#gif(style="display: none;justify-content: center;")
+                                img(src="img/loading2.gif" style="margin:auto")
+                            
+                            
+                            div#cropSection
+                                div(style="height:400px;width:100%")
+                                    #uploadedImageForCrop(style="height:60%;width:100%")
+                                div
+                                    p(style="text-align:center") Crop image to your liking, and when everything is ok click 'Confirm Picture'
+                                    .row
+                                        .col-sm-4
+                                            button.btn.btn-outline-primary.btn-block.mt-3(id="confirmCrop") Confirm Crop
+                                        .col-sm-4
+                                            button.btn.btn-outline-primary.btn-block.mt-3(id ="rotate"  data-deg="-90" style="margin-right:5px") Rotate
+                                        .col-sm-4
+                                            button.btn.btn-outline-primary.btn-block.mt-3(id ="cancelCrop" ) Cancel
+                            
+                            .row 
+                                .col-sm-6
+                                    div.shadow(style="width:-webkit-fill-available;width: -moz-available; ")
+                                        canvas#canvas(style="width:-webkit-fill-available; width: -moz-available; display:none")
+                                .col-sm-6
+                                    div#camanSection(style="display:none")
+                                        .container
+                                            .row
+                                                .col-md-12
+                                                    p.text-center.text-danger Please adjust the contrast filter to remove any background shadow.
+                                                    p.text-center.text-danger Please feel free to use the adjustments filters above to suit your visual desire.
+                                                    h5.text-center.my-3 Filters
+                                                    .row.my-4.text-center
+                                                        .col-md-12
+                                                            .btn-group.btn-group-sm
+                                                                button.filter-btn.brightness-remove.btn.btn-outline-primary.btn-block.mt-3 -
+                                                                h5(style="margin-top:20px !important;padding-left:15px; padding-right:15px") Brightness
+                                                                button.filter-btn.brightness-add.btn.btn-outline-primary.btn-block.mt-3 +
+                                                        .col-md-12
+                                                            .btn-group.btn-group-sm
+                                                                button.btn.btn-outline-primary.btn-block.mt-3.filter-btn.contrast-remove -
+                                                                h5(style="margin-top:20px !important;padding-left:15px; padding-right:15px") Contrast
+                                                                button.btn.btn-outline-primary.btn-block.mt-3.filter-btn.contrast-add +
+                                                        .col-md-12
+                                                            .btn-group.btn-group-sm
+                                                                button.filter-btn.saturation-remove.btn.btn-outline-primary.btn-block.mt-3 -
+                                                                h5(style="margin-top:20px !important;padding-left:15px; padding-right:15px") Saturation
+                                                                button.filter-btn.saturation-add.btn.btn-outline-primary.btn-block.mt-3 +
+                                                        .col-md-12
+                                                            .btn-group.btn-group-sm
+                                                                button.filter-btn.vibrance-remove.btn.btn-outline-primary.btn-block.mt-3 -
+                                                                h5(style="margin-top:20px !important;padding-left:15px; padding-right:15px") Vibrance
+                                                                button.filter-btn.vibrance-add.btn.btn-outline-primary.btn-block.mt-3 +
+                                                        
+                                                        .col-sm-4
+                                                            if(productItem != null || productItem != undefined)
+                                                                button.btn.btn-outline-primary.btn-block.mt-3(id="confirmPicture" data-productItemNumber=productItem.productItemNumber data-productItemId=productItem.id data-pictureNumber=(product.productType == 'Calendars') ? 1 : productVariant.orderNo data-productId=product.productId data-productNumber=product.productNumber data-productVariantId=productItem.productVariantFk) Upload
+                                                            
+                                                        .col-sm-4
+                                                            button.btn.btn-outline-primary.btn-block.mt-3(id="reset") Reset
+
+                                                        .col-sm-4
+                                                            button.btn.btn-outline-primary.btn-block.mt-3(id="cancelCaman") Cancel
+                                                        
+    
+
+    section.section.pb-0.mt-3
+        .container
+            .row
+
+                .col-12.col-md-9
+                    //- // Image
+                    //- img.img-fluid.mb-5(src='assets2/img/85.jpg' alt='...')
+                    .row.justify-content-center
+                        .col-sm-12.text-center
+                            a.btn.btn-outline-primary.btn-block.mb-3(href="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/Template/DownloadTemplate.pdf") Download a template guide to draw on
+                            input#cardPath(style="display:none" value=productItem.pdfPath)
+                            div#container(style=((productVariant.name == 'Standard' && productVariant.productFk == 1) || productVariant.name == 'Photo Pack' || (productVariant.name != 'Standard' && productVariant.name != 'Photo Pack')) ? "cursor:pointer" : "")
+                                canvas.mainCanvas.w100.shadow.mb-4(style=(kid == null) ? "max-width:80%;height:400px; margin: auto;": "width:70%;display:inline;" id="mainCanvas" height="840" width="1189")
+                            if(productVariant.name == 'Standard' && productVariant.productFk == 1)
+                                h2(style="color:#f51167") UPLOAD THE ARTWORK FROM YOUR KIDS ORDER FORM
+                    .row 
+                        // Nav
+                    nav.nav.nav-tabs.mb-3(style="margin-top:20px")
+                        if(kid != null)
+                            a.nav-item.nav-link.active(href='#itemEdit' data-toggle='tab' style="color:black !important")
+                                | Edit Kid Details
+                        a.nav-item.nav-link(href='#itemDescription' data-toggle='tab' style="color:black !important")
+                            | About
+                        a.nav-item.nav-link(href='#itemShipping' data-toggle='tab' style="color:black !important")
+                            | Shipping
+                       
+                    input#productItems(style="display:none" value=existingProductItems)
+                    .tab-content
+                        if(kid != null)
+                            #itemEdit.tab-pane.fade.show.active
+                                
+                                .row.form-group
+                                    .col-md-12
+                                        
+                                        .row 
+                                            .col-md-6
+                                                label(for="name") Select Kid
+                                                select.form-control.mb-2#selectKid
+                                                    each kid in kidsList 
+                                                        option(value=kid.id data-productNumber=product.productNumber data-productItemNumber=kid.productItemNumber data-productVariantId=kid.productVariantId) #{kid.name}
+                                            .col-md-6 
+                                                p#error.small.text-danger
+                                                button.btn.btn-outline-primary.btn-block.mb-3(id="updateProductItem" type="submit" data-productItemId=productItem.id data-pictureNumber=(product.productType == 'Calendars') ? 1 : productVariant.orderNo data-productId=product.productId data-productNumber=product.productNumber data-productVariantId=productItem.productVariantFk) Update Card
+                                        .row
+                                            .col-sm-12
+                                                h3 Edit Kid's Details
+                                    
+                                        .row
+                                            .col-sm-6
+                                                label(for="name") Name
+                                                br
+                                                
+                                                .quantity
+                                                    .pro-qty(style="width:100% !important")
+                                                        input.form-control(id='updateName' data-value=productItem.text1  name='name', type='text' style="width:100% !important;text-align:left" value=productItem.text1) 
+                                                        if(errors && errors.text1)
+                                                            p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.text1}
+                                                
+                                            .col-sm-3
+                                                label(for="age" ) Years Old
+                                                br
+                                                .quantity
+                                                    .pro-qty(style="width:100% !important")
+                                                        input.form-control(id='updateAge'  name='age' data-value=productItem.text2   value=productItem.text2  style="width:100% !important;text-align:left" , type='number' min="0")
+                                                p#errorAge.small.text-danger
+                                            .col-sm-3
+                                                label(for="month" ) Months Old
+                                                
+                                                .quantity
+                                                    .pro-qty(style="width:100% !important")
+                                                        input.form-control(id='updateMonth'  name='month' data-value=productItem.text3 style="width:100% !important;text-align:left"   value=productItem.text3  , type='number' min="0", max="11")
+                                                
+                                        .row(style="margin-top:15px;text-align:center")
+                                            if(kid.classFk != null)
+                                                .col-sm-4
+                                                    label(for="displaySchool") Display School
+                                                    br
+                                                    if(productItem.displayItem1)
+                                                        input(id='displaySchool' name='displaySchool' type='checkBox' checked)
+                                                    else 
+                                                        input(id='displaySchool' name='displaySchool' type='checkBox') 
+                                                
+                                                .col-sm-4
+                                                    label(for="diplayClass") Display Class
+                                                    br 
+                                                    if(productItem.displayItem2)
+                                                        input(id='displayClass' name='displayClass', type='checkBox' checked)
+                                                    else
+                                                        input(id='displayClass' name='displayClass', type='checkBox' )
+                                                .col-sm-4
+                                                    label(for="displayAge") Display Age
+                                                    br
+                                                    if(productItem.displayItem3)
+                                                        input(id='displayAge' name='displayAge', type='checkBox' checked)
+                                                    else
+                                                        input(id='displayAge' name='displayAge', type='checkBox' )
+                                            else
+                                                .col-lg-12
+                                                    label(for="displayAge") Display Age
+                                                    br
+                                                    if(productItem.displayItem3)
+                                                        input(id='displayAge' name='displayAge', type='checkBox' checked)
+                                                    else
+                                                        input(id='displayAge' name='displayAge', type='checkBox' ) 
+
+                                        //- .row(style="margin-top:5px;text-align:center")
+                                            .col-lg-12
+                                                
+                                                
+                        if(kid != null)
+                            #itemDescription.tab-pane.fade
+                                p.text-sm
+                                    | #{product.description}
+                        else 
+                            #itemDescription.tab-pane.fade.show.active
+                                p.text-sm
+                                    | #{product.description}
+                            
+                        #itemShipping.tab-pane.fade
+                            p.text-sm If 
+                                span part&nbsp;of a School Project
+                                |, cards will be 
+                                span delivered to your School if purchase was made before your deadline. 
+                                | Please allow 
+                                span 5 working days 
+                                | after the schools deadline order date, unless the school have extended/delayed date, in which case allow 
+                                span 8 working days 
+                                | from the original deadline date.
+                            
+                            p.text-sm 
+                                span If not part 
+                                | of the School project, 
+                                span please allow 2-3 working days for delivery to your postal address.
+                            
+                            p.text-sm 
+                                span Late orders
+                            p.text-sm Please allow 
+                                span 2-3 working days 
+                                | from placing an order for delivery to your postal address.
+                    
+                .col-12.col-md-3
+                    .row(style="margin-top:10px")
+                       
+                        .col-md-12
+                            if(productItem.classFk == null)
+                                .row 
+                                    .col-md-12
+                                        h6 Enter School and Class Code if Taking part in Fundraising Scheme
+                                .row 
+                                    .col-sm-6
+                                        label(style="font-size:9pt" for="labelSchoolCode") School Code
+                                        .quantity
+                                            .pro-qty(style="width:100% !important")
+                                                input.form-control(id='schoolCode' name='schoolCode', type='text' style="width:100% !important;text-align:left" ) 
+                                                p.small.text-danger#errorSchoolCode(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") 
+                                    .col-sm-6
+                                        label(style="font-size:9pt"  for="labelSchoolCode") Class Code
+                                        .quantity
+                                            .pro-qty(style="width:100% !important")
+                                                input.form-control(id='classCode' name='classCode', type='text' style="width:100% !important;text-align:left" ) 
+                                                p.small.text-danger#errorClassCode(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") 
+                                    p.small.text-danger#errorClassSchool
+                                .row.mb-3 
+                                    .col-sm-12 
+                                        button#linkItem.btn.btn-outline-primary.btn-block.mt-3(data-productItemId=productItem.id) Submit                    
+                            if(productVariant.name == 'Standard' && productVariant.productFk == 1)
+                                .row
+                                    .col-sm-12
+                                        h5 Add image which will appear on both the front and the back of card.
+                                .row 
+                                    .col-sm-12
+                                        h5.mb-0 To Get Started
+                                        p <b>1)</b> Click on <span style="color:#f51167">STANDARD PACK.</span> 
+                                        p Add Image – This will appear on the front and back of the <span style="color:#f51167">STANDARD PACK THIS MUST BE CREATED FIRST.</span>
+                                        p <b>2)</b> To upgrade to <span style="color:#f51167">PHOTO PACK</span> complete the standard pack setup first then click on photo pack. 
+                                        p Upload the image/Photo you wish to appear on the back.
+                                        p Add to basket.
+                            else if(productVariant.name == 'Photo Pack' && productVariant.productFk == 1)
+                                .row
+                                    .col-sm-12
+                                        h5.mb-0 Have you created your standard pack 1st?
+                                        h5 <span style="color:#f51167">This has to be done 1st</span>
+                                        h5 Add image for the <span style="color:#f51167">Back of card only.</span>
+                                .row 
+                                    .col-sm-12
+                                        
+                                        p.mb-0(style="font-size:9pt") Browse for the image you wish to place only on the back of the card. Click on the standard pack to add image on the front of the card 1st, if you have not already done so. Then return to Photo Pack.
+                            
+                            else if(productVariant.name == 'Photo Pack' && productVariant.productFk != 1)
+                                .row
+                                    .col-sm-12
+                                        h5 Add image for the Back of card only
+                                .row 
+                                    .col-sm-12
+                                        p.mb-0(style="font-size:9pt") Browse for the image you wish to place only on the back of the card. 
+                            
+                            else if(productVariant.name != 'Standard' && productVariant.name != 'Photo Pack')
+                                .row
+                                    .col-sm-12
+                                        h5 Add Picture
+                                .row 
+                                    .col-sm-12
+                                        p.mb-0(style="font-size:9pt") Browse for the image you wish to place on your calendar. If your child is taking part in our fundraiser, please upload your childs artwork from your order form template section. You can do this by either scanning the artwork or taking a picture from your smartphone.
+                            if((productVariant.name == 'Standard' && productVariant.productFk == 1) || productVariant.name == 'Photo Pack' || (productVariant.name != 'Standard' && productVariant.name != 'Photo Pack'))
+                                .row 
+                                    .col-sm-12
+                                        
+                                        label.btn.btn-outline-primary.btn-block.mt-3(for="picture1") Browse...
+                                        if(kid != null)
+                                            input(id='picture1' type='file' style="display:none;width:-webkit-fill-available" accept="image/x-png,image/jpeg" data-kidCode=kid.code)
+                                        else 
+                                            input(id='picture1' type='file' style="display:none;width:-webkit-fill-available" accept="image/x-png,image/jpeg" )
+
+                                        p.small.text-danger(id="pictureError")
+                    // Preheading
+                    h5.font-weight-medium.text-xs.text-uppercase(style="color:#f5ba4b !important")
+                        | #{product.productType}
+                    // Heading
+                    h5.mb-2
+                        | #{product.name}
+                    // Text
+                    h3.mb-2 £ #{(parseFloat(productItem.price)).toFixed(2)}
+                    h5 Quantity 
+                    input.form-control#quantity.mb-3(type='number' style="width:100px" min=1 value=1)
+                    // Form
+                    .mb-5.mb-md-0
+                        .form-row
+                            .col-12
+                                h5
+                                    | Select #{productItem.productVariantType}:
+                        .form-row
+                            input#selectCount(style="display:none" value=productVariants.length)
+                            each productVariant, index in productVariants
+                                .col-6
+                                    // Size
+                                    .extended-radio
+                                        if(productVariant.productVariantId == productItem.productVariantFk)
+                                            input.extended-radio-input(id="select" + index type='radio' name='sizeInput' checked)
+                                        else 
+                                            input.extended-radio-input(id="select" + index type='radio' name='sizeInput')
+                                        if(kid != null)
+                                            label.extended-radio-label.text-xs(id="selectLabel" + index for='sizeInputOne'  data-url=('/productItem?productNumber=' + product.productNumber + '&productVariantId=' + productVariant.productVariantId + '&productItemNumber=' + productVariant.productItemNumber))
+                                                | #{productVariant.productVariantName}
+                                        else 
+                                            label.extended-radio-label.text-xs(id="selectLabel" + index for='sizeInputOne'  data-url=('/productItem?productNumber=' + product.productNumber + '&productVariantId=' + productVariant.productVariantId + '&productItemNumber=' + productVariant.productItemNumber))
+                                                | #{productVariant.productVariantName}  
+                        
+                        if(user.accountTypeFk != 1)
+                            .form-row
+                                .col-12
+                                    // Button
+                                    button.btn.btn-outline-primary.btn-block.mt-3#addToBasket(data-productItemId=productItem.id)
+                                        | Add to basket
+                                    p.small.text-danger(id="addToBasketError") 
+                        
+                    
+                                    
+                                                 
+
+                
+
+
+
+    +footer()   
+    <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+    script(src="assets2/js/theme.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/exif-js")
+    
+    script(src="javascript/croppie.js")
+
+    script(src='assets2/js/caman.full.min.js')
+    script(src="javascript/new/compressor.js")
+    script(src="javascript/new/productItem.js")
+    //- script(src="javascript/new/cropper.js")

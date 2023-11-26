@@ -1,0 +1,180 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Class " + schoolClass.name)
+    link(rel="stylesheet" href="css/pieProgress.css")
+
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/britecharts.min.css" rel="stylesheet" type="text/css" />
+    link(href='assets2/css/style.css' rel='stylesheet')    
+
+
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div 
+#overlay2(style="z-index:55")
+    .progress#progressBar
+        .container(style="padding-top:50px")
+            h2(style="color:#3688fc") Processing 
+            div.progress(style="height:25px")
+                div.progress-bar.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px;background-color:#f5ba4b") 0%   
+            h6(style="margin-top:5px" id="progressText")
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Class #{schoolClass.name}
+                            h4 Code #{schoolClass.classNumber}
+                .row
+                    .card
+                        .card-body
+                            .row
+                                .col-lg-4(style="text-align:center")
+                                    .row
+                                        h3.mt-0
+                                            | #{schoolClass.name}
+                                            a.text-muted(href='javascript: void(0);')
+                                            i.mdi.mdi-square-edit-outline.ms-2
+                                        //- p.mb-1 #{productDetail.productType}
+                                        
+                                        .card.shadow.mb-12(style="cursor:pointer")
+                                            .row 
+                                            
+                                                h4.header-title.mb-4.mt-4 Order Details
+                                                div(dir='ltr')
+                                                    .bar-container-horizontal(style='width: 100%;height: 150px;' data-colors='#3688fc,#42d29d,#6c757d,#fa6767,#f9bc0d,#44badc,#e3eaef')
+ 
+                                            .row(style="margin-top:20px")
+                                                input#totalKids(style="display:none" value=orderDetails.totalKids)
+                                                input#orderCount(style="display:none" value=orderDetails.orderCount)
+                                            //- .card-header
+                                            //-     h6 Order Details
+                                            //- .card-body(style="text-align:center")
+                                            //-     div.opChoice(id="purchase"  style="padding-bottom:5px;text-align: center;")
+                                            //-         div.iconHeader
+                                            //-             div.columnBottom
+                                            //-                 div.donut-size( id="specificChart" )
+                                            //-                     div.pie-wrapper(style="!important")
+                                            //-                         span.label
+                                            //-                             span.num 0
+                                            //-                             span.smaller %
+                                            //-                         div.pie
+                                            //-                             div.left-side.half-circle
+                                            //-                             div.right-side.half-circle
+                                            //-                         div.shadow
+                                            //-     .row(style="margin-top:30px")
+                                            //-         .col-sm-12
+                                            //-             h5 #{orderDetails.totalKids} Total Pupils
+                                            //-     .row
+                                            //-         .col-sm-12
+                                            //-             h5 #{orderDetails.orderedKidTotal} Pupils Ordered
+                                            //-     input(id="ordered" type="number" value=orderDetails.orderedPercentage style="display:none")
+
+                                                //- h6 #{orderedKidTotal} Pupils Ordered
+                                                //- if(deadLineDttm != '')
+                                                    - if(daysLeftSign == 'negative')
+                                                        h6 #{(daysLeft * -1)} Days since purchase deadline passed
+                                                    - else if( daysLeftSign == 'zero')
+                                                        h6 Purchase deadline is Today 
+                                                    - else
+                                                        h6 #{daysLeft} Days till purchase deadline
+                                                //- input(id="ordered" type="number" value=orderedPercentage style="display:none")
+                                    .row
+                                        p#error.text-danger
+                                        button#createOrderInstructions.btn.btn-success.mb-2.me-2(type='button' data-classId=schoolClass.id)
+                                            |  Create Order Instructions For Class   
+                                        button#generateOrderForms.btn.btn-warning.mb-2.me-2(type="button" data-classId=schoolClass.id)
+                                            |  Generate Order Job  
+                                        button#generatePurchasedOrders.btn.btn-danger.mb-2.me-2(type="button" data-classId=schoolClass.id)
+                                            | Generate Purchased Orders
+                                .col-lg-8
+                                    ul.nav.nav-pills.bg-nav-pills.nav-justified.mb-3
+                                        li.nav-item
+                                            a.nav-link.rounded-0.active(href='#kidItems' data-bs-toggle='tab' aria-expanded='false')
+                                                | Kids
+                                        li.nav-item
+                                            a.nav-link.rounded-0(href='#orders' data-bs-toggle='tab' aria-expanded='true')
+                                                | Orders
+
+                                    .tab-content
+                                        #kidItems.tab-pane.show.active
+                                            .row.mb-2
+                                                .text-xl-end.mt-xl-0.mt-2
+                                                    button#addKid.btn.btn-success.mb-2.me-2(type='button')
+                                                        |  Add Kid
+                                            input(style="display:none" id="kidSize" value=kids.length)       
+                                            table#kidsTable.table.table-striped.dt-responsive.nowrap.w-100(style="cursor:pointer")
+                                                thead
+                                                    tr
+                                                    th Kid Name
+                                                    th Age
+                                                tbody
+                                                    each kid, index in kids
+                                                        tr(id="kid"+index data-code=kid.code)
+                                                            td #{kid.name}
+                                                            if(kid.month == 0)
+                                                                td #{kid.age} years
+                                                            else 
+                                                                td #{kid.age} years #{kid.month} months
+                                                        
+                                        #orders.tab-pane
+                                            .row.mb-2
+                                                if(orders.length > 0)
+                                                    table.table.shadow.mb-12.table-striped.table-sm.dataTable.no-footer( id="searchResultTable"  role="grid" aria-describedby="classes_info")
+                                                        tbody
+                                                            each order in orders
+                                                                tr
+                                                                    td(style="text-align:left;padding:10px")
+                                                                        .row
+                                                                            .col-sm-6
+                                                                                h6(style="color:black;font-weight:700;font-size:13px;") Order Number:
+                                                                                    span  #{order.orderNumber}
+                                                                                h6(style="color:black;font-weight:700;font-size:13px;") Date Ordered: 
+                                                                                    span  #{order.purchaseDttm}
+                                                                                h6(style="color:black;font-weight:700;font-size:13px;") Order Total: 
+                                                                                    span  £#{(parseFloat(order.total)).toFixed(2)}
+                                                                            .col-sm-6(style="text-align:center")
+                                                                                a.btn.btn-outline-primary.mb-.orderHistory(href="/new_order_details?orderNumber=" + order.orderNumber style="width:75%;font-size:12px;text-align:center;" ) View Order  
+                                            
+                                                else 
+                                                    p.text-center We have no order records for this account.  
+                                    
+                                        
+
+        
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+
+script(src="javascript/class.js")
+script(src="javascript/organiserPieChart.js")
+script(src="assets2/js/adminDashboard.js")
+<script src="assets/js/vendor/d3.min.js"></script>
+<script src="assets/js/vendor/britecharts.min.js"></script>
+<!-- third party end -->
+
+<!-- demo:js -->
+<script src="assets/js/pages/demo.britechart.js"></script>

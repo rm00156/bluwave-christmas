@@ -1,0 +1,204 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Account - ")
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    //- link(href='assets2/css/style.css' rel='stylesheet')  
+    <!-- third party css end -->
+
+
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div     
+// Begin page
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                .row(style="margin-top:10px")
+                    .col-xl-4.col-lg-5
+                        .card.text-center
+                            .card-body
+                                img.rounded-circle.avatar-lg.img-thumbnail.mb-2(src='img/user.png' alt='profile-image')
+                                
+                                
+                                p.text-muted.mb-2.font-13
+                                    strong Name : 
+                                    span.ms-2
+                                        | #{account.name}
+                                p.text-muted.mb-2.font-13
+                                    strong Account Type : 
+                                    span.ms-2
+                                        | #{accountType.accountType}
+                                p.text-muted.mb-2.font-13
+                                    strong Mobile :
+                                    span.ms-2
+                                        | #{account.telephoneNumber}
+                                p.text-muted.mb-2.font-13
+                                    strong Email :
+                                    span.ms-2 #{account.email}
+                                
+                                p.text-muted.mb-2.font-13
+                                    strong Signed Up :
+                                    span.ms-2 #{account.createdAt}
+                                if(school != null)
+                                    a.mb-2.font-13(href="/new_school_details?number=" + school.schoolNumber) 
+                                        strong School :
+                                        span.ms-2 #{school.name}
+
+
+                    .col-xl-8.col-lg-7
+                        .card
+                            .card-body
+                                if(account.accountTypeFk != 1)
+                                    ul.nav.nav-pills.bg-nav-pills.nav-justified.mb-3
+                                        li.nav-item
+                                            a.nav-link.rounded-0.active(href='#kidsTab' data-bs-toggle='tab' aria-expanded='true')
+                                                | Kids
+                                        li.nav-item
+                                            a.nav-link.rounded-0(href='#productItems' data-bs-toggle='tab' aria-expanded='false')
+                                                | Product Items
+                                        li.nav-item
+                                            a.nav-link.rounded-0(href='#orders' data-bs-toggle='tab' aria-expanded='false')
+                                                | Orders
+                                        
+                                        li.nav-item
+                                            a.nav-link.rounded-0(href='#basket' data-bs-toggle='tab' aria-expanded='false')
+                                                | Basket
+
+
+                                if(account.accountTypeFk != 1)
+                                    .tab-content
+                                        #kidsTab.tab-pane.active
+                                            .row
+                                                .col-sm-12(style="text-align:center")
+                                                    input#kidSize(style="display:none" value=kids.length)
+                                                    if(kids.length == 0 )
+                                                        p No kids linked to this account.    
+                                                        //- a.btn.btn-outline-primary(href="/shop" style="width:50%;font-size:12px;text-align:center" ) START SHOPPING
+                                                    else
+                                                        table.table.shadow.mb-12.table-striped.table-sm.dataTable.no-footer#kidsTable(role="grid" aria-describedby="classes_info")
+                                                            tbody
+                                                                each kid, index in kids
+                                                                    tr(style="cursor:pointer" id="kid" + index data-code=kid.code)
+                                                                        td(style="text-align:left;padding:10px") #{kid.name}
+                                                                            
+                                        #productItems.tab-pane
+                                            input#productItemCount(style="display:none" value=productItems.length)
+                                            .table-responsive                   
+                                                table#productitems-datatable.table.table-centered.w-100.dt-responsive.nowrap
+                                                    thead.table-light.text-center
+                                                        tr
+                                                            
+                                                            th #
+                                                            th Product Item
+
+                                                    tbody
+                                                        each productItem, index in productItems
+                                                            tr(style="cursor:pointer" id="item" + index data-href=("/admin_productItem?productItemNumber=" + productItem.productItemNumber))
+                                                                td
+                                                                    p.m-0.d-inline-block.align-middle.font-16 #{productItem.productItemNumber}
+                                                                td
+                                                                    .row 
+                                                                        .col-sm-3 
+                                                                            img.rounded.me-3(src=productItem.displayImagePath alt='contact-img' title='contact-img' height='48' width='48')
+
+                                                                        .col-sm-9
+                                                                            p.m-0.d-inline-block.align-middle.font-16.text-center(style="width:inherit")
+                                                                                a.text-body(href='javascript: void(0);') #{productItem.productName} - #{productItem.productVariantName}
+                                                                                br
+                                                                                a.text-body(href='javascript: void(0);') #{productItem.productType}
+                                    
+
+                                        #orders.tab-pane
+                                            .row
+                                                .col-sm-12(style="text-align:center")
+                                                    if(orderHistory.length == 0 )
+                                                        p We have no order records for this account.    
+                                                        //- a.btn.btn-outline-primary(href="/shop" style="width:50%;font-size:12px;text-align:center" ) START SHOPPING
+                                                    else
+                                                        table.table.shadow.mb-12.table-striped.table-sm.dataTable.no-footer( id="searchResultTable"  role="grid" aria-describedby="classes_info")
+                                                            tbody
+                                                                each order in orderHistory
+                                                                    tr
+                                                                        td(style="text-align:left;padding:10px")
+                                                                            .row
+                                                                                .col-sm-6
+                                                                                    h6(style="color:black;font-weight:700;font-size:13px;") Order Number:
+                                                                                        span  #{order.orderNumber}
+                                                                                    h6(style="color:black;font-weight:700;font-size:13px;") Date Ordered: 
+                                                                                        span  #{order.purchaseDttm}
+                                                                                    h6(style="color:black;font-weight:700;font-size:13px;") Order Total: 
+                                                                                        span  £#{(parseFloat(order.total)).toFixed(2)}
+                                                                                .col-sm-6(style="text-align:center")
+                                                                                    a.btn.btn-outline-primary.mb-.orderHistory(href="/new_order_details?orderNumber=" + order.orderNumber style="width:75%;font-size:12px;text-align:center;" ) View Order  
+                                                
+                                        #basket.tab-pane
+                                            if(basketItemsDetails.basketItems.length > 0)
+                                                .row
+                                                    .col-12.col-md-12
+                                                        
+                                                        input#basketItems(style="display:none" value=basketItemsDetails.basketItems.length)
+                                                        // Heading
+                                                        //- input#deliveryName(value=deliveryOption.option1 style="display:none")
+                                                        //- input#deliveryPrice(value=deliveryOption.option1Price style="display:none")
+                                                        
+                                                        h3.mb-5
+                                                            | Basket
+                                                        each basketItem, index in basketItemsDetails.basketItems
+                                                            .row.align-items-center.mb-5.mb-md-4
+                                                                .col-12.col-md-4
+                                                                    canvas.canvas(id='basket'+index style="width:100%;height:100%;padding:5px" data-basketItem=basketItem.id )
+                                                                    
+                                                                .col-12.col-md-3
+                                                                    // Heading
+                                                                    h4
+                                                                        | #{basketItem.productName} - #{basketItem.productVariantName}
+                                                                    // Text
+                                                                    p.mb-4.mb-md-0.text-sm.text-muted
+                                                                        | #{basketItem.text1}
+                                                                .col-4.col-md-2
+                                                                    // Price
+                                                                    p.mb-0.text-sm.text-muted
+                                                                        | £#{(parseFloat(basketItem.price)).toFixed(2)}
+                                                                .col-4.col-md-2
+                                                                    input.form-control.form-control-sm(type='number' min='1' data-basketItemId=basketItem.basketItemId data-previous=basketItem.quantity data-index=index data-loggedInUserType=user.accountTypeFk data-number=account.accountNumber id="quantity" +index value=basketItem.quantity)
+                                                                .col-4.col-md-1
+                                                                    // Remove
+                                                                    .close(id="remove" +index  data-basketItemId=basketItem.id data-loggedInUserType=user.accountTypeFk data-number=account.accountNumber)
+                                                                        | &times;
+
+
+                                            else 
+                                                .row.text-center
+                                                    .col-12 
+                                                        p Basket is Empty
+
+
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+script(src="https://cdn.jsdelivr.net/npm/exif-js")
+<script src="javascript/new/accountDetails.js"></script>
+script(src="javascript/basket.js")
+script(src="assets2/js/adminDashboard.js")

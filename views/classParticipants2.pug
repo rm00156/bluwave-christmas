@@ -1,0 +1,91 @@
+doctype html
+html(land="en")
+    include ./common/new/header.pug
+    +head(schoolClass.name)
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+    link(rel="stylesheet" href="css/pieProgress.css")
+
+    body(style="background-color:white !important;padding-top:3rem")
+        script(src="javascript/classParticipants.js")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        section.product-section(style="padding-top:50px")
+            .container
+                .row
+                    .col-sm-12
+                        input(type="text" value=path style="display:none" id="path")
+                        h2(style="text-align:center") #{schoolClass.name} Participants
+
+                .row
+                    .col-sm-8
+                        .card.shadow.mb-12
+                            .card-header
+                                h6 Kids
+                            .card-body(style="text-align:center")
+                                .row
+                                    .col-sm-12
+                                        table.table.shadow.mb-12.table-striped.table-sm.dataTable.no-footer( id="kids"  role="grid" aria-describedby="classes_info")
+                                            thead(style="text-align:center")
+                                                tr(role="row"  class="titleBar")
+                                                    th(class="sorting_asc smallerTextSize" style="width:33.33%") Name
+                                                    th(class="sorting_asc smallerTextSize" style="width:33.33%") Age
+                                                    th(class="sorting_asc smallerTextSize" style="width:33.33%") Code
+                                            input(id="kidTotal" style="display:none" value=kidList.length)
+                                            tbody
+                                                each kid, index in kidList
+                                                    tr(id=index style="cursor:pointer" data-id=kid.id) 
+                                                        td(colspan="1" style="text-align:center") #{kid.name}
+                                                        td(colspan="1" style="text-align:center") #{kid.age}
+                                                        td(colspan="1" style="text-align:center") #{kid.code}
+                        
+                    .col-sm-4
+                        .card.shadow.mb-12
+                            .card-header
+                                h6 Overview
+                            .card-body(style="text-align:center")
+                                .row
+                                    .col-sm-12
+                                
+                                        div(id="headerStrip" style="text-align:center; height:0px!important;min-height: 0px!important;") 
+
+                                        h5 Current Status : #{currentStatus}
+                                        
+                                        div.donut-size( id="specificChart" )
+                                            div.pie-wrapper
+                                                span.label
+                                                    span.num 0
+                                                    span.smaller %
+                                                div.pie
+                                                    div.left-side.half-circle
+                                                    div.right-side.half-circle
+                                                div.shadow
+                                        
+
+                                        div(style="text-align:center;margin-top:20px")
+                                            h5 #{kidTotal} Total Pupils
+                                            h5 #{orderedKidTotal} Pupils Ordered
+                                            if(deadLineDttm != '')
+                                                - if(daysLeftSign == 'negative')
+                                                    h5(style="color:red") #{(daysLeft * -1)} Days since purchase deadline passed
+                                                - else if( daysLeftSign == 'zero')
+                                                    h5(style="color:red") Purchase deadline is Today 
+                                                - else
+                                                    h5(style="color:red") #{daysLeft} Days till purchase deadline 
+                                            //- input(type="submit" value="Report")
+
+                                            input(id="ordered" type="number" value=orderDetails.orderedPercentage style="display:none")
+
+                                            input(id="classTotal" type="number" value=classTotal style="display:none")
+                                
+
+            
+        
+        script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+        script( type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js")
+    
+        script(src="javascript/organiserPieChart.js")
+        script(src="javascript/organiser.js")
+    include ./common/new/footer.pug
+    +footer()  

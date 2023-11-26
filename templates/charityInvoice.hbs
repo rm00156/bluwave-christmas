@@ -1,0 +1,115 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:m="http://schemas.microsoft.com/office/2004/12/omml" xmlns="http://www.w3.org/TR/REC-html40"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 15">
+<meta name="Originator" content="Microsoft Word 15">
+
+
+<style>
+
+</style>
+
+</head>
+
+<body lang="EN-GB" link="blue" vlink="purple" style="tab-interval:36.0pt">
+
+<div class="WordSection1">
+
+<table class="MsoNormalTable" border="0" width="100%" cellspacing="5" cellpadding="0" style="mso-cellspacing:1.5pt;mso-yfti-tbllook:1184">
+ <tbody><tr style="mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes">
+  <td style="padding:.75pt .75pt .75pt .75pt">
+  <div>
+  <div>
+  <div>
+  <div>
+  <p class="MsoNormal" style="background:#17AAB7;margin:0px"><span style="mso-fareast-font-family:
+  &quot;Times New Roman&quot;;color:black;mso-color-alt:windowtext;background:#17AAB7;
+  mso-no-proof:yes">
+<img width="90%" height="131" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards" ><!--[endif]--></span><span style="mso-fareast-font-family:&quot;Times New Roman&quot;"><o:p></o:p></span></p>
+  </div>
+  </div>
+  <div>
+  <p class="MsoNormal" style="background:#075F5E;color:#075F5E;margin:0px"><span style="mso-fareast-font-family:
+  " times="" new="">gapDiv</span><span style="mso-fareast-font-family:&quot;Times New Roman&quot;"><o:p></o:p></span></p>
+  </div>
+  <div>
+  <h1 style="text-align:center">{{schoolName}}</h1>
+ 
+{{#each items}}
+<table style="border: 1px solid black;width:100%">
+<colgroup>
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="35%">
+<col width="35%">
+</colgroup>
+<tr>
+	<td colspan="5" style="text-align:center">
+		Class : {{name}}
+	</td>
+</tr>
+<tr>
+	<td style="text-align:center">Package</td>
+	<td style="text-align:center">Quantity</td>
+	<td style="text-align:center">(£) Total</td>
+	<td style="text-align:center">(£) Give Back Amount Per Purchase</td>
+	<td style="text-align:center">(£) Total Give Back Amount</td>
+</tr>
+<tr>
+<td style="text-align:center">Standard Pack</td>
+<td style="text-align:center">{{standardPackQuantity}}</td>
+<td style="text-align:center">{{standardTotalCost}}</td>
+<td style="text-align:center">{{standardPackGiveBackPer}}</td>
+<td style="text-align:center">{{standardPackGiveBack}}</td>
+
+</tr>
+
+<tr>
+<td style="text-align:center">Photo Pack</td>
+<td style="text-align:center">{{photoPackQuantity}}</td>
+<td style="text-align:center">{{photoTotalCost}}</td>
+<td style="text-align:center">{{photoPackGiveBackPer}}</td>
+<td style="text-align:center">{{photoPackGiveBack}}</td>
+
+</tr>
+<tr>
+<td style="text-align:center">Calendar</td>   
+<td style="text-align:center">{{calendarQuantity}}</td>
+<td style="text-align:center">{{calendarTotalCost}}</td>
+<td style="text-align:center">{{calendarGiveBackPer}}</td>
+<td style="text-align:center">{{calendarGiveBack}}</td>
+
+</tr>
+<tr>
+<td style="text-align:center">(£) Total</td>
+<td></td>
+<td></td>
+<td></td>
+<td style="text-align:center">{{giveBackTotal}}</td>
+
+</tr>
+
+
+</table>
+<br>
+{{/each}}  
+
+  {{#if finalPage}}
+   <h1 style="text-align:center">Total Give Back Amount: £{{totalGiveBack}}</h1>
+  {{/if}}
+  </div>
+  </div>
+  </div>
+  </td>
+ </tr>
+</tbody></table>
+
+<p class="MsoNormal"><span style="mso-fareast-font-family:&quot;Times New Roman&quot;"><o:p>&nbsp;</o:p></span></p>
+
+</div>
+
+
+
+
+</body></html>

@@ -1,0 +1,7 @@
+@charset "UTF-8";
+/* CSS Document */
+
+@media screen and (max-width:768px){
+	#cardRight{display: none;}
+	#cardLeft{width:100%!important; padding-bottom:25%!important;}
+}

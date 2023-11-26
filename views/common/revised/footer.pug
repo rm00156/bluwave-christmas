@@ -1,0 +1,68 @@
+mixin footer()
+    footer.section.bg-dark(style="background-color:#17aab7!important")
+        // Triangles
+        .bg-triangle.bg-triangle-light.bg-triangle-bottom.bg-triangle-left
+        .bg-triangle.bg-triangle-light.bg-triangle-bottom.bg-triangle-right
+        // Content
+        .container
+            .row.align-self-center
+                .col-md-auto
+                    // Brand
+                    p
+                        a.footer-brand.text-white(href='#')
+                            img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" width="200px" height="100%" alt="Kids Cards")
+
+                .col-md
+                    // Links
+                    ul.list-unstyled
+                        li
+                            a.text-white(href="/terms")
+                                | Terms and conditions
+                        li
+                            a.text-white(href="/privacy")
+                                | Privacy policy
+                        li
+                            a.text-white(href="/about")
+                                | About us
+                        li
+                            a.text-white(href='/faqs')
+                                | FAQs
+                
+                .col-md
+                    // Links
+                    ul.list-unstyled
+                        if(!user)
+                            li
+                                a.text-white(href="/login")
+                                    | Create Account
+                            li
+                                a.text-white(href="/login")
+                                    | Sign In
+                
+                .col-md
+                    // Links
+                    ul.list-unstyled
+                        li
+                            p.text-white
+                                i.fas.fa-home
+                                |  Bluwave Ltd, Unit 1B, 1A Philip Walk, London, SE15 3NH
+
+                        li
+                            p.text-white
+                                i.fas.fa-envelope
+                                |  sales@thebluwavegroup.com
+                        li
+                            p.text-white
+                                i.fas.fa-phone
+                                |  020 7277 7663
+            // / .row
+            .row.align-items-center
+                .col-md
+                    // Copyright
+                    p.text-white.text-muted
+                        small
+                            | &copy; Copyright 
+                            span.current-year
+                            |  Bluwave. All rights reserved.
+        
+

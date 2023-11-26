@@ -1,0 +1,101 @@
+doctype html
+html(land="en")
+    include common/new/header.pug
+    +head("Kids Creative Cards - Children's artwork on greeting cards" )
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+
+
+    body(style="background-color:white !important;padding-top:3rem")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        script(src="javascript/home.js")  
+
+        section.product-section(style="margin-top:10px")
+            .container
+                   
+                .row
+                    .col-sm-6
+                        .row
+                            .col-sm-12
+                                h4(style="text-align:center") Sign up and start <font style="color:#f51167">Creating</font> your own family <font style="color:#f51167">Christmas cards</font>
+                        form(action="/login", method ="POST")
+                            .card.shadow.mb-4
+                                .card-body(style="text-align:center")
+                                    h5 Login
+                                    .row
+                                        .col-sm-12
+                                            img( src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/logiconA2.png"  style="margin-top:20px" alt="Register below if you do not have an account" )
+                                    
+                                    .row(style="margin-top:20px")
+                                        .col-sm-12
+                                            if(error)
+                                                p.small.text-danger(style="font-size:9pt") #{error} 
+                                            if(reset)
+                                                p.small.text-danger Password has successfully been reset
+                                            label(for="email") Email
+                                            .quantity(style="margin-bottom:15px;")
+                                                .pro-qty(style="width:100% !important")
+                                                    input(style="width:100% !important;text-align:left;" placeholder='Please enter your email', required=true, name='email', type='email', value=(formData != undefined) ? formData.email : 'reece.miller-mcpherson@underwriteme.co.uk')
+
+                                    .row(style="margin-top:20px")
+                                        .col-sm-12
+                                            label(for="password") Password
+                                            .quantity(style="margin-bottom:15px;")
+                                                .pro-qty(style="width:100% !important")
+                                                    input(style="width:100% !important;text-align:left;" placeholder="Enter current password", required=true , name='password', type='password', value=(formData != undefined) ? formData.password : 'welcome')
+                            
+                                    .row
+                                        .col-sm-12
+                                            a(href="/forgottenPassword" style="margin-bottom:5px") Forgotten Password?
+                                    .row(style="margin-top:20px")
+                                        .col-sm-12
+                                            button.site-btn Login
+                    
+                    .col-sm-6
+                        .col-sm-12
+                            h4(style="text-align:center") Not <font style="color:#f51167">Creative.....</font> Sign up and see our range of <font style="color:#f51167">Card templates</font> to choose <font style="color:#f51167">from</font>
+                        .card.shadow.mb-4
+                            .card-body(style="text-align:center")
+                                h5 Register
+                                .row
+                                    .col-sm-12
+                                        img( src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/regiconA2.png"  style="margin-top:20px" alt="Register below if you do not have an account" )
+                                        if(error)
+                                            p.small.text-danger(style="font-size:9pt") #{error} 
+                                
+                                .row(style="margin-top:20px")
+                                    .col-sm-12
+                                        div.searchItem2.blockItem
+                                            div.inputtitle2
+                                                p.accessHeader(style="margin-bottom:0") 
+                                                    strong Parent Sign Up:
+                                                p(style="margin-bottom:0") If you are a <strong>Parent</strong> with your Child taking part in a nursery/school Christmas card project or you want to see what other products we have on offer.
+                                            h3(style="color:#f51167") PARENT REGISTRATION NOW CLOSED
+                                            //- form(action="/signup" method="get" style="margin-top:10px")
+                                                input(style="display:none" name="type" value="parent" id="type")
+                                                button.site-btn Click here
+                                .row(style="margin-top:20px")
+                                    .container
+                                    .col-sm-12
+                                        div.inputtitle2
+                                            p.accessHeader(style="margin-bottom:0")
+                                                strong Nursery/School Organiser Sign Up:
+                                            p(style="margin-bottom:5px") If you are an <strong>Organiser</strong> for your nursery/school Christmas card project
+                                        //- h3(style="color:#f51167") SCHOOL REGISTRATION NOW CLOSED
+                                        form(action="/signup_organiser" method="get" style="margin-top:10px")
+                                            button.site-btn Click here
+                .container
+                    .row
+                        .col-sm-4.shadow(style="padding:10px")
+                            img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/ProductItem/Previews/xmascards_designs2spread_Page_03.jpg")
+                        .col-sm-4.shadow(style="padding:10px")
+                            img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/ProductItem/Previews/xmascards_designs2spread_Page_02.jpg")
+                        .col-sm-4.shadow(style="padding:10px")
+                            img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/ProductItem/Previews/xmascards_designs2spread_Page_04.jpg")
+                  
+
+                
+    include common/new/footer.pug
+    +footer()

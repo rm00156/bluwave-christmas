@@ -1,0 +1,116 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Parent Dashboard")
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')
+
+
+body 
+    +navbar()
+    //- section.section.section-full.bg-light
+    //-     // Content
+    //-     .container
+    input#numberOfKids(style="display:none" value=kids.length)
+    
+                                            
+    
+    section.overflow-hidden
+        .container
+            .row(style="margin-top:50px")
+                .col-12.col-md-6.offset-xl-1.order-md-2.section.pt-md-0.pb-0
+                    //- // Button
+                    //- a.btn.btn-lg.btn-circle.btn-hero.ml-4.bg-white.shadow.text-body.d-none.d-md-block(href='#modal-video' data-toggle='modal')
+                    //-     i.fas.fa-play
+                    // Image
+                    .img-half
+                        img.img-cover.img-incline-left(src='img/frontcardsnew.png' alt='...')
+                .col-12.col-md-6.col-xl-5.order-md-1.section.parent
+                    // Preheading
+                    p.font-weight-medium.text-xs.text-uppercase.text-primary(data-toggle='animation' style="color:#fff !important" data-animation='fadeUp' data-animation-order='0' data-animation-trigger='load')
+                        | f
+                    // Heading
+                    h1.mb-4(data-toggle='animation' data-animation='fadeUp' data-animation-order='1' data-animation-trigger='load')
+                        | Is your school taking part in the christmas scheme?
+                    // Subheading
+                    p.mb-3.text-muted(data-toggle='animation' data-animation='fadeUp' data-animation-order='2' data-animation-trigger='load')
+                        |  Link your child to their school and their class and proceed to make your card
+                    // Button
+                    //- br
+                    a.btn.btn-outline-primary(href='/linkKids' data-toggle='animation' data-animation='fadeUp' data-animation-order='3' data-animation-trigger='load')
+                        | Click here
+                        i.fas.fa-arrow-right.ml-2
+    if(isKidsLinkedToAccount)
+        
+        section.section.bg-light(style="padding-top:2rem;padding-bottom:2rem")
+            .container
+                //- .row.justify-content-center.mb-5 
+                    a.btn.btn-outline-primary(href='/linkKids' data-toggle='animation' data-animation='fadeUp' data-animation-order='3' data-animation-trigger='load')
+                        | Link Child to School
+                        i.fas.fa-arrow-right.ml-2
+                .row.justify-content-center                            
+                    .col-sm-9
+                        .form-styled.bg-white
+                            
+                            h3 My Items
+                            table.table.shadow.mb-12.table-striped.table-sm.dataTable.no-footer( id="searchResultTable"  role="grid" aria-describedby="classes_info")
+                                thead 
+                                    th(style="width:10%") Product Item
+                                    th(style="width:90%") Name 
+                                tbody
+                                    each kid, index in kids 
+                                        tr(style="cursor:pointer" id="kid" + index data-productNumber=kid.productNumber data-productVariantId=kid.productVariantId data-productItemNumber=kid.productItemNumber)
+                                            td 
+                                                img(src=kid.picture1Path width="100%")
+                                            td(style="text-align:left;padding:10px") #{kid.name}  
+    
+    
+    section.section(style="padding-top:3.5rem;padding-bottom:2rem")
+        .container
+            h1(style="text-align:center") Want to see what else we have to offer?
+            .row(style="margin-top:20px")
+                .col-12.col-md-6
+                    // Category
+                    a.card.card-tall.border-0.mb-3.md-md-0(href='/shop?category=Christmas Cards')
+                        // Image
+                        .bg-cover(style='background-image: url(img/christmascards2.jpeg)')
+                        // Body
+                        .card-body
+                            // Title
+                            h3.card-title.text-white
+                                | Christmas Cards
+                            // Text
+                            //- p.mb-0.card-text.text-white.text-muted
+                            //-     | Lorem ipsum dolor sit amet, consectetur adipisicing elit a amet dicta eum quae reiciendis.
+                .col-12.col-md-6
+                    // Category
+                    a.card.card-tall.border-0(href='/shop?category=Calendars')
+                        // Image
+                        .bg-cover(style='background-image: url(img/calendars2.jpeg)')
+                        // Body
+                        .card-body
+                            // Title
+                            h2.card-title.text-white
+                                | Calendars
+                            // Text
+                            //- p.card-text.text-white.text-muted.mb-0
+                                | Lorem ipsum dolor sit amet, consectetur adipisicing elit a amet dicta eum quae reiciendis.
+   
+
+
+    
+
+
+
+
+    +footer()   
+    <script src="assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+    script(src="assets2/js/theme.min.js")
+    script(src="assets2/js/parentDashboard.js")
+    

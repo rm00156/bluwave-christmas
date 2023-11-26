@@ -1,0 +1,104 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Orders")
+  link(rel="stylesheet" href="css/organiser.css")
+  link(rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css")
+  link(rel="stylesheet" href="css/kcards_landscape_cards.css" type="text/css" media="screen")
+  meta(name="robots" content="index, follow" )
+  meta(name="revisit-after" content="7 days")
+  meta(name="version" content="1.0")
+  meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0")
+      
+  body
+    div.outercontainer
+        header.headertop
+            div.kclogo
+                img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+                script(src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js")
+                script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+                script(src="javascript/orders.js")
+        div.gapDiv gapDiv
+        include ./common/navbar.pug
+        +navbar(user)
+
+        div.schoolOrdersContainer
+            .schoolOrders
+                .organiserClassColumnContainer
+                    table(id='basketItemsTable' class="display table table-striped table-sm")
+                        thead  
+                            tr
+                                th Card 
+                                th Package
+                                th Description
+                                th Quantity
+                                th Price
+                        tbody
+                            input(style="display:none" value=purchaseBasketId id="purchaseBasketId")
+                            each basketItem, index in basketItems
+                                tr(style="height:40%")
+                                    td(style="width:25%")
+                                        div(style="height:100%;width:100%;")
+                                            canvas.canvas(id='basket'+index style="width:100%;height:100%;padding:5px" data-basketItem=basketItem.id )
+                                    td(style="width:15%;text-align:center")
+                                        h6 #{basketItem.packageName}
+                                    td(style="width:30%;")
+                                        div(style="height:100%;width:100%")  
+                                            p(style="padding:0;margin:0")  Name : #{basketItem.name}
+                                            if(basketItem.age !=0 && basketItem.month !=0)
+                                                p(style="padding:0;margin:0") #{basketItem.age} years #{basketItem.month} months
+                                            else if( basketItem.age !=0 )
+                                                p(style="padding:0;margin:0") #{basketItem.age} years
+                                            else
+                                                p(style="padding:0;margin:0") #{basketItem.month} months
+                                            if(parentAccountTypeFk == 2 || parentAccountTypeFk == 3)
+                                                p(style="padding:0;margin:0")  School : #{basketItem.schoolName}
+                                                p(style="padding:0;margin:0")  Class : #{basketItem.className}
+                                                p(style="padding:0;margin:0")  Display School : #{basketItem.displaySchool == 1 ? 'Yes': 'No'}
+                                                p(style="padding:0;margin:0")  Display Class : #{basketItem.displayClass == 1 ? 'Yes': 'No'}
+                                            p(style="padding:0;margin:0")  Display Age : #{basketItem.displayAge == 1 ? 'Yes': 'No'}
+                                    td(style="width:10%")
+                                        p( data-index=index data-basketItemId=basketItem.id id="quantity" +index  style="width:50px") #{basketItem.quantity }       
+                                    td(style="width:10%")
+                                        h6(id="price"+index) £#{(basketItem.price * basketItem.quantity).toFixed(2)}
+                                    //- td(style="width:10%")
+                                    //-     input(type="submit" value="Remove" id="remove" +index  data-basketItemId=basketItem.id).mt-3.btn.btn-primary
+                    input(style="display:none" id="basketItems" value=basketItems.length)
+            .organiserPieChartColumn
+                div(style="text-align:center;margin-top:20px")
+                    p.titleLarge(style="text-align:center;font-size:16pt") Order No. #{orderNo}
+                    p.titleLarge(style="text-align:center;font-size:16pt") Purchase Date
+                    p(style="text-align:center;font-size:12pt;color:black") #{date}
+                    if(basketItems[0].shippingAddressFk != null)
+                        if(basketItems[0].shippedFl == true)
+                            p.titleLarge(style="text-align:center;font-size:16pt") SHIPPED
+                            p(style="text-align:center;font-size:12pt;color:black") #{basketItems[0].shippedDttm}
+                        else
+                            button.stagesButton(id="setToShipped"  style="width:80%") Set Order To Shipped
+
+                    p.titleLarge(style="text-align:center;font-size:16pt" id="basketTotal") Order Total 
+                    p(style="text-align:center;font-size:12pt;color:black") £#{total.toFixed(2)}
+                    p.titleLarge(style="text-align:center;font-size:16pt") Purchase Email
+                    p(style="text-align:center;font-size:12pt;color:black") #{email}
+                    if(shipping)
+                        p.titleLarge(style="text-align:center;font-size:16pt") Shipping Address
+                        p(style="text-align:center;font-size:12pt;color:black") #{shipping.addressLine1}
+                        p(style="text-align:center;font-size:12pt;color:black") #{shipping.addressLine2}
+                        p(style="text-align:center;font-size:12pt;color:black") #{shipping.city}
+                        p(style="text-align:center;font-size:12pt;color:black") #{shipping.postCode}
+                        p(style="text-align:center;font-size:12pt;color:black") #{country.name}
+                        //- if(shipping.shippedFl == false)
+                        //-     p.titleLarge(style="text-align:center;")  Not Shipped
+                        //-     button.stagesButton(id="shipped" data-shipping=shipping.id  style="width:80%") Set to Shipped
+                        //- else
+                        //-     p.titleLarge(style="text-align:center;font-size:16pt") Shipped
+                        //-     p(style="text-align:center;font-size:12pt;color:black") #{shipping.shippedDttm}   
+                        
+                    button.stagesButton(id="generateItems"  style="width:80%") Generate Purchased Items
+                    button.stagesButton(id="orderAccount" data-orderAccountId=orderAccountId  style="width:80%") Go to Order Account
+                    
+
+    include ./common/footer.pug
+    +footer()    

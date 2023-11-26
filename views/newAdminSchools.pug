@@ -1,0 +1,101 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Schools")
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <!-- third party css end -->
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div     
+    
+// Begin page
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Schools
+                
+                .row
+                    .card
+                        .card-body
+                            .row.mb-2
+                                .col-xl-9
+                                    .row.gy-2.gx-2.align-items-center.justify-content-xl-start.justify-content-between
+                                        .col-auto
+                                            label(for='nameSearch') Name
+                                            input#nameSearch.form-control(type='search')
+                                        
+                                        .col-auto
+                                            label(for='addressSearch') School Address
+                                            input#addressSearch.form-control(type='search')
+                                        
+                                        .col-auto
+                                            label(for='postCodeSearch') Post Code
+                                            input#postCodeSearch.form-control(type='search')
+                                        
+                                        .col-auto
+                                            label.me-2(for='statuss') Status
+                                            select#statuss.form-select
+                                                option(value='' selected='')
+                                                each statusType in statusTypes
+                                                    option(value=statusType.type) #{statusType.type} 
+                                        
+                                        .col-auto
+                                            label(for='emailSearch') Email
+                                            input#emailSearch.form-control(type='search')
+                                        
+                                .col-xl-3
+                                    .text-xl-end.mt-xl-0.mt-2
+                                        button#search.btn.btn-success.mb-2.me-2(type='button')
+                                            |  Search
+                                        
+                                        button#clear.btn.btn-danger.mb-2.me-2(type='button')
+                                            |  Clear
+                                            
+
+                            
+                            .row.mb-2
+                                table#schoolTable.table.table-striped.dt-responsive.nowrap.w-100(style="cursor:pointer")
+                                    thead
+                                        tr
+                                            th(style="width:25%") School
+                                            th(style="width:15%") Address
+                                            th(style="width:15%") Post Code
+                                            th(style="width:15%") Status
+                                            th(style="width:15%") Email
+                                            th(style="width:15%") Created Date
+                                    tbody
+                                    
+                                    
+                                        
+
+        
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+
+<script src="javascript/new/newSchools.js"></script>
+script(src="assets2/js/adminDashboard.js")

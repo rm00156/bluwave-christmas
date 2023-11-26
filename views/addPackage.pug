@@ -1,0 +1,32 @@
+doctype html
+html(land="en")
+  include ./common/header.pug
+  +head("Add Package")
+  body
+    header
+      include ./common/navbar.pug
+      +navbar(user)
+      div.container
+        div.row
+            .col-sm-12.offest-md-2.col-md-8
+                .jumbotron
+                    h2.text-center Add Package
+                    .row
+                        .col-sm-12.col-md-12.col-xs-12
+                            form(action="/createPackage", method ="POST" ,enctype="multipart/form-data")
+                                div.formgroup
+                                    label.small.mb-1.mt-3 Package Name:
+                                    input(placeholder="Enter Package Name" type="text" name="packageName" required=true  ).form-control 
+                            
+                                    label.small.mb-1.mt-3 Price (£):
+                                    input(placeholder="Enter Package Price" type="text" name="packagePrice" required=true  ).form-control 
+                        
+                                    label.small.mb-1.mt-3 Package Image:
+                                    br
+                                    input(type="file" name="fileToUpload" id="fileToUpload" required=true)
+                                    br
+                                    button(type="submit").mt-3.btn.btn-primary Add Package  
+    include ./common/footer.pug
+    +footer()  
+    
+

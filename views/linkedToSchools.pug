@@ -1,0 +1,69 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Kids Linked To School")
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <!-- third party css end -->
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div     
+    
+// Begin page
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Kids Linked To School
+                
+                .row
+                    .card
+                        .card-body
+                            
+                            .row.mb-2
+                                table#kidstoSchoolTable.table.table-striped.dt-responsive.nowrap.w-100(style="cursor:pointer")
+                                    thead
+                                        tr
+                                        th School
+                                        th Number Of Kids 
+                                    tbody
+                                        input#numberOfItems(value=schoolDetails.length style="display:none")
+                                        each schoolDetail, index in schoolDetails
+                                            tr(id=index data-schoolNumber=schoolDetail.schoolNumber)
+                                                td #{schoolDetail.name}
+
+                                                td #{schoolDetail.totalKids}
+
+                                    
+                                    
+                                        
+
+        
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+
+script(src="assets2/js/adminDashboard.js")
+script(src="javascript/new/linkedToSchool.js")

@@ -1,0 +1,334 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Product Item " )
+    <!-- third party css end -->
+    link(href='assets2/css/style.css' rel='stylesheet')  
+    link(href='css/croppie.css' rel='stylesheet')
+    //- link(rel='stylesheet' href='assets2/css/theme.min.css')
+
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div   
+// Begin page
+input#accountType(value=user.accountTypeFk style="display:none")
+#overlay2
+    .progress#progressBar
+        .container(style="padding-top:50px")
+            h2(style="color:black") Processing 
+            div.progress(style="height:25px")
+                div.progress-bar.progress-bar-striped.progress-bar-animated(id="progress" style="width:0%;height:25px;background-color:#f5ba4b") 0%   
+            h6(style="margin-top:5px" id="progressText")
+#overlay
+    .section.section-full
+        .container
+            .row.justify-content-center
+
+                .col-md-10.col-lg-10
+                    .form-styled.bg-white(style="overflow-y: scroll;height:640px;margin-top:100px")
+                        div#gif(style="display: none;justify-content: center;")
+                            img(src="img/loading2.gif" style="margin:auto")
+                        
+                        
+                        div#cropSection
+                            div(style="height:400px;width:100%")
+                                #uploadedImageForCrop(style="height:60%;width:100%")
+                            div
+                                p(style="text-align:center") Crop image to your liking, and when everything is ok click 'Confirm Picture'
+                                .row
+                                    .col-lg-4.text-center
+                                        button.btn.btn-outline-primary.btn-block.mt-3(id="confirmCrop") Confirm Crop
+                                    .col-lg-4.text-center
+                                        button.btn.btn-outline-primary.btn-block.mt-3.text-center(id ="rotate"  data-deg="-90" style="margin-right:5px") Rotate
+                                    .col-lg-4.text-center
+                                        button.btn.btn-outline-primary.btn-block.mt-3(id ="cancelCrop" ) Cancel
+                        
+                        .row.p-5
+                            .col-sm-6
+                                div(style="width:-webkit-fill-available")
+                                    canvas#canvas(style="width:-webkit-fill-available; display:none")
+                            .col-sm-6
+                                div#camanSection(style="display:none")
+                                    .container
+                                        .row
+                                            .col-md-12
+                                                h4.text-center.my-3 Filters
+                                                .row.my-4.text-center
+                                                    .col-md-12
+                                                        .btn-group.btn-group-sm
+                                                            button.filter-btn.brightness-remove.btn.btn-outline-primary.btn-block.mt-3 -
+                                                            h5(style="margin-top:20px !important;padding-left:15px; padding-right:15px") Brightness
+                                                            button.filter-btn.brightness-add.btn.btn-outline-primary.btn-block.mt-3 +
+                                                    .col-md-12
+                                                        .btn-group.btn-group-sm
+                                                            button.btn.btn-outline-primary.btn-block.mt-3.filter-btn.contrast-remove -
+                                                            h5(style="margin-top:20px !important;padding-left:15px; padding-right:15px") Contrast
+                                                            button.btn.btn-outline-primary.btn-block.mt-3.filter-btn.contrast-add +
+                                                    .col-md-12
+                                                        .btn-group.btn-group-sm
+                                                            button.filter-btn.saturation-remove.btn.btn-outline-primary.btn-block.mt-3 -
+                                                            h5(style="margin-top:20px !important;padding-left:15px; padding-right:15px") Saturation
+                                                            button.filter-btn.saturation-add.btn.btn-outline-primary.btn-block.mt-3 +
+                                                    .col-md-12
+                                                        .btn-group.btn-group-sm
+                                                            button.filter-btn.vibrance-remove.btn.btn-outline-primary.btn-block.mt-3 -
+                                                            h5(style="margin-top:20px !important;padding-left:15px; padding-right:15px") Vibrance
+                                                            button.filter-btn.vibrance-add.btn.btn-outline-primary.btn-block.mt-3 +
+                                                    
+                                                    .col-md-6
+                                                        button.btn.btn-outline-primary.btn-block.mt-3(id="confirmPicture" data-productItemNumber=productItem.productItemNumber data-productItemId=productItem.id data-pictureNumber=(product.productType == 'Calendars') ? 1 : productVariant.orderNo data-productId=product.productId data-productNumber=product.productNumber data-productVariantId=productItem.productVariantFk) Upload
+                                                        
+                                                    .col-md-6
+                                                        button.btn.btn-outline-primary.btn-block.mt-3(id="reset") Reset
+     
+.wrapper
+    
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                section.section.pb-0.mt-5
+                    .container
+                        .row
+                            .page-title-box.mb-2
+                                h2 ProductItem Number ##{productItem.productItemNumber}
+                            .col-12.col-md-8
+                                //- // Image
+                                //- img.img-fluid.mb-5(src='assets2/img/85.jpg' alt='...')
+                                .row.justify-content-center
+                                    .col-sm-12.text-center
+                                        input#cardPath(style="display:none" value=productItem.pdfPath)
+                                        canvas.mainCanvas.w100.shadow.mb-4(style=(kid == null) ? "max-width:80%;margin: auto;height:600px": "width:-webkit-fill-available;display:inline;" id="mainCanvas" height="840" width="1189")
+                                
+                                .row 
+                                    // Nav
+                                //- nav.nav.nav-tabs.mb-3(style="margin-top:20px")
+                                    if(kid != null)
+                                        a.nav-item.nav-link.active(href='#itemEdit' data-toggle='tab')
+                                            | Edit Kid Details
+                                    a.nav-item.nav-link(href='#itemDescription' data-toggle='tab')
+                                        | About
+                                    a.nav-item.nav-link(href='#itemShipping' data-toggle='tab')
+                                        | Shipping
+
+                                input#productItems(style="display:none" value=existingProductItems)
+                                
+                                if(kid != null)
+                                    #itemEdit.tab-pane.fade.show.active
+                                        
+                                        .row.form-group
+                                            .col-md-12
+                                                
+                                                .row
+                                                    .col-sm-12
+                                                        h3 Edit Kid's Details
+                                            
+                                                .row
+                                                    .col-lg-6
+                                                        label(for="name") Name
+                                                        br
+                                                        
+                                                        .quantity
+                                                            .pro-qty(style="width:100% !important")
+                                                                input.form-control(id='updateName' data-value=productItem.text1  name='name', type='text' style="width:100% !important;text-align:left" value=productItem.text1) 
+                                                                if(errors && errors.text1)
+                                                                    p.small.text-danger(style="text-align:left;margin-left:0;margin-top:0;margin-bottom:5px") #{errors.text1}
+                                                        
+                                                    .col-lg-3
+                                                        label(for="age" ) Years Old
+                                                        br
+                                                        .quantity
+                                                            .pro-qty(style="width:100% !important")
+                                                                input.form-control(id='updateAge'  name='age' data-value=productItem.text2   value=productItem.text2  style="width:100% !important;text-align:left" , type='number' min="0")
+                                                        p#errorAge.small.text-danger
+                                                    .col-lg-3
+                                                        label(for="month" ) Months Old
+                                                        
+                                                        .quantity
+                                                            .pro-qty(style="width:100% !important")
+                                                                input.form-control(id='updateMonth'  name='month' data-value=productItem.text3 style="width:100% !important;text-align:left"   value=productItem.text3  , type='number' min="0", max="11")
+
+
+                                                .row(style="margin-top:15px;text-align:center")
+                                                    if(kid.classFk != null)
+                                                        .col-lg-4
+                                                            label(for="displaySchool") Display School
+                                                            br
+                                                            if(productItem.displayItem1)
+                                                                input(id='displaySchool' name='displaySchool' type='checkBox' checked)
+                                                            else 
+                                                                input(id='displaySchool' name='displaySchool' type='checkBox') 
+                                                        
+                                                        .col-lg-4
+                                                            label(for="diplayClass") Display Class
+                                                            br 
+                                                            if(productItem.displayItem2)
+                                                                input(id='displayClass' name='displayClass', type='checkBox' checked)
+                                                            else
+                                                                input(id='displayClass' name='displayClass', type='checkBox' )
+                                                        .col-lg-4
+                                                            label(for="displayAge") Display Age
+                                                            br
+                                                            if(productItem.displayItem3)
+                                                                input(id='displayAge' name='displayAge', type='checkBox' checked)
+                                                            else
+                                                                input(id='displayAge' name='displayAge', type='checkBox' )
+                                                    else
+                                                        .col-lg-12
+                                                            label(for="displayAge") Display Age
+                                                            br
+                                                            if(productItem.displayItem3)
+                                                                input(id='displayAge' name='displayAge', type='checkBox' checked)
+                                                            else
+                                                                input(id='displayAge' name='displayAge', type='checkBox' ) 
+
+                                                .row(style="margin-top:5px;text-align:center")
+                                                    .col-lg-12
+                                                        p#error.small.text-danger
+                                                        button.btn.btn-outline-primary.btn-block.mt-3(id="updateProductItem" type="submit" data-productItemId=productItem.id data-pictureNumber=(product.productType == 'Calendars') ? 1 : productVariant.orderNo data-productId=product.productId data-productNumber=product.productNumber data-productVariantId=productItem.productVariantFk) Update Card
+
+                            .col-12.col-md-4
+                                // Preheading
+                                p.font-weight-medium.text-xs.text-uppercase.text-primary
+                                    | #{product.productType}
+                                // Heading
+                                h3.mb-4
+                                    | #{product.name}
+                                //- // Text
+                                //- h3.mb-5 £ #{(parseFloat(productItem.price)).toFixed(2)}
+                                //- h5 Quantity 
+                                //- input.form-control#quantity.mb-3(type='number' style="width:100px" min=1 value=1)
+                                // Form
+                                .mb-5.mb-md-0
+                                    .form-row
+                                        .col-12
+                                            h5
+                                                | Select #{productItem.productVariantType}:
+
+
+                                    .form-row
+                                        input#selectCount(style="display:none" value=productVariants.length)
+                                        each productVariant, index in productVariants
+                                            .col-6
+                                                // Size
+                                                .extended-radio
+                                                    if(productVariant.productVariantId == productItem.productVariantFk)
+                                                        input.extended-radio-input(id="select" + index type='radio' name='sizeInput' checked)
+                                                    else 
+                                                        input.extended-radio-input(id="select" + index type='radio' name='sizeInput')
+                                                    if(kid != null)
+                                                        label.extended-radio-label.text-xs(id="selectLabel" + index for='sizeInputOne'  data-url=('/admin_productItem?productItemNumber=' + productVariant.productItemNumber))
+                                                            | #{productVariant.productVariantName}
+                                                    else 
+                                                        label.extended-radio-label.text-xs(id="selectLabel" + index for='sizeInputOne'  data-url=('/admin_productItem?productItemNumber=' + productVariant.productItemNumber))
+                                                            | #{productVariant.productVariantName}  
+
+                                .row(style="margin-top:10px")
+                       
+                                    .col-md-12
+                                        if(productVariant.name == 'Standard')
+                                            .row
+                                                .col-sm-12
+                                                    h3 Add Artwork
+                                            .row 
+                                                .col-sm-12
+                                                    p Browse for the image you wish to place on the front and back of the card
+                                        else if(productVariant.name == 'Photo Pack')
+                                            .row
+                                                .col-sm-12
+                                                    h3 Add Picture
+                                            .row 
+                                                .col-sm-12
+                                                    p Browse for the image you wish to place only on the back of the card
+                                        else
+                                            .row
+                                                .col-sm-12
+                                                    h3 Add Picture
+                                            .row 
+                                                .col-sm-12
+                                                    p Browse for the image you wish to place on your calendar card
+                                        .row 
+                                            .col-sm-12
+                                                
+                                                label.btn.btn-outline-primary.btn-block.mt-3(for="picture1") Browse...
+                                                if(kid != null)
+                                                    input(id='picture1' type='file' style="opacity:0;width:-webkit-fill-available" accept="image/x-png,image/jpeg" data-kidCode=kid.code)
+                                                else 
+                                                    input(id='picture1' type='file' style="opacity:0;width:-webkit-fill-available" accept="image/x-png,image/jpeg" )
+
+                                                p.small.text-danger(id="pictureError")
+
+                                .row(style="margin-top:10px")
+                                    .col-md-12   
+                                        h2 Shortcuts
+                                        if(kid != null)
+                                            a(href='/kidProductItems?kidNumber=' + kid.code) Kid Product Items
+                                        
+                    
+                                        br
+                                        a(href='new_account_details?number=' + account.accountNumber ) Account 
+                                        
+                                        if(school != null)
+                                            br
+                                            a(href='/new_school_details?number=' + school.schoolNumber) School 
+                                        
+                                        if(schoolClass != null)
+                                            br
+                                            a(href='/class?classNumber=' + schoolClass.classNumber) Class 
+
+                                .row(style="margin-top:10px")
+                                    .col-md-12   
+                                        h2 Images     
+
+                                        a(href=productItem.picture1Path)   
+                                            img.shadow(src=productItem.picture1Path width="100px")                    
+
+                                        if(productItem.picture2Path != null && productVariant.orderNo > 1)
+                                            a(href=productItem.picture2Path)   
+                                                img.shadow(src=productItem.picture2Path width="100px")  
+                                        
+                                        if(productItem.picture3Path != null && productVariant.orderNo > 2)
+                                            a(href=productItem.picture3Path)   
+                                                img.shadow(src=productItem.picture3Path width="100px") 
+                                        
+                                        if(productItem.picture4Path != null && productVariant.orderNo > 3)
+                                            a(href=productItem.picture4Path)   
+                                                img.shadow(src=productItem.picture4Path width="100px") 
+                                        
+                                        if(productItem.picture5Path != null && productVariant.orderNo > 4)
+                                            a(href=productItem.picture5Path)   
+                                                img.shadow(src=productItem.picture5Path width="100px") 
+                                .row(style="margin-top:10px")
+                                    .col-md-12   
+                                        h2 Downloads 
+
+                                        a(href=productItem.pdfPath) Generate Product Item
+    +footer()
++setting()
+
++scripts()
+ <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                    
+<script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+script(src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js")
+script(src="https://cdn.jsdelivr.net/npm/exif-js")
+
+script(src="javascript/croppie.js")
+//- script(src="assets2/js/theme.min.js")
+script(src='assets2/js/caman.full.min.js')
+script(src="javascript/new/compressor.js")
+script(src="javascript/new/productItem.js")
+script(src="assets2/js/adminDashboard.js")

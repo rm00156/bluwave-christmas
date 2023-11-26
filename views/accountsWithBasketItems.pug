@@ -1,0 +1,72 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Accounts With Basket Items")
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <!-- third party css end -->
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div     
+    
+// Begin page
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Accounts With Basket Items
+                            h4 Basket Total £#{(outstandingAmount).toFixed(2)}
+                            h4 Number of Accounts: #{accounts.length}
+                .row
+                    .card
+                        .card-body
+                            
+                            .row.mb-2
+                                table#accountsTable.table.table-striped.dt-responsive.nowrap.w-100(style="cursor:pointer")
+                                    thead
+                                        tr
+                                        th Account Email
+                                        th Name 
+                                        th Created Date 
+                                    tbody
+                                        input#numberOfItems(value=accounts.length style="display:none")
+                                        each account, index in accounts
+                                            tr(id=index data-accountNumber=account.accountNumber)
+                                                td #{account.email}
+
+                                                td #{account.name}
+                                                td #{account.created_at}
+
+                                    
+                                    
+                                        
+
+        
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+
+script(src="assets2/js/adminDashboard.js")
+script(src="javascript/new/accountsWithBasketItems.js")

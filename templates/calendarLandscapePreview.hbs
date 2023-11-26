@@ -1,0 +1,43 @@
+<style type="text/css">
+#overlay {
+    position: fixed;
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    cursor: pointer;
+}
+#infoi {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#infoi {
+  z-index: 10;
+}
+</style>
+<html>
+<body>
+<div id="infoi">
+  <img src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/watermark/copyright.png" style="width:100%;height:100%">
+</div>
+	<div id="overlay" >
+		<div style="height:672px;width:922px;margin-top:27px;margin-left:637px">
+            <img src={{calendarPicture}} style="height:100%;width:100%">
+		</div>
+	</div>
+	<div style="height:100%;width:100%">
+		<div>
+			<img src={{background}} style="height:100%;width:100%">
+		</div>
+	</div>
+
+</body>
+
+</html>

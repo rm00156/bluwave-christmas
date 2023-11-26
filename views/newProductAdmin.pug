@@ -1,0 +1,21 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    +head("Product")
+// Begin page
+.wrapper
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+
+    +footer()
+
++setting()
+
++scripts()

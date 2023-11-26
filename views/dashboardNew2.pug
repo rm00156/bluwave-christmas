@@ -1,0 +1,353 @@
+doctype html
+<!doctype html>
+html(lang="en")
+    include common/new/header.pug
+    +head("Admin Dashboard")
+    //- link(href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet")
+    link(href="css/new/sb-admin-2.min.css" rel="stylesheet")
+    link(href="css/new/basic.css" rel="stylesheet")
+    link(href="css/pieProgress.css" rel="stylesheet")
+    script(src="javascript/pieChart.js")
+    body(id="page-top")
+        div(id="wrapper")
+            include common/new/verticalAdminNavbar.pug
+            +verticalAdminNavbar()
+            .d-flex.flex-column(id="content-wrapper")
+
+                <!-- Main Content -->
+                div(id="content")
+                    include common/new/horizontalAdminNavbar.pug
+                    +horizontalAdminNavbar("Dashboard")
+                    .container-fluid
+                        <!-- Page Heading -->
+                        //- .d-sm-flex.align-items-center.justify-content-between.mb-4
+                            h1.h3.mb-0.text-gray-800 Dashboard
+                        
+                        .row
+                            .col-xl-3.col-md-6.mb-4
+                                .card.border-left-primary.shadow.h-100.py-2
+                                    .card-body
+                                        .row.no-gutters.align-items-center
+                                            .col.mr-2
+                                                .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1 Gross Revenue
+                                                .h5.mb-0.font-weight-bold.text-gray-800 £#{totalRevenue}
+                                            
+                                            .col-auto
+                                                i.fas.fa-pound-sign.fa-2x.text-gray-300
+                            
+                            .col-xl-3.col-md-6.mb-4
+                                .card.border-left-success.shadow.h-100.py-2
+                                    .card-body
+                                        .row.no-gutters.align-items-center
+                                            .col.mr-2
+                                                .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1 Net Revenue
+                                                .h5.mb-0.font-weight-bold.text-gray-800 
+                                            
+                                            .col-auto
+                                                i.fas.fa-coins.fa-2x.text-gray-300
+                            
+                            .col-xl-3.col-md-6.mb-4
+                                .card.border-left-info.shadow.h-100.py-2
+                                    .card-body
+                                        .row.no-gutters.align-items-center
+                                            .col.mr-2
+                                                .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1 Christmas Scheme Packs Sold
+                                                .h5.mb-0.font-weight-bold.text-gray-800 #{totalCardPacks}
+                                                
+                                            
+                                            .col-auto
+                                                i.fas.fa-history.fa-2x.text-gray-300
+
+                            .col-xl-3.col-md-6.mb-4
+                                .card.border-left-danger.shadow.h-100.py-2
+                                    .card-body
+                                        .row.no-gutters.align-items-center
+                                            .col.mr-2
+                                                .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1 New Card Designs Sold
+                                                .h5.mb-0.font-weight-bold.text-gray-800 
+                                            
+                                            .col-auto
+                                                i.fas.fa-envelope.fa-2x.text-gray-300
+
+
+                        .row
+                            .col-xl-3.col-md-6.mb-4
+                                .card.border-left-warning.shadow.h-100.py-2
+                                    .card-body
+                                        .row.no-gutters.align-items-center
+                                            .col.mr-2
+                                                .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1 Calendars Sold
+                                                .h5.mb-0.font-weight-bold.text-gray-800 #{totalCalendarPacks}
+                                            
+                                            .col-auto
+                                                i.fas.fa-calendar-week.fa-2x.text-gray-300
+                            
+                            .col-xl-3.col-md-6.mb-4
+                                .card.border-left-secondary.shadow.h-100.py-2
+                                    .card-body
+                                        .row.no-gutters.align-items-center
+                                            .col.mr-2
+                                                .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1 Cups Sold
+                                                .h5.mb-0.font-weight-bold.text-gray-800 
+                                            
+                                            .col-auto
+                                                i.fas.fa-mail-bulk.fa-2x.text-gray-300
+                            
+                            .col-xl-3.col-md-6.mb-4
+                                .card.border-left-purple.shadow.h-100.py-2
+                                    .card-body
+                                        .row.no-gutters.align-items-center
+                                            .col.mr-2
+                                                .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1 T-shirts sold
+                                                .h5.mb-0.font-weight-bold.text-gray-800 
+                                            
+                                            .col-auto
+                                                i.fas.fa-users.fa-2x.text-gray-300
+
+                            .col-xl-3.col-md-6.mb-4
+                                .card.border-left-pink.shadow.h-100.py-2
+                                    .card-body
+                                        .row.no-gutters.align-items-center
+                                            .col.mr-2
+                                                .text-xs.font-weight-bold.text-primary.text-uppercase.mb-1 Customer Accounts
+                                                .h5.mb-0.font-weight-bold.text-gray-800 2578
+                                                
+                                            
+                                            .col-auto
+                                                i.fas.fa-store.fa-2x.text-gray-300
+                        
+                        .row
+                            <!-- Area Chart -->
+                            .col-xl-8.col-lg-7
+                                .card.shadow.mb-4
+                                    <!-- Card Header - Dropdown -->
+                                    .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                                        h6.m-0.font-weight-bold.text-primary Gross Revenue
+                                        .dropdown.no-arrow
+                                            a.dropdown-toggle(href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
+                                                i.fas.fa-ellipsis-v.fa-sm.fa-fw.text-gray-400
+                                            .dropdown-menu.dropdown-menu-right.shadow.animated--fade-in(aria-labelledby="dropdownMenuLink")
+                                                a.dropdown-item( href="#") Net Revenue
+                                                a.dropdown-item( href="#") 24 hr Revenue
+                                                a.dropdown-item( href="#") Card Packs Sold
+                                                a.dropdown-item( href="#") Calendars Sold
+                                                a.dropdown-item( href="#") Post Cards Sold
+                                                a.dropdown-item( href="#") Customer Accounts    
+                                                a.dropdown-item( href="#") Kids Orders
+
+                                        <!-- Card Body -->
+                                    .card-body
+                                        .chart-area
+                                            canvas(id="myAreaChart")
+
+                            .col-xl-4.col-lg-7
+                                .card.shadow.mb-4
+                                    <!-- Card Header - Dropdown -->
+                                    .card-header.py-3.d-flex.flex-row.align-items-center.justify-content-between
+                                        h6.m-0.font-weight-bold.text-primary Percentage of Kids with Orders
+                                        .dropdown.no-arrow
+                                            a.dropdown-toggle(href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false")
+                                            i.fas.fa-ellipsis-v.fa-sm.fa-fw.text-gray-400
+
+                                    <!-- Card Body -->
+                                    .card-body
+                                        div.donut-size( id="specificChart" style="margin-top:20px")
+                                            div.pie-wrapper
+                                                span.label
+                                                    span.num 0
+                                                    span.smaller %
+                                                div.pie
+                                                    div.left-side.half-circle
+                                                    div.right-side.half-circle
+                                                div.shadow
+
+
+                        <!-- Content Row -->
+                        .row
+                            <!-- Content Column -->
+                            .col-lg-6.mb-4
+                                .card.shadow.mb-4
+                                    .card-header.py-3
+                                        h6.m-0.font-weight-bold.text-primary Schools Progress
+                                    .card-body
+                                        h4.small.font-weight-bold Great Heath Academy 
+                                            span.float-right 70%
+                                        .progress.mb-4
+                                            .progress-bar.bg-success(role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100")
+                                        
+                                        h4.small.font-weight-bold Plumpton
+                                            span.float-right 20%
+                                        .progress.mb-4
+                                            .progress-bar.bg-danger(role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100")
+                                        
+
+                            .col-lg-6.mb-4
+                                .card.shadow.mb-4
+                                    .card-header.py-3
+                                        h6.m-0.font-weight-bold.text-primary Task Progress
+                                    .card-body
+                                        h4.small.font-weight-bold Generating Proofs For Class ABC
+                                            span.float-right 97%
+                                        .progress.mb-4
+                                            .progress-bar.bg-success(role="progressbar" style="width: 97%" aria-valuenow="97" aria-valuemin="0" aria-valuemax="100")
+                                        
+                                        h4.small.font-weight-bold Updating Card for Customer Abigal
+                                            span.float-right 20%
+                                        .progress.mb-4
+                                            .progress-bar.bg-warning(role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100")
+              
+
+        include common/new/footer.pug
+        +footer()
+
+
+
+        script(src="vendor/jquery/jquery.min.js")
+        script(src="vendor/bootstrap/js/bootstrap.bundle.min.js")
+
+        <!-- Core plugin JavaScript-->
+        script(src="vendor/jquery-easing/jquery.easing.min.js")
+
+        <!-- Custom scripts for all pages-->
+        script(src="javascript/sb-admin-2.min.js")
+
+        <!-- Page level plugins -->
+        script(src="vendor/chart.js/Chart.min.js")
+
+        <!-- Page level custom scripts -->
+        script(src="javascript/demo/chart-area-demo.js")
+        script(src="javascript/demo/chart-pie-demo.js")
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+//- html(land="en")
+    include ./common/header.pug
+    head
+        title Kids Creative Cards - Dashboard
+        meta(name="description" content="Kids Creative Cards is a fundraising enterprise for nurseries and schools" )
+        meta(name="keywords" content="greeting cards, Easter fundraising project, kids cards 4 easter, kids cards")
+        meta(name="robots" content="index, follow" )
+        meta(name="revisit-after" content="7 days" )
+        meta(name="version" content="1.0" )
+        meta(name="google-site-verification" content="HRSGo4PTnq623i1qQkYcTKIMN8rTWOjUmQ9QbssoX5E" )
+        link(rel="shortcut icon" href="favicon.ico")
+        link(rel="stylesheet" href="css/kcards5.css" type="text/css" media="screen")
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+            
+        //- link(rel="stylesheet" href="css/kcards2.css" type="text/css" media="screen" )
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js")
+        link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous")
+        
+        script(type="text/javascript" src="javascript/dashboard.js")
+    body
+        div.outercontainer
+            header.headertop
+                div.kclogo
+                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/logo/kc4clogo4HD.png" alt="Kids Cards")
+            div.gapDiv gapDiv  
+            include common/navbar.pug
+            +navbar(user)                            
+            section <!--Aftr header-->
+                article
+                    div.mainarea(style="background:none!important; max-width:1200px!important;")
+                        div.searchStrip
+                            div.fullWidth
+                                div.extra(id="divTable" )  
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        h5 Total Revenue
+                                        h5 £#{totalRevenue}
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                        h5 Total Kids
+                                        h5 #{totalKids}
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        h5 Total Kids with Orders
+                                        h5 #{totalKidsWithOrders}
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                        h5 Total Parent Accounts
+                                        h5 #{totalParentAccounts}
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        h5 24 hour Revenue
+                                        h5 £#{todayRevenue}
+                        .searchStrip
+                            .fullWidth
+                                div.extra(id="divTable" )  
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                        h5 Total Card Packs Sold
+                                        h5 #{totalCardPacks}
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        h5 Total Calendars Sold
+                                        h5 #{totalCalendarPacks}
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                        
+                                    div(id="summary" style="background:#bcbdc0;width:20%;height:60px")
+                                        
+                                    div(id="summary" style="background:#fff;width:20%;height:60px")
+                                            
+                               
+                        div.introHeader Let's Get Started. Please select from the following below:                        
+                        nav.fullWidth.whiteBG
+                            div(id="options_case")
+                                div(id="admin" class="opChoice" onmouseover="hoverStateOn1('admin')" onmouseout="hoverStateOff1('admin')")
+                                    div.iconHeader
+                                        p Administrator
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/admin.png" alt="Administrator")
+                                    form(action="/addSchool" method="get")
+                                        button.iconButton
+                                            p Add School 
+                                    form(action="/signUpAdmin" method="get")
+                                        button.iconButton
+                                            p Add New Administrator
+                                div(id="accounts" class="opChoice" onmouseover="hoverStateOn6('accounts')" onmouseout="hoverStateOff6('accounts')")
+                                    div.iconHeader
+                                        p Accounts
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/admin.png" alt="Schools")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                div(id="schools" class="opChoice" onmouseover="hoverStateOn2('schools')" onmouseout="hoverStateOff2('schools')")
+                                    div.iconHeader
+                                        p School
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/schools.png" alt="Schools")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                div(id="classes" class="opChoice" onmouseover="hoverStateOn3('classes')" onmouseout="hoverStateOff3('classes')")
+                                    div.iconHeader
+                                        p Classes
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/classes.png" alt="Classes")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                div(id="kids" class="opChoice" onmouseover="hoverStateOn4('kids')" onmouseout="hoverStateOff4('kids')")
+                                    div.iconHeader
+                                        p Kids
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/child.png" alt="Kids")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                div(id="orders" class="opChoice" onmouseover="hoverStateOn5('orders')" onmouseout="hoverStateOff5('kids')")
+                                    div.iconHeader
+                                        p Orders
+                                    img(src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/packages.png" alt="Orders")
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+                                    button.iconButton
+                                        p(style="color:transparent !important") Dummy
+    include ./common/footer.pug
+    +footer()                         

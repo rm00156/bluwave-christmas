@@ -1,0 +1,142 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Order " + order[0].orderNumber)
+    link(href='assets2/css/style.css' rel='stylesheet')   
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')
+    body
+        +navbar()
+
+        section.section.pb-0
+            .container
+                .row.justify-content-center                            
+                    .col-sm-9.account-body
+                        .card-body.mb-5(style="border: 1px solid #f5ba4b")
+                            div(style="padding-bottom:10px;border-bottom: 4px solid #f5ba4b")
+                                h3(style="font-weight:700") Order Number: 
+                                    span #{order[0].orderNumber}
+                                h6(style="color:black;font-weight:700;font-size:13px;") Date Ordered: 
+                                    span  #{order[0].purchaseDttm}
+                                h6(style="color:black;font-weight:700;font-size:13px;") Order Total: 
+                                    span  £#{(parseFloat(order[0].total)).toFixed(2)}
+                            .row(style="margin-top:20px;")
+                                .col-sm-12
+                                    .card-body(style="border: 1px solid #f5ba4b")
+                                        div(style="padding-bottom:10px;border-bottom: 4px solid #f5ba4b")
+                                            h5(style="font-weight:700") Order Details
+                                        .row(style="margin-top:20px;")
+                                            .col-sm-6
+                                                div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                    h6(style="font-weight:700;") DELIVERY DETAILS
+                                                if(order[0].shippingAddressFk != null)
+                                                    div(style="padding-top:10px;padding-left:5px;")
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].fullName}
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].addressLine1}
+                                                        if(order[0].addressLine2 != null)
+                                                            h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].addressLine2}
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].city}
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].postCode}
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].country}
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].phoneNumber}
+                                                else
+                                                    h6(style="color:black;font-weight:700;font-size:13px;") Collection From School
+
+                                            .col-sm-6
+                                                div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                    h6(style="font-weight:700;") DELIVERY OPTION
+                                                div(style="padding-top:10px;padding-left:5px;")
+                                                    if(order[0].shippingAddressFk != null)
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") #{order[0].deliveryName}
+                                                            span  £#{(parseFloat(order[0].deliveryPrice)).toFixed(2)}
+                                                    else
+                                                        h6(style="color:black;font-weight:700;font-size:13px;") £0.00
+
+
+                                        .row(style="margin-top:20px;")
+                                            .col-sm-12
+                                                div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                    h6(style="font-weight:700;") ITEMS
+                                                div(style="padding-top:10px;padding-left:5px;")
+                                                    .shopping__cart__table
+                                                        table(style="width:100%")
+                                                            thead
+                                                                tr(style="background-color: #f5ba4b")
+                                                                    th Product
+                                                                    th Quantity
+                                                                    th Total
+                                                                    th
+                                                            tbody
+                                                                each orderItem, index in order
+                                                                    tr
+                                                                        td.product__cart__item
+                                                                            .product__cart__item__pic(style="width:100px;height:100px;overflow:hidden")
+                                                                                img(src=orderItem.picture alt='' style="    width: -webkit-fill-available;")
+                                                                            .product__cart__item__text
+                                                                                h6 #{orderItem.basketItemText1}
+                                                                                h5 £#{orderItem.price}
+                                                                                h6(style="margin-bottom:0") #{orderItem.productName} - #{orderItem.productVariantName}
+                                                                                
+                                                                        td.quantity__item
+                                                                            .quantity
+                                                                                h6 #{orderItem.quantity}
+                                                                        td.cart__price £#{(parseFloat(orderItem.cost)).toFixed(2)}
+                                        .row(style="margin-top:20px;")
+                                            .col-sm-6
+                                                div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                    h6(style="font-weight:700;") PAYMENT DETAILS
+                                                div(style="padding-top:10px;padding-left:5px;")
+                                                    //- if(order[0].paymentType == 'Stripe')
+                                                    ul(style="list-style:none")
+                                                        li
+                                                            label
+                                                                img(src="https://www.boohoo.com/on/demandware.static/-/Sites/default/dw1f80c965/paymenticons/card-icon.svg" style="width:50px;margin-left:5px")
+                                                                h6(style="float:right; margin-left: 10px") Card
+                                                    //- else
+                                                        ul(style="list-style:none")
+                                                            li
+                                                                label
+                                                                    img(src="https://www.boohoo.com/on/demandware.static/-/Sites/default/dw0a8b8784/paymenticons/paypal-icon.svg" style="width:50px;margin-left:5px")
+                                                                    h6(style="float:right; margin-left: 10px") Paypal
+                                            
+                                            .col-sm-6
+                                                div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                    h6(style="font-weight:700;") ORDER TOTAL
+                                                div(style="padding-top:10px;padding-left:5px;")
+                                                    ul.checkout__total__all(style="border:none")
+                                                        li
+                                                            p Subtotal 
+                                                                span £#{(parseFloat(order[0].subTotal)).toFixed(2)}
+                                                        li
+                                                            if(order[0].shippingAddressFk != null)
+                                                                p(style="color:black;font-weight:700;font-size:13px;") #{order[0].deliveryName}
+                                                                    span £#{(parseFloat(order[0].deliveryPrice)).toFixed(2)}
+                                                            else 
+                                                                h6(style="color:black;font-size:13px;") Collection From School
+                                                                    span £0.00
+                                                        li(id="total")
+                                                            h6(style="font-weight:700;")
+                                                                | Total 
+                                                                span £#{(parseFloat(order[0].total)).toFixed(2)}
+                                        if(refunds.length > 0)
+                                            .row(style="margin-top:20px")
+                                                .col-sm-12
+                                                    div(style="padding-top:10px;padding-left:5px;background-color:#f5ba4b;")
+                                                        h6(style="font-weight:700;") REFUNDS
+                                                    div(style="padding-top:10px;padding-left:5px;")
+                                                        each refund in refunds
+                                                            h6(style="font-weight:700") #{refund.createdDttm}
+                                                                span(style="float:right") #{refund.type} £#{(parseFloat(refund.amount)).toFixed(2)}
+                                        .row(style="margin-top:20px")
+                                            .col-sm-12   
+                                                a.btn.btn-outline-primary(href="/parentOrders" style="width:50%;font-size:12px;text-align:center;margin-top:10px;float:right" ) BACK TO ORDER HISTORY
+
+        +footer()   
+        <script src="assets2/libs/jquery/dist/jquery.min.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                            
+        <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+        script(src="assets2/js/theme.min.js")

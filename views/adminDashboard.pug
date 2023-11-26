@@ -1,0 +1,274 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Dashboard")
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    //- <!-- third party css end -->
+
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div    
+// Begin page
+.wrapper
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            h4.page-title Dashboard
+                .row
+                    .col-12
+                        .card.widget-inline
+                            .card-body.p-0
+                                .row.g-0
+                                    input#numberOfNonCompleted(style="display:none" value=schoolDashboardStatus.numberOfNonCompleted)
+                                    input#numberOfCompleted(style="display:none" value=schoolDashboardStatus.numberOfCompleted)
+                                    
+                                    if(user.email == 'rmillermcpherson4@gmail.com')
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-bottom
+                                                .card-body.text-center
+                                                    i.mdi.mdi-school.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{numberOfSchools}
+                                                    p.text-muted.font-15.mb-0 Schools
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-start.border-bottom
+                                                .card-body.text-center
+                                                    i.dripicons-checklist.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{orderDetails.numberOfOrders}
+                                                    p.text-muted.font-15.mb-0 Orders
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-start.border-bottom
+                                                .card-body.text-center
+                                                    i.dripicons-user-group.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{numberOfCustomers}
+                                                    p.text-muted.font-15.mb-0 Customers
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-start.border-bottom
+                                                .card-body.text-center
+                                                    i.dripicons-graph-line.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        if(giveBackDetails != null)
+                                                            span £#{(parseFloat(giveBackDetails.giveBackTotal)).toFixed(2)}
+                                                        else 
+                                                            span £0
+                                                        i.mdi.mdi-arrow-down.text-danger
+                                                    p.text-muted.font-15.mb-0 Give Back Amount
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-start.border-bottom
+                                                a(href='/revenue_chart')
+                                                    .card-body.text-center
+                                                        i.dripicons-graph-line.text-muted(style='font-size: 24px;')
+                                                        h3
+                                                            span £#{(orderDetails.subTotal).toFixed(2)}
+                                                            i.mdi.mdi-arrow-up.text-success
+                                                        p.text-muted.font-15.mb-0 Revenue
+                                            
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-end.border-start.border-bottom
+                                                .card-body.text-center
+                                                    i.uil.uil-kid.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{numberOfLinkedKids}
+                                            
+                                                    p.text-muted.font-15.mb-0 Linked Kids
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-end
+                                                .card-body.text-center
+                                                    i.mdi.mdi-currency-gbp.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        if(giveBackDetails == null)
+                                                            span £#{(orderDetails.subTotal)}
+                                                        else 
+                                                            span £#{(orderDetails.subTotal - giveBackDetails.giveBackTotal).toFixed(2)}
+                                                    p.text-muted.font-15.mb-0 Profit
+
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-end
+                                                .card-body.text-center
+                                                    i.mdi.mdi-currency-gbp.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span £#{(parseFloat(subTotalToday)).toFixed(2)}
+                                                    p.text-muted.font-15.mb-0 Revenue Today
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-end
+                                                .card-body.text-center
+                                                    i.mdi.mdi-percent.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{((orderDetails.numberOfOrders/numberOfCustomers)*100).toFixed(2)}%
+                                                    p.text-muted.font-15.mb-0 Orders/Customer
+
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-end
+                                                .card-body.text-center
+                                                    i.mdi.mdi-timelapse.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{averageTimeFromSignUpToPurchaseInMinutes}
+                                                    p.text-muted.font-15.mb-0 Average Time From SignUp To Purchase In Minutes
+
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-end
+                                                .card-body.text-center
+                                                    i.mdi.mdi-registered-trademark.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{numberOfSignUpsToday}
+                                                    p.text-muted.font-15.mb-0 Sign Ups Today
+                                        .col-sm-6.col-lg-2
+                                            .card.shadow-none.m-0.border-end
+                                                .card-body.text-center
+                                                    i.uil.uil-kid.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{numberOfOrdersToday}
+                                            
+                                                    p.text-muted.font-15.mb-0 Orders Today
+
+
+                                    else 
+                                        .col-sm-6.col-lg-3
+                                            .card.shadow-none.m-0
+                                                .card-body.text-center
+                                                    i.mdi.mdi-school.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{numberOfSchools}
+                                                    p.text-muted.font-15.mb-0 Schools
+                                        .col-sm-6.col-lg-3
+                                            .card.shadow-none.m-0.border-start
+                                                .card-body.text-center
+                                                    i.dripicons-checklist.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{orderDetails.numberOfOrders}
+                                                    p.text-muted.font-15.mb-0 Orders
+                                        .col-sm-6.col-lg-3
+                                            .card.shadow-none.m-0.border-start
+                                                .card-body.text-center
+                                                    i.dripicons-user-group.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        span #{numberOfCustomers}
+                                                    p.text-muted.font-15.mb-0 Customers
+                                        .col-sm-6.col-lg-3
+                                            .card.shadow-none.m-0.border-start
+                                                .card-body.text-center
+                                                    i.dripicons-graph-line.text-muted(style='font-size: 24px;')
+                                                    h3
+                                                        if(giveBackDetails != null)
+                                                            span £#{(parseFloat(giveBackDetails.giveBackTotal)).toFixed(2)}
+                                                        else 
+                                                            span £0
+                                                        i.mdi.mdi-arrow-up.text-success
+                                                    p.text-muted.font-15.mb-0 Give Back Amount
+                    
+                .row
+                    .col-lg-3
+                        .card
+                            .card-body
+                                .d-flex.justify-content-between.align-items-center
+                                    h4.header-title School Statuses
+                                
+                                .mt-3.my-4.chartjs-chart(style='height: 207px;')
+                                    canvas#project-status-chart(data-colors='#42d29d,#f9bc0d')
+                                .row.text-center.mt-2.py-2
+                                    .col-sm-6
+                                        .my-2.my-sm-0
+                                            i.mdi.mdi-trending-up.text-success.mt-3.h3
+                                            h3.fw-normal
+                                                span #{schoolDashboardStatus.numberOfCompletedPercentage}%
+                                            p.text-muted.mb-0 Completed
+                                    .col-sm-6
+                                        .my-2.my-sm-0
+                                            i.mdi.mdi-trending-down.mt-3.h3(style="color:#f9bc0d")
+                                            h3.fw-normal
+                                                span #{schoolDashboardStatus.numberOfNonCompletedPercentage}%
+                                            p.text-muted.mb-0  In-progress
+                                            
+                    .col-lg-4
+                        .card
+                            .card-body
+                                .d-flex.justify-content-between.align-items-center
+                                    h4.header-title.mb-3 School Progress
+                                table#progressTable.table.dt-responsive.nowrap.w-100(style="cursor:pointer")
+                                    thead
+                                        th
+                                    tbody
+                                        each schoolProgressDetail, index in schoolProgressDetails
+                                            tr 
+                                                td
+                                                    a(href="/new_school_details?number=" + schoolProgressDetail.schoolNumber)
+                                                        h5.mb-1.mt-0.fw-normal #{schoolProgressDetail.name}
+                                                        .progress-w-percent
+                                                            span.progress-value.fw-bold #{parseFloat((schoolProgressDetail.percentage)).toFixed(0)}%
+                                                            .progress.progress-sm
+                                                                if(index % 4 == 0)
+                                                                    .progress-bar.bg-success(role='progressbar' style='width:' + parseFloat((schoolProgressDetail.percentage)).toFixed(0) +'%;' aria-valuenow=parseFloat((schoolProgressDetail.percentage)).toFixed(0) aria-valuemin='0' aria-valuemax='100')
+                                                                else if(index % 3 == 0)
+                                                                    .progress-bar.bg-warning(role='progressbar' style='width:' + parseFloat((schoolProgressDetail.percentage)).toFixed(0) +'%;' aria-valuenow=parseFloat((schoolProgressDetail.percentage)).toFixed(0) aria-valuemin='0' aria-valuemax='100')
+
+                                                                else if(index % 2 == 0)
+                                                                    .progress-bar.bg-danger(role='progressbar' style='width:' + parseFloat((schoolProgressDetail.percentage)).toFixed(0) +'%;' aria-valuenow=parseFloat((schoolProgressDetail.percentage)).toFixed(0) aria-valuemin='0' aria-valuemax='100')
+                                                                else
+                                                                    .progress-bar.bg-dark(role='progressbar' style='width:' + parseFloat((schoolProgressDetail.percentage)).toFixed(0) +'%;' aria-valuenow=parseFloat((schoolProgressDetail.percentage)).toFixed(0) aria-valuemin='0' aria-valuemax='100')
+
+                    .col-lg-5 
+                        
+                        .card
+                            .card-body
+                                h4.header-title.mt-2.mb-3 Top Selling Products
+                                if(topFivePerformingProductVariants.length > 0)
+                                    .table-responsive
+                                        table#topFiveTable.table.table-centered.table-nowrap.table-hover.mb-0
+                                            tbody
+                                                each item in topFivePerformingProductVariants
+                                                    tr
+                                                        td
+                                                            img.shadow(src=item.displayImagePath style="width:100px")
+                                                        td
+                                                            h5.font-14.my-1.fw-normal #{item.productName}
+                                                            span.text-muted.font-13 #{item.productVariantName}
+                                                        
+                                                        td
+                                                            h5.font-14.my-1.fw-normal #{item.totalQuantity}
+                                                            span.text-muted.font-13 Quantity
+                                                        td
+                                                            h5.font-14.my-1.fw-normal £#{parseFloat((item.price)).toFixed(2)}
+                                                            span.text-muted.font-13 Price
+                                                        
+                                                        td
+                                                            h5.font-14.my-1.fw-normal £#{parseFloat((item.cost)).toFixed(2)}
+                                                            span.text-muted.font-13 Cost
+                                else 
+                                    p No Items have been bought
+
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+
+//- <!-- Datatable Init js -->
+//- <script src="assets/js/pages/demo.datatable-init.js"></script>
+//- //- script(src="javascript/newProducts.js")
+
+<script src="assets/js/vendor/chart.min.js"></script>
+<script src="assets/js/pages/demo.dashboard-projects.js"></script>
+script(src="assets2/js/adminDashboard.js")
+

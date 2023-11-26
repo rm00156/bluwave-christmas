@@ -1,0 +1,111 @@
+doctype html
+head
+    include ./common/revised/adminHead.pug
+    include ./common/revised/adminSideBar.pug
+    include ./common/revised/adminTopBar.pug
+    include ./common/revised/adminFooter.pug
+    include ./common/revised/adminSetting.pug
+    include ./common/revised/adminScripts.pug
+    <!-- Datatables css -->
+    
+    +head("Give Back Details")
+    <link href="assets/css/vendor/dataTables.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/vendor/responsive.bootstrap5.css" rel="stylesheet" type="text/css" />
+    <!-- third party css end -->
+#preloader
+    #status
+        .bouncing-loader
+            div
+            div
+            div     
+    
+// Begin page
+.wrapper
+
+    +sidebar()
+    .content-page
+        .content
+            +topbar()
+            .container-fluid
+                // start page title
+                .row
+                    .col-12
+                        .page-title-box
+                            a(href="/new_school_details?number=" + school.schoolNumber)
+                                h3.page-title #{school.name} Give Back Details
+                
+                .row 
+                    .col-sm-8
+                        each schoolClass, index in classes 
+                            .row
+                                .card.shadow
+                                    .card-header 
+                                        h3 #{schoolClass.name}
+                                    .card-body.text-center
+                                        table.table.table-responsive.mb-0.w-100
+                                            thead
+                                                    tr.text-center
+                                                        th Package
+                                                        th Quantity
+                                                        th (£) Total
+                                                        th (£) Give Back Amount Per Purchase
+                                                        th (£) Total Give Back Amount
+                                            tbody
+                                                    tr
+                                                        td Standard Pack
+                                                        td #{schoolClass.standardPackQuantity}
+                                                        td #{schoolClass.standardTotalCost}
+                                                        td #{schoolClass.standardPackGiveBackPer}
+                                                        td #{schoolClass.standardPackGiveBack}
+                                                    tr
+                                                        td Photo Pack
+                                                        td #{schoolClass.photoPackQuantity}
+                                                        td #{schoolClass.photoTotalCost}
+                                                        td #{schoolClass.photoPackGiveBackPer}
+                                                        td #{schoolClass.photoPackGiveBack}
+                                                    tr
+                                                        td Calendar
+                                                        td #{schoolClass.calendarQuantity}
+                                                        td #{schoolClass.calendarTotalCost}
+                                                        td #{schoolClass.calendarGiveBackPer}
+                                                        td #{schoolClass.calendarGiveBack} 
+
+                                                    tr
+                                                        td
+                                                        td
+                                                        td
+                                                        td
+                                                            h5.text-muted (£) Total
+                                                        td 
+                                                            h5.text-muted #{schoolClass.giveBackTotal}        
+                        
+                                
+                    .col-sm-4
+                        .card.shadow
+                            .card-header 
+                                h5.text-center (£) Total Amount To Be Given Back
+                            .card-body.text-center
+
+                                h1 £ #{totalGiveBackAmount}
+                                if(charityAmount == null || charityAmount.confirmedFl == false)
+                                    h5.text-danger NOT CONFIRMED BY CUSTOMER  
+                                else 
+                                    h5.text-success CONFIRMED BY CUSTOMER                  
+                                    if(schoolRequiresAction == true)
+                                        h5.text-danger SEND MONEY BACK TO SCHOOL AND MOVE SCHOOL TO NEXT STEP
+                                    else
+                                        h5.text-success NO FURTHER ACTION REQUIRED  
+
+
+        
+    +footer()
++setting()
+
++scripts()
+<script src="assets/js/vendor/jquery.dataTables.min.js"></script>
+<script src="assets/js/vendor/dataTables.bootstrap5.js"></script>
+<script src="assets/js/vendor/dataTables.responsive.min.js"></script>
+<script src="assets/js/vendor/responsive.bootstrap5.min.js"></script>
+
+script(src="assets2/js/adminDashboard.js")
+script(src="javascript/new/giveback.js")

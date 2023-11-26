@@ -1,0 +1,83 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Submit Bank Details")
+    link(href='assets2/css/style.css' rel='stylesheet')   
+    <link href="assets/css/vendor/britecharts.min.css" rel="stylesheet" type="text/css" />
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')
+
+body
+    +navbar()
+    section.section.section-full.bg-light
+        // Content
+        .container
+            
+            .row.justify-content-center
+
+                .col-md-10.col-lg-8
+                    .form-styled.bg-white
+                        // Heading
+                        h4.text-center.mb-4
+                            | Submit Bank Details
+                        // Subheading
+                        p.text-center.mb-5
+                            | Please enter the Bank Details for where you wish to receive the fundraising amount <b>£#{charityAmount.amount}</b>
+                        // Password
+                        form#form.form-group(action='/confirmAmount' method='post')
+
+                            .row
+                                .col-sm-6
+                                    label Full Name Of Account Holder:
+                                    .input-group
+                                        input.form-control(placeholder='Please enter the name of the account holder', pattern='[a-zA-Z- ]+' minlength=1, maxlength=50 ,id="name" required=true, name='name', type='text' value=(formData != undefined) ? formData.name : '')
+                                    p#error.small.text-danger
+                                
+                                .col-sm-6
+                                    label Payment Type:
+                                    br
+                                    select.form-control(id="type" name="type")
+                                        option(value="BACS") BACS
+                                        option(value="Cheque") Cheque
+
+                            .row(style="margin-top:5px")
+                                .col-sm-6
+                                    label Bank Account Number:
+                                    .input-group
+                                        input.form-control(placeholder='Please enter your bank account number', id="bankAcc" minlength=8, maxlength=8  required=true, name='bankAcc', type='text' value=(formData != undefined) ? formData.bankAcc : '')
+                                    p#errorBankAcc.small.text-danger
+                                
+                                .col-sm-6
+                                    label Sort Code:
+                                    .input-group
+                                        input.form-control(placeholder='Please enter your sort code', id="sortCode" required=true, minlength=6, maxlength=6  value=(formData != undefined) ? formData.sortCode : '' name='sortCode', type='text' )
+                                    p#errorSortCode.small.text-danger
+
+                            .row(style="margin-top:5px")
+                                
+                                
+                            .row(style="margin-top:5px") 
+                                .col-sm-6(style="text-align:center;margin-top:20px")
+                                    
+                                    input.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" type="submit" value="Submit & Confirm")
+                                .col-sm-6(style="text-align:center;margin-top:20px")
+                                    a(href="/confirmAmount")
+                                        input.btn.btn-success.mb-2.me-2(style="border-color:#f5ba4b !important;background-color:#f5ba4b !important" value="Cancel")
+                    
+
+    +footer()        
+    //- script(src="javascript/organiser.js") 
+    <script src="assets/libs/jquery/dist/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>     
+    <script src="assets/js/vendor/d3.min.js"></script>
+    //- <script src="assets/js/vendor/britecharts.min.js"></script>
+   
+    //- <script src="assets/js/pages/demo.britechart.js"></script>                   
+    //- script(src="javascript/organiserPieChart.js")
+    script(src="assets2/js/theme.min.js")
+    script( type="text/javascript" src="javascript/charity.js")

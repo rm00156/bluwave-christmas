@@ -1,0 +1,50 @@
+doctype html
+html(lang="en")
+    include ./common/new/header.pug
+    +head("Ship")
+    link(href="css/new/basic.css"  rel="stylesheet")
+    link(rel="stylesheet" href="css/temp.css")
+    link(rel="stylesheet" href="css/new/style.css")
+    body(style="background-color:white !important;padding-top:3rem")
+        include common/new/horizontalNavbar.pug
+        +horizontalNavbar(user)
+        script(src="javascript/jsQR.js")
+        section.product-section(style="padding-top:50px")
+            .container
+                .row
+                    .col-sm-12
+                        h2(style="text-align:center") Quick Ship
+                
+                .row
+                    .col-sm-12
+                        .card.shadow.mb-12
+                            .card-header
+                                h6 By Qr Code
+                            .card-body(style="text-align:center")
+                                .row
+                                    .col-sm-12
+                                        h5 Scan Qr Code on Order Email to set order to shipped
+                                        
+                                        img(id="image" src="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/qr_example.png" style="width:60%")
+                                        div.containerR(style="margin-top:10px;display:none" id="qr")
+                                            div
+                                                div(id="loadingMessage")
+                                                canvas(id="canvas"  hidden)
+                                                div(id="output" hidden)
+                                                    div(id="outputMessage") No QR code detected.
+                                                    div(hidden)
+                                                        b Data:
+                                                            span(id="outputData")
+                                                    
+                                            
+                                        button.site-btn(id="buttonClick" style="margin-top:10px") Ship with QR Code
+                                        button.site-btn(id="stop" style="display:none") Cancel
+                    
+            script(src="javascript/shipOrder.js")
+        include ./common/new/footer.pug
+        +footer()                                  
+                                        
+                                   
+                                        
+    
+

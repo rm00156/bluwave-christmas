@@ -1,0 +1,146 @@
+doctype html
+head
+    include common/revised/normalHeader.pug
+    include common/revised/navbar.pug
+    include common/revised/footer.pug
+    +head("Organiser Dashboard")
+    link(rel="stylesheet" href="css/pieProgress.css")
+    link(href='assets2/css/style.css' rel='stylesheet') 
+    <link href="assets/css/vendor/britecharts.min.css" rel="stylesheet" type="text/css" />
+    link#app-style(href='assets/css/app-creative.min.css' rel='stylesheet' type='text/css')
+    link(href="assets/css/test.css" rel='stylesheet' type='text/css')
+body 
+    +navbar()
+    section.section.section-full.bg-light.mt-3
+        // Content
+        .container
+            .row 
+                .col-sm-3 
+                    .card.shadow.mb-12
+                        //- .card-header
+                            h6 Progress
+                        .card-body(style="text-align:center")
+                            .row
+                                .col-sm-12
+                                    div.opChoice(id="purchase"  style="padding-bottom:5px;text-align: center;")
+                                        div.iconHeader
+                                            div.columnBottom
+                                                div.donut-size( id="statusChart" )
+                                                    div.pie-wrapper(style="!important;")
+                                                        span.label
+                                                            span.num 
+                                                                h6.currentStatus(style="padding-top:60px;font-size:9pt") #{school.type}
+                                                                input(style="display:none" id="currentStatus" value=school.type)
+                                                                input(style="display:none" id="statusCount" value=school.typeId)
+                                                        div.pie
+                                                            div.left-side.half-circle(style="border: solid #4B0082")
+                                                            div.right-side.half-circle(style="border: solid #4B0082")
+                                                        div.shadow
+
+                            .row
+                                .col-sm-12
+                                    each statusTypeDetail, index in statusTypeDetails.statusTypeDetails
+                                        h8(style=(statusTypeDetail.reached ? "color:green" : "")) #{(index + 1)}. #{statusTypeDetail.statusType} 
+                                        i.fas.fa-check(style=(statusTypeDetail.reached ? "color:green" : "display:none"))
+                                        br
+                .col-sm-9 
+                    .row
+                        .col-sm-4
+                            #schoolDetails.card.shadow.mb-12(style="cursor:pointer" data-schoolNumber=school.schoolNumber)
+                                .card-header
+                                    h6 School Details
+                                .card-body(style="text-align:center")
+                                    h5 #{school.name}
+                                    p  Address: #{school.address}, #{school.postCode}
+                                    p  Telephone: #{school.number}
+                                    p  Email: #{user.email}
+                                    p  Organiser Name: #{user.name}
+                                    a(href="/participants")
+                                        p  Number of Classes: #{numberOfClasses}
+                                    p  Number of Kids Per Class #{school.numberOfKidsPerClass}
+                        .col-sm-4
+                                a(href="/participants")
+                                    .card.shadow.mb-12(style="cursor:pointer")
+                                        .card-header
+                                            h6 Order Details
+                                        .card-body(style="text-align:center")
+                                            .row 
+                                                div(dir='ltr')
+                                                    .bar-container-horizontal(style='width: 100%;height: 220px;' data-colors='#3688fc,#42d29d,#6c757d,#fa6767,#f9bc0d,#44badc,#e3eaef')
+
+                                            .row(style="margin-top:20px")
+                                                input#totalKids(style="display:none" value=orderDetails.totalKids)
+                                                input#orderCount(style="display:none" value=orderDetails.orderCount)
+                                            .row
+                                                .col-sm-12
+                                                    if(deadlineDetails.deadLineDttm != '')
+                                                        - if(deadlineDetails.daysLeftSign == 'negative')
+                                                            h5(style="color:red") #{(deadlineDetails.daysLeft * -1)} Days since purchase deadline passed
+                                                        - else if( deadlineDetails.daysLeftSign == 'zero')
+                                                            h5(style="color:red") Purchase deadline is Today 
+                                                        - else
+                                                            h5(style="color:red") #{deadlineDetails.daysLeft} Days till purchase deadline  
+                                                    input(id="ordered" type="number" value=orderDetails.orderedPercentage style="display:none")
+                                        
+                                                
+                        .col-sm-4
+                            .row
+                                .card.shadow.mb-12(style="cursor:pointer")
+                                    .card-header
+                                        h6  Give Back Amount
+                                    .card-body.text-center
+                                        
+                                        if(giveBackAmount != null)
+                                            h1 £#{giveBackAmount.giveBackTotal}
+                                        else 
+                                            h1 £0.00
+                                        if(charityAmount)
+                                            if(charityAmount.confirmedFl == false)
+                                                a.btn.btn-outline-primary.button2.mb-5(href='/confirmAmount' style="width:50%;color:black !important") Confirm
+                                            else 
+                                                a(href="/confirmAmount")
+                                                    h5.text-success CONFIRMED
+                            .row 
+                                .card.shadow(style="cursor:pointer")
+                                    .card-header
+                                        h6  Resources
+                                    .card-body.text-center
+                                        ul 
+                                            li
+                                                a(href="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/Template/EmailTeachersGuideSampleOrderForm2022.pdf") Sample and order form explained
+                                            li
+                                                a(href="https://kidscards4christmas.s3.eu-west-2.amazonaws.com/Template/EmailTeachersGuide2022.pdf") Teachers and Organisers Guide
+                    
+                    .row(style="margin-top:10px")
+                        .col-sm-4
+                            a(href="/linkKids")
+                                .card.shadow.mb-12(style="cursor:pointer")
+                                    .card-header
+                                        h6 Link My Child
+                                    .card-body(style="text-align:center")
+                                        img(src="img/frontcardsnew.png" style="width:-webkit-fill-available; width:-moz-available")
+                        
+                        .col-sm-4 
+                            a(href="/shop")
+                                .card.shadow.mb-12(style="cursor:pointer")
+                                    .card-header
+                                        h6 Shop
+                                    .card-body(style="text-align:center")
+                                        img(src="img/shop.jpeg" style="width:60%")
+                           
+                        
+    +footer() 
+    //- <script src="assets/libs/jquery/dist/jquery.min.js"></script>
+    //- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnKt8_N4-FKOnhI_pSaDL7g_g-XI1-R9E"></script>
+                     
+    <script src="assets2/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets2/libs/flickity/dist/flickity.pkgd.min.js"></script>
+
+    <script src="assets/js/vendor/d3.min.js"></script>
+    <script src="assets/js/vendor/britecharts.min.js"></script>
+   
+    <script src="assets/js/pages/demo.britechart.js"></script>      
+    script(src="javascript/organiser.js")                     
+    script(src="javascript/organiserPieChart.js")
+    script(src="assets2/js/theme.min.js")
+    
