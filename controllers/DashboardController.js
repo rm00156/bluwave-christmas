@@ -10,7 +10,7 @@ const aws = require('aws-sdk');
 const path = require('path');
 const fs = require('fs-extra');
 const PDFMerge = require('pdf-merge');
-const config = require('../config/config.json');
+// const process.env = require('../process.env/process.env.json');
 
 const env = process.env.NODE_ENV || "development";
 const validator = require('../validators/shippingDetails');
@@ -18,11 +18,11 @@ const validator = require('../validators/shippingDetails');
 let Queue = require('bull');
 // Connect to a local redis intance locally, and the Heroku-provided URL in production
 
-//create config file
+//create process.env file
 aws.config.update({
-  secretAccessKey: config.secretAccessKey,
-  accessKeyId:config.accessKeyId,
-  region: config.region
+  secretAccessKey: process.env.secretAccessKey,
+  accessKeyId:process.env.accessKeyId,
+  region: process.env.region
 });
 
 const compile = async function(templateName, data)
@@ -602,8 +602,8 @@ exports.addToBasket2 = async function(req,res)
                 {
 
                     var path = productItem.pdfPath;
-                    var fileName = path.replace(config.s3BucketPath,'');
-                    var fileName = path.replace(config.s3BucketPath,'');
+                    var fileName = path.replace(process.env.s3BucketPath,'');
+                    var fileName = path.replace(process.env.s3BucketPath,'');
                         models.basketItem.build({
                             path:path,
                             kidFk:(kidId == undefined || kidId == null) ? null : kidId,
@@ -784,7 +784,7 @@ exports.addToBasket = function(req,res)
                         }
                     }
 
-                    var fileName = path.replace(config.s3BucketPath,'');
+                    var fileName = path.replace(process.env.s3BucketPath,'');
                     await models.basketItem.create({
                         path:path,
                         kidFk:kidId,
@@ -1359,7 +1359,7 @@ exports.print = async function(req,res)
         // put check that sampleArray has length greater than zero
         const s3 = new aws.S3();
         var params = {
-        Bucket:config.bucketName,
+        Bucket:process.env.bucketName,
         };
 
         var files = new Array();
@@ -1392,7 +1392,7 @@ exports.print = async function(req,res)
 
     fs.unlink(  process.cwd() + '/tmp/'  + now + '_proof.pdf');
 
-    path = config.s3BucketPath + params.Key;
+    path = process.env.s3BucketPath + params.Key;
     models.class.update(
         {proofPath:path},
              {where:{
@@ -2147,7 +2147,7 @@ exports.printForm = async function(req,res)
      });
      const page= await browser.newPage();
      var basketItems = new Array();
-     basketItems.push({cardPath:config.s3BucketPath +'Packages/package2.jpg'});
+     basketItems.push({cardPath:process.env.s3BucketPath +'Packages/package2.jpg'});
      var data = {basketItems:basketItems};
      const content = await compile('printForm', data);
      await page.setContent(content);

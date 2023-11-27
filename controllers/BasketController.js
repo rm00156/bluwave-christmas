@@ -1,7 +1,7 @@
 const models = require('../models');
 const productController = require('../controllers/ProductController');
 const parentController = require('../controllers/ParentController');
-const config = require('../config/config.json');
+// const process.env = require('../process.env/process.env.json');
 const { product } = require('puppeteer');
 
 exports.getBasketItemsDetailsForAccountId = async function(accountId)
@@ -74,7 +74,7 @@ exports.addToBasket = async function(req,res)
     else
     {
         var path = productItem.pdfPath;
-        var fileName = path.replace(config.s3BucketPath,'');
+        var fileName = path.replace(process.env.s3BucketPath,'');
 
         await models.basketItem.create({
             path:path,

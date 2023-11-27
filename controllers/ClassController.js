@@ -7,7 +7,7 @@ var adminController = require('../controllers/AdminController');
 
 const PDFMerge = require('pdf-merge');
 const aws = require('aws-sdk');
-const config = require('../config/config.json');
+// const process.env = require('../process.env/process.env.json');
 const archiver = require('archiver');
 // const REDIS_URL = process.env.REDISCLOUD_URL || 'redis://127.0.0.1:6379';
 // // const Redis = require('ioredis');
@@ -24,9 +24,9 @@ const hbs = require('handlebars');
 const moment = require('moment');
 
 aws.config.update({
-    secretAccessKey: config.secretAccessKey,
-    accessKeyId:config.accessKeyId,
-    region: config.region
+    secretAccessKey: process.env.secretAccessKey,
+    accessKeyId:process.env.accessKeyId,
+    region: process.env.region
   });
 
 exports.getClassById = async function(id)
@@ -162,7 +162,7 @@ const processSchoolOrderInstruction = async function(schoolId, job)
     });
  
     var params = {
-        Bucket:config.bucketName,
+        Bucket:process.env.bucketName,
     };
 
     const s3 = new aws.S3();
@@ -200,7 +200,7 @@ const processSchoolOrderInstruction = async function(schoolId, job)
     params.ACL = 'public-read' ;
     params.Body = purchaseBuffer;
 
-    var pdfPath = config.s3BucketPath + fileName;
+    var pdfPath = process.env.s3BucketPath + fileName;
     var s3UploadPromise = new Promise(function(resolve, reject) {
     s3.upload(params, function(err, data) {
             if (err) {
@@ -281,7 +281,7 @@ async function generateCoverSheetForSchoolOrderInstructions(school, classes, now
 const downloadFiles = async function(filePath, params, i,s3)
 {
     var now = Date.now();
-    const fileName = filePath.replace(config.s3BucketPath,'');
+    const fileName = filePath.replace(process.env.s3BucketPath,'');
     params.Key = fileName;
     var file;
     const tempFile = 'tmp' +'/SchoolOrderInstruction' + i + '_' + now +'.pdf';
@@ -391,7 +391,7 @@ async function createOrderInstruction(schoolClass, schoolDeadline, createFl, pro
 
     const s3 = new aws.S3();
     var params = {
-        Bucket:config.bucketName,
+        Bucket:process.env.bucketName,
         Body: buffer,
         Key: filename,
         ACL:'public-read'
@@ -418,7 +418,7 @@ async function createOrderInstruction(schoolClass, schoolDeadline, createFl, pro
             classFk:schoolClass.id,
             deadLineDttm: schoolDeadline.deadLineDttm,
             createdDttm: Date.now(),
-            pdfPath: config.s3BucketPath + filename,
+            pdfPath: process.env.s3BucketPath + filename,
             deleteFl: false,
             versionNo: 1
     
@@ -429,7 +429,7 @@ async function createOrderInstruction(schoolClass, schoolDeadline, createFl, pro
         await models.classOrderInstruction.update({
             deadLineDttm: schoolDeadline.deadLineDttm,
             createdDttm: Date.now(),
-            pdfPath: config.s3BucketPath + filename,
+            pdfPath: process.env.s3BucketPath + filename,
             versionNo: models.sequelize.literal('versionNo + 1')
         },{
             where:{
@@ -608,7 +608,7 @@ exports.generateOrdersPdf = async function(classId, job)
 
     const s3 = new aws.S3();
     var params = {
-        Bucket:config.bucketName,
+        Bucket:process.env.bucketName,
     };
 
     var path = null;
@@ -698,7 +698,7 @@ exports.generateOrdersPdf = async function(classId, job)
 
     var s3Stream = fs.createReadStream(fileName);
     params = {
-        Bucket:config.bucketName,
+        Bucket:process.env.bucketName,
         Body: s3Stream,
         Key: fileName,
         ACL:'public-read'
@@ -719,7 +719,7 @@ exports.generateOrdersPdf = async function(classId, job)
     progress++;
     job.progress(progress);
 
-    return {pdfPath:config.s3BucketPath + fileName};
+    return {pdfPath:process.env.s3BucketPath + fileName};
 }
 
 exports.downloadPurchasedFiles = async function(purchasedFile, params, i,s3)
@@ -875,7 +875,7 @@ exports.generatePrintForm = async function(classId, job)
     var s3FileLocation = school.name + '/' + schoolClass.name + '/' + now + "_printForm.pdf";
 
     var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: buffer,
     Key: s3FileLocation,
     ACL:'public-read'
@@ -897,7 +897,7 @@ exports.generatePrintForm = async function(classId, job)
     progress++;
     job.progress(progress);
 
-    var s3Path = config.s3BucketPath + s3FileLocation;
+    var s3Path = process.env.s3BucketPath + s3FileLocation;
     return s3Path;
 }
 

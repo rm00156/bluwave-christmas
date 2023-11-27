@@ -4,7 +4,7 @@ const path = require('path');
 
 const fs = require('fs-extra');
 const moment = require('moment');
-const config = require('./config/config.json');
+// const process.env = require('./process.env/process.env.json');
 let models = require('./models');
 const aws = require('aws-sdk');
 const puppeteer = require('puppeteer');
@@ -14,7 +14,7 @@ const nodeMailer = require('nodemailer');
 // Connect to a local redis intance locally, and the Heroku-provided URL in production
 let REDIS_URL = /*process.env.REDIS_URL*/ process.env.STACKHERO_REDIS_URL_TLS || "redis://127.0.0.1:6379";
 const env = process.env.NODE_ENV || "development";
-const urlPrefix = env == 'development' ? 'http://localhost:4000' : config.website;
+const urlPrefix = env == 'development' ? 'http://localhost:4000' : process.env.website;
 const productController = require('./controllers/ProductController.js');
 const kidController = require('./controllers/KidController.js');
 const schoolController = require('./controllers/SchoolController.js');
@@ -51,9 +51,9 @@ const client = REDIS_URL.includes('rediss://')
 
 
 aws.config.update({
-    secretAccessKey: config.secretAccessKey,
-    accessKeyId:config.accessKeyId,
-    region: config.region
+    secretAccessKey: process.env.secretAccessKey,
+    accessKeyId:process.env.accessKeyId,
+    region: process.env.region
   });
 
   const compile = async function(templateName, data)
@@ -339,11 +339,11 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
 
     var date = Date.now();
     var suffix = 'jpeg';
-    var s3PicturePath = config.s3BucketPath + "Pictures/" + date + '_' + fileName + '.' + suffix;
+    var s3PicturePath = process.env.s3BucketPath + "Pictures/" + date + '_' + fileName + '.' + suffix;
     
     const s3 = new aws.S3();
     var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: blob,
     Key: 'Pictures/' + date + '_' + fileName + '.' + suffix,
     ACL:'public-read'
@@ -482,7 +482,7 @@ async function createProductItemPdf(productItemInfo, job,progress)
     job.progress(progress);
 
     return models.productItem.update({
-      pdfPath:config.s3BucketPath + s3FileLocation
+      pdfPath:process.env.s3BucketPath + s3FileLocation
     },{
       where:{
         id:productItemInfo.id
@@ -527,19 +527,19 @@ async function noPurchaseMadeSinceSignUp()
 async function sendNoPurchaseMadeSinceSignUp(account)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
   var data = {name:(account.name == null ? '' : account.name)};
   const content = await compile('noPurchaseSinceSignUp', data);
   var mailOptions = {
-    from:config.mailServer_email,
+    from:process.env.mailServer_email,
     to: env == 'development' ? testEmail: account.email,
     subject:'School Project - Buy your kids cards here',
     html: content
@@ -595,12 +595,12 @@ async function forEachDayReminder(array,callback)
 async function threeDayReminder(account)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
@@ -609,7 +609,7 @@ async function threeDayReminder(account)
   const content = await compile('dayReminder', data);
 
   var mailOptions = {
-    from:config.mailServer_email,
+    from:process.env.mailServer_email,
     to: env == 'development' ? testEmail : account.email,
     subject:'3 Days till purchase deadline',
     html: content
@@ -627,12 +627,12 @@ async function threeDayReminder(account)
 async function oneDayReminder(account)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
@@ -641,7 +641,7 @@ async function oneDayReminder(account)
   const content = await compile('dayReminder', data);
 
   var mailOptions = {
-    from:config.mailServer_email,
+    from:process.env.mailServer_email,
     to: env == 'development' ? testEmail : account.email,
     subject:'1 Day till purchase deadline',
     html: content
@@ -659,12 +659,12 @@ async function oneDayReminder(account)
 async function sendResetEmail(email,job)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
   models.resetEmail.findOne({
@@ -692,7 +692,7 @@ async function sendResetEmail(email,job)
       }).then(()=>{
 
         var mailOptions = {
-          from:config.mailServer_email,
+          from:process.env.mailServer_email,
           to: email,
           subject:'Reset Password',
           html: content
@@ -729,7 +729,7 @@ async function sendResetEmail(email,job)
           }
         }).then(()=>{
           var mailOptions = {
-            from:config.mailServer_email,
+            from:process.env.mailServer_email,
             to: email,
             subject:'Reset Password',
             html: content
@@ -800,12 +800,12 @@ async function testTrial(x,y, width,height, name , nameX, nameY, nameHeight, nam
 async function test()
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
@@ -815,7 +815,7 @@ async function test()
   var data ={};
   const content = await compile('delayEmail', data);
           var mailOptions = {
-          from:config.mailServer_email,
+          from:process.env.mailServer_email,
           to: 'rmillermcpherson4@gmail.com',
           subject:' have confirmed their charity give back amount',
           html: content
@@ -832,12 +832,12 @@ async function test()
 async function sendConfirmDetailsEmail(schoolId,name,bankAcc,sortCode,type)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
@@ -858,8 +858,8 @@ async function sendConfirmDetailsEmail(schoolId,name,bankAcc,sortCode,type)
     
   const content = await compile('charityConfirmEmail', data);
   var mailOptions = {
-          from:config.mailServer_email,
-          to: env == 'development' ? testEmail : config.mailServer_email,
+          from:process.env.mailServer_email,
+          to: env == 'development' ? testEmail : process.env.mailServer_email,
           subject:school.name + ' have confirmed their charity give back amount',
           html: content
       };
@@ -1139,12 +1139,12 @@ async function eachPurchaseSchoolClass(array,callback,result)
 async function sendCharityEmail(school)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
@@ -1159,7 +1159,7 @@ async function sendCharityEmail(school)
   var confirmLink =urlPrefix + '/login?confirmAmount=true';
   const content = await compile('charityEmail', {name:name, confirmLink:confirmLink});
   var mailOptions = {
-    from:config.mailServer_email,
+    from:process.env.mailServer_email,
     to: (env == 'development') ? testEmail : school.email,
     subject:'Charity contribution amount',
     html: content
@@ -1186,7 +1186,7 @@ smtpTransport.sendMail(mailOptions,async function(errors,res){
       })
 
 
-      mailOptions.to = (env == 'development') ? testEmail : config.mailServer_email;
+      mailOptions.to = (env == 'development') ? testEmail : process.env.mailServer_email;
 
       smtpTransport.sendMail(mailOptions,async function(errors,res){
 
@@ -1344,12 +1344,12 @@ async function deadlineRecurringTask()
 async function sendDelayEmail(schoolId)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
@@ -1369,7 +1369,7 @@ async function sendDelayEmail(schoolId)
         
   const content = await compile('delayEmail', data);
   var mailOptions = {
-                      from:config.mailServer_email,
+                      from:process.env.mailServer_email,
                       to: env == 'development' ? testEmail : school.email,
                       subject:'Delay Period has now passed',
                       html: content
@@ -1399,12 +1399,12 @@ async function sendDelayEmail(schoolId)
 async function sendDeadlineEmail(schoolId)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
@@ -1434,7 +1434,7 @@ async function sendDeadlineEmail(schoolId)
       
   const content = await compile('deadlineEmail', data);
   var mailOptions = {
-      from:config.mailServer_email,
+      from:process.env.mailServer_email,
       to: env == 'development' ? testEmail :school.email,
       subject:'Purchase Deadline has now passed',
       html: content
@@ -1494,7 +1494,7 @@ async function uploadToS3(buffer,s3FileLocation)
 {
   const s3 = new aws.S3();
   var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: buffer,
     Key: s3FileLocation,
     ACL:'public-read'
@@ -1515,7 +1515,7 @@ await s3UploadPromise;
 
 async function createCalendarAndUploadToS3Bucket(data,height,width,portrait,color, now, job,progress)
 {
-  data.background = config.s3BucketPath + 'Calendar/Pictures/Background/' + (portrait == true ? 'portrait' + color + '.png' : 'landscape' + color + '.png'); 
+  data.background = process.env.s3BucketPath + 'Calendar/Pictures/Background/' + (portrait == true ? 'portrait' + color + '.png' : 'landscape' + color + '.png'); 
   
   var template = 'calendar' + (portrait == true ? 'Portrait' : 'Landscape');
   
@@ -1607,18 +1607,18 @@ function updateCalendar(calendarId,job)
                       var blueFilename = data.kidName + "_Blue_" + now + ".pdf";
 
                       models.calendar.update({
-                        landscapeRedPath: config.s3BucketPath + fileLandscapeLocation + redFilename,
-                        landscapeGreenPath: config.s3BucketPath + fileLandscapeLocation + greenFilename,
-                        landscapeBluePath: config.s3BucketPath + fileLandscapeLocation + blueFilename,
-                        landscapeRedPathPreview:config.s3BucketPath + previewLandscapeFileLocation + redFilename,
-                        landscapeGreenPathPreview:config.s3BucketPath + previewLandscapeFileLocation + greenFilename,
-                        landscapeBluePathPreview:config.s3BucketPath + previewLandscapeFileLocation + blueFilename,
-                        portraitRedPath:config.s3BucketPath + filePortraitLocation + redFilename ,
-                        portraitGreenPath:config.s3BucketPath + filePortraitLocation + greenFilename,
-                        portraitBluePath:config.s3BucketPath + filePortraitLocation + blueFilename,
-                        portraitRedPathPreview:config.s3BucketPath + previewPortraitFileLocation + redFilename,
-                        portraitGreenPathPreview:config.s3BucketPath + previewPortraitFileLocation + greenFilename,
-                        portraitBluePathPreview:config.s3BucketPath + previewPortraitFileLocation + blueFilename
+                        landscapeRedPath: process.env.s3BucketPath + fileLandscapeLocation + redFilename,
+                        landscapeGreenPath: process.env.s3BucketPath + fileLandscapeLocation + greenFilename,
+                        landscapeBluePath: process.env.s3BucketPath + fileLandscapeLocation + blueFilename,
+                        landscapeRedPathPreview:process.env.s3BucketPath + previewLandscapeFileLocation + redFilename,
+                        landscapeGreenPathPreview:process.env.s3BucketPath + previewLandscapeFileLocation + greenFilename,
+                        landscapeBluePathPreview:process.env.s3BucketPath + previewLandscapeFileLocation + blueFilename,
+                        portraitRedPath:process.env.s3BucketPath + filePortraitLocation + redFilename ,
+                        portraitGreenPath:process.env.s3BucketPath + filePortraitLocation + greenFilename,
+                        portraitBluePath:process.env.s3BucketPath + filePortraitLocation + blueFilename,
+                        portraitRedPathPreview:process.env.s3BucketPath + previewPortraitFileLocation + redFilename,
+                        portraitGreenPathPreview:process.env.s3BucketPath + previewPortraitFileLocation + greenFilename,
+                        portraitBluePathPreview:process.env.s3BucketPath + previewPortraitFileLocation + blueFilename
                       },{
                           where:{
                             id:calendarId
@@ -1640,12 +1640,12 @@ function updateCalendar(calendarId,job)
 async function sendPurchaseEmail( bluwave, basketItems, orderNumber, date, total, time, job )
 {
   var smtpTransport = nodeMailer.createTransport({
-      host:config.mailServer_host,
+      host:process.env.mailServer_host,
       port:587,
       secure:false,
       auth:{
-        user:config.mailServer_email,
-        pass:config.mailServer_password
+        user:process.env.mailServer_email,
+        pass:process.env.mailServer_password
       }
   });
 
@@ -1679,8 +1679,8 @@ async function sendPurchaseEmail( bluwave, basketItems, orderNumber, date, total
 
       const content = await compile(template, data);
       var mailOptions = {
-                          from:config.mailServer_email,
-                          to: bluwave ? config.mailServer_email : basketItems[0].email,
+                          from:process.env.mailServer_email,
+                          to: bluwave ? process.env.mailServer_email : basketItems[0].email,
                           subject:'Thanks for making a purchase',
                           html: content
                         }
@@ -1725,8 +1725,8 @@ async function sendPurchaseEmail( bluwave, basketItems, orderNumber, date, total
       // var attachmentPath = await orderController.getOrderDetailsGroupByTypeForId(purchaseBasket.id, job);
       // console.log(attachmentPath.pdfPath)
       var mailOptions = {
-                          from:config.mailServer_email,
-                          to:bluwave ? config.mailServer_email : basketItems[0].email,
+                          from:process.env.mailServer_email,
+                          to:bluwave ? process.env.mailServer_email : basketItems[0].email,
                           subject:'Thanks for making a purchase',
                           html: content
                         }
@@ -1754,18 +1754,18 @@ async function sendPurchaseEmail( bluwave, basketItems, orderNumber, date, total
 const sendOrganiserRegistrationEmailToBluwave = function(school,name,account, numberOfClasses, job)
 {
   var smtpTransport = nodeMailer.createTransport({
-  host:config.mailServer_host,
+  host:process.env.mailServer_host,
   port:587,
   secure:false,
   auth:{
-    user:config.mailServer_email,
-    pass:config.mailServer_password
+    user:process.env.mailServer_email,
+    pass:process.env.mailServer_password
   }
 });
 
 var mailOptions = {
-  from:config.mailServer_email,
-  to:env == 'development' ? testEmail : config.mailServer_email,
+  from:process.env.mailServer_email,
+  to:env == 'development' ? testEmail : process.env.mailServer_email,
   subject:'Organiser ' + name + ' has registered school ' + school.name,
   html:'<p>' + 
   'School/Nursery Name: ' + school.name + '<br>' +
@@ -1798,19 +1798,19 @@ smtpTransport.sendMail(mailOptions,function(errors,res){
 const sendOrganiserRegistrationEmail = async function(email,school,name,job)
 {
   var smtpTransport = nodeMailer.createTransport({
-  host:config.mailServer_host,
+  host:process.env.mailServer_host,
   port:587,
   secure:false,
   auth:{
-    user:config.mailServer_email,
-    pass:config.mailServer_password
+    user:process.env.mailServer_email,
+    pass:process.env.mailServer_password
   }
 });
 
 var data = {schoolName:school.name, name:name};
 const content = await compile('registerOrganiser', data);
   var mailOptions = {
-    from:config.mailServer_email,
+    from:process.env.mailServer_email,
     to: env == 'development' ? testEmail : email,
     subject:'Welcome to Kidscards4christmas fundraising project',
     html:content
@@ -1839,20 +1839,20 @@ const content = await compile('registerOrganiser', data);
 const sendParentRegistrationEmailToBluwave = function(email,name,telephoneNo,job)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
 
   var accountType =  'Parent ';
   var emailType =  'Parent Registration Bluwave';
   var mailOptions = {
-    from:config.mailServer_email,
-    to: config.mailServer_email,
+    from:process.env.mailServer_email,
+    to: process.env.mailServer_email,
     subject:accountType + name + ' has registered',
     html:'<p>New ' + accountType + ' registration</p>' +
     '<p>Parent name: ' + name + '</p>'+
@@ -1886,12 +1886,12 @@ const sendParentRegistrationEmailToBluwave = function(email,name,telephoneNo,job
 const sendParentRegistrationEmail = async function(email,job)
 {
   var smtpTransport = nodeMailer.createTransport({
-    host:config.mailServer_host,
+    host:process.env.mailServer_host,
     port:587,
     secure:false,
     auth:{
-      user:config.mailServer_email,
-      pass:config.mailServer_password
+      user:process.env.mailServer_email,
+      pass:process.env.mailServer_password
     }
   });
   
@@ -1917,7 +1917,7 @@ const sendParentRegistrationEmail = async function(email,job)
 
     const content = await compile(template, {});
   var mailOptions = {
-    from:config.mailServer_email,
+    from:process.env.mailServer_email,
     to:email,
     subject:'Thank you for registering',
     html:content
@@ -1967,7 +1967,7 @@ const generatePurchasedCards = async function(purchasedBasketItems,classId, job)
   processed++;
   const s3 = new aws.S3();
   var params = {
-  Bucket:config.bucketName,
+  Bucket:process.env.bucketName,
   };
 
   if(purchasedBasketItems.length > 1)
@@ -2010,7 +2010,7 @@ job.progress(processed);
 processed++;
     fs.unlink(  process.cwd() + '/tmp/'  + now + '_purchased.pdf');
 
-   var path = config.s3BucketPath+params.Key;
+   var path = process.env.s3BucketPath+params.Key;
  return   models.class.update(
         {cardsPath:path},
              {where:{
@@ -2190,7 +2190,7 @@ const s3 = new aws.S3();
 let s3FileLocation = classSchool.schoolName + '/' + classSchool.className + '/' + Date.now() + "_printForm.pdf";
 
 var params = {
-  Bucket:config.bucketName,
+  Bucket:process.env.bucketName,
   Body: buffer,
   Key: s3FileLocation,
   ACL:'public-read'
@@ -2211,7 +2211,7 @@ await s3UploadPromise;
 job.progress(processed);
   processed++;
 
-let s3Path = config.s3BucketPath + s3FileLocation;
+let s3Path = process.env.s3BucketPath + s3FileLocation;
 
   return models.class.update({
   printFormPath:s3Path
@@ -2306,10 +2306,10 @@ const tempMethod = async function(files,kidId,name,age,month,displaySchool,displ
     });
   
    var suffix =(files.file2.mimeType == 'image/png') ? 'png' : 'jpg';
-    let s3ArtworkPath = config.s3BucketPath+"Artwork/" + date +'_' + fileName + '.' + suffix;
+    let s3ArtworkPath = process.env.s3BucketPath+"Artwork/" + date +'_' + fileName + '.' + suffix;
     var buffer= Buffer.from(files.file2.data.data);
     var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: buffer,
     Key: 'Artwork/'+ date +'_' + fileName + '.' + suffix,
     ACL:'public-read'
@@ -2401,12 +2401,12 @@ const updateCard = async function(classFk,kidId,age,name,displaySchool,displayCl
           });
           
           var suffix =(files.file2.mimeType == 'image/png') ? 'png' : 'jpg';
-          let s3ArtworkPath = config.s3BucketPath +"Artwork/" + date + '_' + fileName + '.' + suffix;
+          let s3ArtworkPath = process.env.s3BucketPath +"Artwork/" + date + '_' + fileName + '.' + suffix;
       
           var buffer =Buffer.from(files.file2.data.data);
             const s3 = new aws.S3();
             var params = {
-            Bucket:config.bucketName,
+            Bucket:process.env.bucketName,
             Body: buffer,
             Key: 'Artwork/' +  date + '_' + fileName + '.' + suffix,
             ACL:'public-read'
@@ -2647,7 +2647,7 @@ const createPdf = async function( data, job, processed )
     let s3Package2FileLocation = package2FileLocation + Date.now() + "_" + filename;
     // let s3Package2PreviewFileLocation = package2PreviewFileLocation + Date.now() + "_" + filename;
     var params = {
-      Bucket:config.bucketName,
+      Bucket:process.env.bucketName,
       Body: buffer,
       Key: s3FileLocation,
       ACL:'public-read'
@@ -2666,10 +2666,10 @@ const createPdf = async function( data, job, processed )
   await s3UploadPromise;
   // await fs.unlink(tempDir);
   // delete from temp dir
-    let s3Path = config.s3BucketPath + s3FileLocation;
-    // let s3PreviewPath = config.s3BucketPath + s3PreviewFileLocation;
-    let s3Package2Path = config.s3BucketPath + s3Package2FileLocation;
-    // let s3Package2PreviewPath = config.s3BucketPath + s3Package2PreviewFileLocation;
+    let s3Path = process.env.s3BucketPath + s3FileLocation;
+    // let s3PreviewPath = process.env.s3BucketPath + s3PreviewFileLocation;
+    let s3Package2Path = process.env.s3BucketPath + s3Package2FileLocation;
+    // let s3Package2PreviewPath = process.env.s3BucketPath + s3Package2PreviewFileLocation;
     // const browser2 = await puppeteer.launch({
     //   'args' : [
     //     '--no-sandbox',
@@ -2696,7 +2696,7 @@ const createPdf = async function( data, job, processed )
 
   //   await browser2.close();
   //   var previewParams = {
-  //     Bucket:config.bucketName,
+  //     Bucket:process.env.bucketName,
   //     Body: buffer2,
   //     Key: s3PreviewFileLocation,
   //     ACL:'public-read'
@@ -2740,7 +2740,7 @@ const createPdf = async function( data, job, processed )
 
     await browser3.close();
     var package2Params = {
-      Bucket:config.bucketName,
+      Bucket:process.env.bucketName,
       Body: buffer3,
       Key: s3Package2FileLocation,
       ACL:'public-read'
@@ -2782,7 +2782,7 @@ const createPdf = async function( data, job, processed )
 
   //   await browser4.close();
   //   var package2PreviewParams = {
-  //     Bucket:config.bucketName,
+  //     Bucket:process.env.bucketName,
   //     Body: buffer4,
   //     Key: s3Package2PreviewFileLocation,
   //     ACL:'public-read'
@@ -2881,7 +2881,7 @@ const createProofs = async function(kids,classId,year,className,schoolName,job)
   // put check that sampleArray has length greater than zero
   const s3 = new aws.S3();
   var params = {
-  Bucket:config.bucketName,
+  Bucket:process.env.bucketName,
   };
 
   // var files = new Array();
@@ -2923,7 +2923,7 @@ const createProofs = async function(kids,classId,year,className,schoolName,job)
   
   fs.unlink(  process.cwd() + '/tmp/'  + now + '_proof.pdf');
 
-   var path = config.s3BucketPath+params.Key;
+   var path = process.env.s3BucketPath+params.Key;
  return  models.class.update(
        {proofPath:path},
             {where:{
@@ -3135,19 +3135,19 @@ async function sendOrdersNotShippedReminder()
   if(orderNumbers.length > 0)
   {
     var smtpTransport = nodeMailer.createTransport({
-      host:config.mailServer_host,
+      host:process.env.mailServer_host,
       port:587,
       secure:false,
       auth:{
-        user:config.mailServer_email,
-        pass:config.mailServer_password
+        user:process.env.mailServer_email,
+        pass:process.env.mailServer_password
       }
     });
   
     const content = await compile('ordersToBeShippedReminder', {orderNumbers:orderNumbers});
     var mailOptions = {
-      from:config.mailServer_email,
-      to:env == 'development' ? testEmail : config.mailServer_email,
+      from:process.env.mailServer_email,
+      to:env == 'development' ? testEmail : process.env.mailServer_email,
       subject:'REMINDER OF ORDERS TO BE SHIPPED',
       html:content
     }
@@ -3172,19 +3172,19 @@ async function sendSchoolArtworkPacksNotSentReminder()
   if(schools.length > 0)
   {
     var smtpTransport = nodeMailer.createTransport({
-      host:config.mailServer_host,
+      host:process.env.mailServer_host,
       port:587,
       secure:false,
       auth:{
-        user:config.mailServer_email,
-        pass:config.mailServer_password
+        user:process.env.mailServer_email,
+        pass:process.env.mailServer_password
       }
     });
   
     const content = await compile('schoolArtworkPacksNotSentReminder', {schools:schools});
     var mailOptions = {
-      from:config.mailServer_email,
-      to:env == 'development' ? testEmail : config.mailServer_email,
+      from:process.env.mailServer_email,
+      to:env == 'development' ? testEmail : process.env.mailServer_email,
       subject:'REMINDER OF SCHOOLS ARTWORK PACK NOT SENT OUT',
       html:content
     }
@@ -3210,19 +3210,19 @@ async function sendSchoolReadyForPrintingReminder()
   if(schools.length > 0)
   {
     var smtpTransport = nodeMailer.createTransport({
-      host:config.mailServer_host,
+      host:process.env.mailServer_host,
       port:587,
       secure:false,
       auth:{
-        user:config.mailServer_email,
-        pass:config.mailServer_password
+        user:process.env.mailServer_email,
+        pass:process.env.mailServer_password
       }
     });
   
     const content = await compile('schoolPrintingSentReminder', {schools:schools});
     var mailOptions = {
-      from:config.mailServer_email,
-      to:env == 'development' ? testEmail : config.mailServer_email,
+      from:process.env.mailServer_email,
+      to:env == 'development' ? testEmail : process.env.mailServer_email,
       subject:'REMINDER OF SCHOOLS READY TO PRINT',
       html:content
     }
@@ -3241,19 +3241,19 @@ async function sendCharityAmountConfirmedSendToSchoolReminder()
   if(schools.length > 0)
   {
     var smtpTransport = nodeMailer.createTransport({
-      host:config.mailServer_host,
+      host:process.env.mailServer_host,
       port:587,
       secure:false,
       auth:{
-        user:config.mailServer_email,
-        pass:config.mailServer_password
+        user:process.env.mailServer_email,
+        pass:process.env.mailServer_password
       }
     });
   
     const content = await compile('charityAmountConfirmedSendToSchoolReminder', {schools:schools});
     var mailOptions = {
-      from:config.mailServer_email,
-      to:env == 'development' ? testEmail : config.mailServer_email,
+      from:process.env.mailServer_email,
+      to:env == 'development' ? testEmail : process.env.mailServer_email,
       subject:'REMINDER OF SCHOOLS TO SEND FUNDRAISING AMOUNT TO',
       html:content
     }

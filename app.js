@@ -1,4 +1,8 @@
 var express = require('express');
+const notProduction = process.env.NODE_ENV != 'production';
+if(notProduction) {
+  require('dotenv').config();
+}
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');

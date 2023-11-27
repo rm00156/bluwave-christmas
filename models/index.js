@@ -2,8 +2,11 @@ var fs = require("fs");
 var path = require("path");
 var Sequelize = require("sequelize");
 var env = process.env.NODE_ENV || "development";
-var config = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
-var sequelize = new Sequelize(config.database, config.username, config.password, config);
+// var process.env = require(path.join(__dirname, '..', 'process.env', 'process.env.json'))[env];
+var sequelize = new Sequelize(process.env.database, process.env.username, process.env.password, {
+    host: process.env.database_host,
+    dialect: process.env.database_dialect
+});
 var db = {};
  
  console.log(env);

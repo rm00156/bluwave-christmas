@@ -1,7 +1,7 @@
 const models = require('../models');
 let bcrypt = require('bcrypt');
 let passport = require('passport');
-const config = require('../config/config.json');
+// const process.env = require('../process.env/process.env.json');
 const{validateUser,validateOrganiserSignup} = require('../validators/signup');
 const {isEmpty} = require('lodash');
 var queueController = require('../controllers/QueueController');
@@ -382,7 +382,7 @@ const createDummyKid = async function(req, res, next,accountId)
             parentAccountFk:accountId,
             deleteFl:false
           }).save().then(kid=>{
-            var s3Bucket = config.s3BucketPath + 'Calendar/';
+            var s3Bucket = process.env.s3BucketPath + 'Calendar/';
             models.calendar.build({
               kidFk:kid.id,
               landscapeRedPath: s3Bucket + 'defaultLandscapeRed.pdf',

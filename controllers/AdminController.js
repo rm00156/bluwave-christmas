@@ -7,7 +7,7 @@ var schoolController = require('../controllers/SchoolController');
 var accountUtility = require('../utility/account/accountUtility');
 var orderController = require('../controllers/OrderController');
 var basketController = require('../controllers/BasketController');
-const config = require('../config/config.json');
+// const process.env = require('../process.env/process.env.json');
 
 exports.getAdminDashboardPage = async function(req,res)
 {
@@ -518,7 +518,7 @@ exports.updateOrderBasketItem = async function(req, res) {
     productItem = productItem[0];
 
     const path = productItem.pdfPath;
-    const fileName = path.replace(config.s3BucketPath, '');
+    const fileName = path.replace(process.env.s3BucketPath, '');
     const picture = productItem.picture1Path;
 
     await models.basketItem.update({
