@@ -8,14 +8,13 @@ var queueController = require('../controllers/QueueController');
 
 var dashboardController = require('../controllers/DashboardController');
 var dadController = require('../controllers/DadController');
-var adminController = require('../controllers/AdminController');
-var schoolController = require('../controllers/SchoolController');
+const schoolUtility = require('../utility/school/schoolUtility');
 
 const fetch = require('node-fetch');
 const { stringify } = require('querystring');
-const secretKey = '6LdzUtsZAAAAANN5bdygrPETR8paX5WGFT38ATfB';
 
 const accountUtility = require('../utility/account/accountUtility');
+const STATUS_TYPES = require('../utility/school/statusTypes');
 
 exports.captcha = async function(req,res)
 {
@@ -26,7 +25,7 @@ exports.captcha = async function(req,res)
     }
 
     const query = stringify({
-        secret: secretKey,
+        secret: process.env.captcha_secret_key,
         response: req.body.captcha,
         remoteip: req.connection.remoteAddress
       });
@@ -63,7 +62,7 @@ exports.signup = async (req, res, next)=>{
             var telephoneNo = req.body.telephoneNo;
             
             var transaction = await models.sequelize.transaction();
-            var accountNumber = await adminController.getNewAccountCode();
+            var accountNumber = await accountUtility.getNewAccountCode();
 
             const accountDetail = {
                 accountNumber: accountNumber,
@@ -101,8 +100,7 @@ exports.signup = async (req, res, next)=>{
  }
  
 
- exports.signupOrganiser = function(req,res,next)
- {
+ exports.signupOrganiser = function(req,res,next) {
     let errors = {};
     return validateOrganiserSignup(errors, req).then( async errors=>{
  
@@ -111,10 +109,10 @@ exports.signup = async (req, res, next)=>{
         console.log(errors);
         rerender_signup(errors,req,res, next);
     }
-    else{
+    else {
 
         const t = await models.sequelize.transaction()
-        var accountNumber = await adminController.getNewAccountCode();
+        var accountNumber = await accountUtility.getNewAccountCode();
         try {
 
             const accountDetail = {
@@ -128,42 +126,23 @@ exports.signup = async (req, res, next)=>{
             }
             const newAccount = await accountUtility.createAccount(accountDetail);
 
-            var schoolNumber = await generateSchoolNumber(req.body.school);
+            var schoolNumber = await schoolUtility.generateSchoolNumber();
 
-            var school = await models.school.create({
-                name:req.body.school,
-                schoolNumber:schoolNumber,
-                address:req.body.address,
-                postCode: req.body.postCode,
-                number: req.body.telephoneNo,
-                email: req.body.email,
-                additionalInfo: req.body.additionalInfo,
-                numberOfKidsPerClass: req.body.numberOfKidsPerClass,
-                organiserAccountFk: newAccount.id,
-                deleteFl: false,
-                versionNo: 1
-            });
+            var school = await schoolUtility.createSchool(req.body.school, schoolNumber, req.body.address,
+                req.body.postCode, req.body.telephoneNo, req.body.email, req.body.additionalInfo, req.body.numberOfKidsPerClass,
+                newAccount.id);
 
             var classArray = req.body['classArray[]'];
 
-            for(var i = 0; i < classArray.length; i++) 
-            {
+            for(var i = 0; i < classArray.length; i++) {
                 var index = classArray[i];
                 var classValue = req.body['class' + index];
-                await schoolController.createClass( classValue, school.id,t);
+                await schoolUtility.createClass(classValue, school.id, 31);
             }
 
-            await models.status.create({
-                statusTypeFk: 1,
-                createdDttm: Date.now(),
-                schoolFk:school.id,
-                deleteFl: false,
-                versionNo: 1
-            },{ transaction: t});
+            await schoolUtility.createNewStatusForSchoolId(school.id, STATUS_TYPES.STATUS_TYPES_ID.REGISTERED);
 
-        }
-        catch(error)
-        {
+        } catch(error) {
             console.log(error)
             await t.rollback();
             throw error;
@@ -432,21 +411,4 @@ const createDummyKid = async function(req, res, next,accountId)
 }
 
 
-function generateSchoolNumber(school)
-{
-    var schoolCode = school.substring(0,3);
-    var code = dadController.makeCode();
-    var schoolNumber = schoolCode + code;
 
-    return models.school.findOne({
-        where:{
-            schoolNumber: schoolNumber
-        }
-    }).then(school => {
-
-        if(school == null)
-            return schoolNumber;
-
-        return generateSchoolNumber(school);
-    })
-}

@@ -4,7 +4,8 @@ const models = require('../models');
 var dadController = require('../controllers/DadController');
 var queueController = require('../controllers/QueueController');
 
-
+const schoolUtility = require('../utility/school/schoolUtility');
+const STATUS_TYPES = require('../utility/school/statusTypes');
 
 const aws = require('aws-sdk');
 const path = require('path');
@@ -38,400 +39,186 @@ hbs.registerHelper('dateFormat', (value,format)=>{
   return moment(value).format(format);
 });
 
-const loadScreen = async function( req, res)
-{
+const loadScreen = async function (req, res) {
 
     // need an admin view 
     // and a parent screen 
     let account = req.user;
 
-    if( account.accountTypeFk == 1 )
-    {
-        res.render('dashboardNew', {user:req.user} );
-
-        // admin
-        // models.account.findAll({
-        //     where:{
-        //         accountTypeFk:2
-        //     }
-        // }).then(accounts=>{
-
-        //     var totalParentAccounts = accounts.length;
-
-        //     models.kid.findAll().then(kids=>{
-
-        //         var totalKids = kids.length;
-
-        //         models.sequelize.query('select distinct k.* from basketitems b ' + 
-        //                         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
-        //                         ' inner join kids k on b.kidFk = k.id ' + 
-        //                         ' where pb.status = :completed ',
-        //                         {replacements:{completed:'Completed'}, type:models.sequelize.QueryTypes.SELECT})
-        //                             .then(totalKidsWithOrders=>{
-
-        //                                 totalKidsWithOrders = totalKidsWithOrders.length;
-
-        //                                 models.sequelize.query('select sum(total) as total from purchaseBaskets ' +
-        //                                 ' where status = :completed ',
-        //                                 {replacements:{completed:'Completed'}, type:models.sequelize.QueryTypes.SELECT})
-        //                                     .then(totalRevenue=>{
-        //                                         console.log(totalRevenue);
-        //                                         if((totalRevenue[0]).total == null)
-        //                                             totalRevenue = 0.00;
-        //                                         else
-        //                                             totalRevenue = (totalRevenue[0]).total.toFixed(2);
-                                                  
-        //                                           models.sequelize.query('select sum(total) as total from purchaseBaskets ' +
-        //                                           ' where status = :completed and purchaseDttm > current_date',
-        //                                           {replacements:{completed:'Completed'}, type:models.sequelize.QueryTypes.SELECT})
-        //                                               .then(todayRevenue=>{
-        //                                                 todayRevenue =  (todayRevenue[0]).total == null ? '0.00' : (todayRevenue[0]).total.toFixed(2);
-                                                  
-        //                                                 models.sequelize.query('select sum(b.quantity) as quantity from basketitems b ' +
-        //                                                 ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
-        //                                                 ' where pb.status = :completed ' +
-        //                                                 ' and (b.packageFk = 1 or b.packageFk = 2)',
-        //                                                 {replacements:{completed:'Completed'}, type:models.sequelize.QueryTypes.SELECT}).
-        //                                                 then(totalCardPacks=>{
-
-        //                                                     totalCardPacks = (totalCardPacks[0]).quantity == null ? 0 : totalCardPacks[0].quantity;
-
-        //                                                     models.sequelize.query('select sum(b.quantity) as quantity from basketitems b ' +
-        //                                                     ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
-        //                                                     ' where pb.status = :completed ' +
-        //                                                     ' and (b.packageFk = 3)',
-        //                                                     {replacements:{completed:'Completed'}, type:models.sequelize.QueryTypes.SELECT}).
-        //                                                     then(async totalCalendarPacks=>{
-
-        //                                                         totalCalendarPacks = (totalCalendarPacks[0]).quantity == null ? 0 : totalCalendarPacks[0].quantity;
-
-        //                                                         var schools = await models.school.findAll();
-        //                                                         var schoolCount = schools.length - 1;
-
-        //                                                         // average quantity per order
-        //                                                         res.render('dashboardNew', {user:req.user,totalKids:totalKids,totalParentAccounts:totalParentAccounts,
-        //                                                             totalKidsWithOrders:totalKidsWithOrders, totalRevenue:totalRevenue, todayRevenue:todayRevenue,
-        //                                                                 totalCalendarPacks:totalCalendarPacks, totalCardPacks:totalCardPacks, schoolCount:schoolCount} );
-                                                    
-        //                                                     })
-
-        //                                                 })
-                                                        
-        //                                           })
-        //                                     })
-        //                             })
-        //     })
-
-        // })
-
-   
-
-    }
-    else if(account.accountTypeFk == 3)
-    {
+    if (account.accountTypeFk == 1) {
+        res.render('dashboardNew', { user: req.user });
+    } else if (account.accountTypeFk == 3) {
         models.school.findOne({
-            where:{
-                organiserAccountFk:account.id
+            where: {
+                organiserAccountFk: account.id
             }
-        }).then(school=>{
-         
+        }).then(school => {
+
             var schoolId = school.id;
-            models.sequelize.query('select k.* from kids k ' + 
-                                ' inner join classes c on k.classFk = c.id ' + 
-                                ' inner join schools s on c.schoolFk = s.id ' + 
-                                ' where s.id = :schoolId ' +
-                                ' and k.deleteFl = false ' ,
-                                {replacements:{schoolId:schoolId},type:models.sequelize.QueryTypes.SELECT}).then(kids=>{
+            models.sequelize.query('select k.* from kids k ' +
+                ' inner join classes c on k.classFk = c.id ' +
+                ' inner join schools s on c.schoolFk = s.id ' +
+                ' where s.id = :schoolId ' +
+                ' and k.deleteFl = false ',
+                { replacements: { schoolId: schoolId }, type: models.sequelize.QueryTypes.SELECT }).then(kids => {
 
-                                    var kidTotal = kids.length;
+                    var kidTotal = kids.length;
 
-                                    models.sequelize.query('select distinct k.* from kids k ' + 
-                                    ' inner join classes c on k.classFk = c.id ' + 
-                                    ' inner join schools s on c.schoolFk = s.id ' + 
-                                    ' inner join basketitems b on b.kidFk = k.id ' + 
-                                    ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
-                                    ' where s.id = :schoolId '+ 
-                                    ' and pb.status = :completed '+
-                                    ' and k.deleteFl = false ',
-                                    {replacements:{schoolId:schoolId, completed:'Completed'},type:models.sequelize.QueryTypes.SELECT}).then(orderedKids=>{
+                    models.sequelize.query('select distinct k.* from kids k ' +
+                        ' inner join classes c on k.classFk = c.id ' +
+                        ' inner join schools s on c.schoolFk = s.id ' +
+                        ' inner join basketitems b on b.kidFk = k.id ' +
+                        ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
+                        ' where s.id = :schoolId ' +
+                        ' and pb.status = :completed ' +
+                        ' and k.deleteFl = false ',
+                        { replacements: { schoolId: schoolId, completed: 'Completed' }, type: models.sequelize.QueryTypes.SELECT }).then(orderedKids => {
 
-                                        var orderedKidTotal = orderedKids.length;
-                                        var orderedPercentage = ( orderedKidTotal / kidTotal ) * 100;
-                                        orderedPercentage = Math.round( orderedPercentage * 10 ) / 10;
-                                        orderedPercentage = isNaN(orderedPercentage) ?  0 : orderedPercentage;
+                            var orderedKidTotal = orderedKids.length;
+                            var orderedPercentage = (orderedKidTotal / kidTotal) * 100;
+                            orderedPercentage = Math.round(orderedPercentage * 10) / 10;
+                            orderedPercentage = isNaN(orderedPercentage) ? 0 : orderedPercentage;
 
-                                        models.kid.findOne({
-                                            where:{
-                                                parentAccountFk:req.user.id
-                                            }
-                                        }).then(kid=>{
+                            models.kid.findOne({
+                                where: {
+                                    parentAccountFk: req.user.id
+                                }
+                            }).then(kid => {
 
-                                             models.sequelize.query('select p.price, b.quantity from  basketitems b ' + 
-                                            ' inner join packages p on b.packageFk = p.id ' +
-                                            ' where b.accountFk = :accountId ' + 
-                                            ' and purchaseBasketFk is null'  , {replacements:{
-                                              accountId: account.id
-                                                  }, type: models.sequelize.QueryTypes.SELECT 
-                                              }).then(basketItems=>{
-                                    
-                                               let subTotal = 0;
-                                               basketItems.forEach(basketItem=>{
-                                                   subTotal = subTotal + parseFloat(basketItem.price) * basketItem.quantity;
-                                               });
+                                models.sequelize.query('select p.price, b.quantity from  basketitems b ' +
+                                    ' inner join packages p on b.packageFk = p.id ' +
+                                    ' where b.accountFk = :accountId ' +
+                                    ' and purchaseBasketFk is null', {
+                                        replacements: {
+                                            accountId: account.id
+                                        }, type: models.sequelize.QueryTypes.SELECT
+                                }).then(basketItems => {
 
-                                               models.sequelize.query('select p.price, b.quantity from basketitems b ' + 
-                                               ' inner join packages p on b.packageFk = p.id ' +
-                                               ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
-                                               ' where b.accountFk = :accountId ' + 
-                                               ' and pb.status = :pending' , {replacements:{
-                                                accountId: account.id, pending:'Pending'
-                                                    }, type: models.sequelize.QueryTypes.SELECT 
-                                                }).then(basketItems2=>{
-
-                                                    basketItems2.forEach(basketItem=>{
-                                                        subTotal = subTotal + parseFloat(basketItem.price) * basketItem.quantity;
-                                                    });
-     
-                                                    models.deadLine.findOne({
-                                                        where:{
-                                                          schoolFk:schoolId
-                                                        }
-                                                      }).then(deadLine=>{
-                                                       var deadLineDttm = '';
-                                                       var daysLeft = undefined;
-                                                       var daysLeftSign;
-                                                       var now = Date.now();
-                                                       if(deadLine != null)
-                                                       {
-                                                         var unparsedDeadLine = deadLine.deadLineDttm;
-                                                 
-                                                         var month =unparsedDeadLine.getMonth() + 1;
-                                                         month = month <10 ? '0' + month : month;
-                                                         var days = unparsedDeadLine.getDate();
-                                                         days = days <10 ? '0' + days : days;
-                                                         var years = unparsedDeadLine.getFullYear();
-                                                 
-                                                         deadLineDttm = years + '-' + month + '-' + days;
-                                                 
-                                                         
-                                                 
-                                                         var unparsedDeadlineTime = unparsedDeadLine.getTime();
-                                                         daysLeft = unparsedDeadlineTime - now;
-                                                 
-                                                         daysLeft = daysLeft/(1000*60*60*24);
-                                                         
-                                                         
-                                                            if( daysLeft < 0 )
-                                                            {
-                                                            daysLeft = Math.ceil(daysLeft);
-                                                            if(daysLeft == 0 )
-                                                                daysLeftSign = 'zero';
-                                                            else
-                                                                daysLeftSign = 'negative';
-                                                            
-                                                            }
-                                                            else if ( daysLeft == 0 )
-                                                            {
-                                                            daysLeftSign = 'zero';
-                                                            }
-                                                            else
-                                                            {
-                                                            daysLeft = Math.ceil(daysLeft);
-                                                            if(daysLeft == 0 )
-                                                                daysLeftSign = 'zero';
-                                                            else
-                                                                daysLeftSign = 'postive';
-                                                            }
-                                                       }
-                                                       var statusCount = 1;
-                                                       models.status.findOne({
-                                                               where:{
-                                                                   statusTypeFk:1,
-                                                                   schoolFk:school.id
-                                                               },
-                                                               order:
-                                                               [['createdDttm','DESC']]
-                                                           }).then(registered=>{      
-                                                               
-                                                            registered.dataValues.createdDttm = formatDate(registered.dataValues.createdDttm);
-                                                            
-                                                                models.status.findOne({
-                                                                        where:{
-                                                                            statusTypeFk:2,
-                                                                            schoolFk:school.id
-                                                                        },
-                                                                        order:[['createdDttm','DESC']]
-                                                                    }).then(artSent=>{
-                                                                        if(artSent != null)
-                                                                        {
-                                                                            artSent.dataValues.createdDttm = formatDate(artSent.dataValues.createdDttm);
-                                                                            statusCount++;
-                                                                        }
-                                                                                models.status.findOne({
-                                                                                where:{
-                                                                                    statusTypeFk:3,
-                                                                                    schoolFk:school.id
-                                                                                },
-                                                                                order:[['createdDttm','DESC']]
-                                                                            }).then(artReceived=>{
-                                                                                if(artReceived != null)
-                                                                                {
-                                                                                    artReceived.dataValues.createdDttm = formatDate(artReceived.dataValues.createdDttm);
-                                                                                    statusCount++;
-                                                                                }
-                                                                                models.status.findOne({
-                                                                                    where:{
-                                                                                        statusTypeFk:6,
-                                                                                        schoolFk:school.id
-                                                                                    },
-                                                                                    order:[['createdDttm','DESC']]
-                                                                                }).then(sampleSent=>{
-                                                                                    if(sampleSent != null)
-                                                                                    {
-                                                                                        sampleSent.dataValues.createdDttm = formatDate(sampleSent.dataValues.createdDttm);
-                                                                                        statusCount++;
-                                                                                    }
-                                                                                    models.status.findOne({
-                                                                                        where:{
-                                                                                            statusTypeFk:7,
-                                                                                            schoolFk:school.id
-                                                                                        },
-                                                                                        order:[['createdDttm','DESC']]
-                                                                                    }).then(purchaseDeadline=>{
-                                                                                        if(purchaseDeadline != null)
-                                                                                        {
-                                                                                            purchaseDeadline.dataValues.createdDttm = formatDate(purchaseDeadline.dataValues.createdDttm);
-                                                                                            statusCount++;
-                                                                                            // find the latest status which has status print or delay and display that
-                                                                                        }
-                                                                                        models.sequelize.query('select s.*,st.type from statuses s ' + 
-                                                                                                ' inner join schools sch on s.schoolFk = sch.id ' + 
-                                                                                                ' inner join statusTypes st on s.statusTypeFk = st.id ' +
-                                                                                                ' where sch.id = :schoolId ' + 
-                                                                                                ' and (s.statusTypeFk = 9 or s.statusTypeFk =10 )' + 
-                                                                                                ' order by s.createdDttm desc, s.statusTypeFk desc LIMIT 1',
-                                                                                            {replacements:{schoolId:school.id}, type:models.sequelize.QueryTypes.SELECT})
-                                                                                            .then(printDelayStatus=>{
-
-                                                                                                if(printDelayStatus.length > 0)
-                                                                                                {
-                                                                                                    statusCount++;
-                                                                                                    printDelayStatus = printDelayStatus[0];
-                                                                                                    printDelayStatus.createdDttm = formatDate(printDelayStatus.createdDttm);
-
-                                                                                                }
-                                                                                                else
-                                                                                                    printDelayStatus = null;
-
-                                                                                                
-                                                                                                    models.status.findOne({
-                                                                                                        where:{
-                                                                                                            statusTypeFk:12,
-                                                                                                            schoolFk:school.id
-                                                                                                        },
-                                                                                                        order:[['createdDttm','DESC']]
-                                                                                                    }).then(delivery=>{
-                                                                                                        if(delivery != null)
-                                                                                                        {
-                                                                                                            delivery.dataValues.createdDttm = formatDate(delivery.dataValues.createdDttm);
-                                                                                                            statusCount++;
-                                                                                                        }
-                                                                                                        models.status.findOne({
-                                                                                                            where:{
-                                                                                                                statusTypeFk:14,
-                                                                                                                schoolFk:school.id
-                                                                                                            },
-                                                                                                            order:[['createdDttm','DESC']]
-                                                                                                        }).then(confirmCharity=>{
-                                                                                                            if(confirmCharity != null)
-                                                                                                            {
-                                                                                                                confirmCharity.dataValues.createdDttm = formatDate(confirmCharity.dataValues.createdDttm);
-                                                                                                                statusCount++;
-                                                                                                            }
-                                                                                                            models.status.findOne({
-                                                                                                                where:{
-                                                                                                                    statusTypeFk:15,
-                                                                                                                    schoolFk:school.id
-                                                                                                                },
-                                                                                                                order:[['createdDttm','DESC']]
-                                                                                                            }).then(sentCharity=>{
-                                                                                                                if(sentCharity != null)
-                                                                                                                {
-                                                                                                                    sentCharity.dataValues.createdDttm = formatDate(sentCharity.dataValues.createdDttm);
-                                                                                                                    statusCount++;
-                                                                                                                }
-                                                                                                                models.status.findOne({
-                                                                                                                    where:{
-                                                                                                                        statusTypeFk:13,
-                                                                                                                        schoolFk:school.id
-                                                                                                                    },
-                                                                                                                    order:[['createdDttm','DESC']]
-                                                                                                                }).then(response=>{
-                                                                                                                    if(response != null)
-                                                                                                                    {
-                                                                                                                        response.dataValues.createdDttm = formatDate(response.dataValues.createdDttm);
-                                                                                                                        statusCount++;
-                                                                                                                    }
-                                                                                                                        var displayParentSection = kid == null ? false : true; 
-
-                                                                                                                    models.sequelize.query("select st.type from statuses s " + 
-                                                                                                                                    " inner join statusTypes st on s.statusTypeFk = st.id " + 
-                                                                                                                                    " where s.schoolFk = :schoolId " + 
-                                                                                                                                    " order by createdDttm desc LIMIT 1",
-                                                                                                                                    {replacements:{
-                                                                                                                                        schoolId: school.id
-                                                                                                                                            }, type: models.sequelize.QueryTypes.SELECT 
-                                                                                                                                        }).then(currentStatus=>{
-                                                                                                                                            console.log(currentStatus);
-                                                                                                                                            res.render('organiserDashboard2', {user:req.user,orderedPercentage:orderedPercentage,
-                                                                                                                        
-                                                                                                                                                kidTotal:kidTotal,orderedKidTotal:orderedKidTotal, displayParentSection:displayParentSection,numberOfBasketItems:basketItems.length + basketItems2.length, subTotal:subTotal,
-                                                                                                                                                    deadLineDttm:deadLineDttm,daysLeft:daysLeft,daysLeftSign:daysLeftSign,school:school,
-                                                                                                                                                registered:registered,artSent:artSent,artReceived:artReceived,
-                                                                                                                                                sampleSent:sampleSent,purchaseDeadline:purchaseDeadline,printDelayStatus:printDelayStatus,
-                                                                                                                                                delivery:delivery,confirmCharity:confirmCharity, sentCharity:sentCharity, response:response,
-                                                                                                                                                currentStatus:currentStatus[0].type, statusCount:statusCount}); 
-                                                                                                                                        })
-                                                                                                                    
-                                                                                                                })             
-
-        
-                                                                                                                
-                                                                                                            })
-                                            
-                                                                                                            
-                                                                                                        })
-                                        
-
-
-                                                                                                    })
-                                    
-
-
-                                                                                            })
-                                                                                    })
-                                                                                    
-                                                                                })
-
-                                                                        
-                                                                                })
-
-                                                                    });
-                                                            
-                                                        });
-
-                                    
-                                                  
-                                                    })
-                                                })
-
-                                               
-                                              });  
-                                        });
+                                    let subTotal = 0;
+                                    basketItems.forEach(basketItem => {
+                                        subTotal = subTotal + parseFloat(basketItem.price) * basketItem.quantity;
                                     });
-                                })
-                               
-          })
+
+                                    models.sequelize.query('select p.price, b.quantity from basketitems b ' +
+                                        ' inner join packages p on b.packageFk = p.id ' +
+                                        ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
+                                        ' where b.accountFk = :accountId ' +
+                                        ' and pb.status = :pending', {
+                                            replacements: {
+                                                accountId: account.id, pending: 'Pending'
+                                            }, type: models.sequelize.QueryTypes.SELECT
+                                    }).then(async basketItems2 => {
+
+                                        basketItems2.forEach(basketItem => {
+                                            subTotal = subTotal + parseFloat(basketItem.price) * basketItem.quantity;
+                                        });
+                                        
+                                        const deadLine = await schoolUtility.getSchoolDeadlineBySchoolId(schoolId);
+                                        
+                                        const deadlineDetails = schoolUtility.getDeadlineDetails(deadLine);
+                                        
+                                        var statusCount = 1;
+                                        const registered = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, STATUS_TYPES.STATUS_TYPES_ID.REGISTERED);
+                                        registered.dataValues.createdDttm = formatDate(registered.dataValues.createdDttm);
+
+                                        const artSent = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, STATUS_TYPES.STATUS_TYPES_ID.DEADLINE_SET);
+                                        if (artSent != null) {
+                                            artSent.dataValues.createdDttm = formatDate(artSent.dataValues.createdDttm);
+                                            statusCount++;
+                                        }
+
+                                        const artReceived = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, STATUS_TYPES.STATUS_TYPES_ID.ARTWORK_PACK_SENT);
+                                        if (artReceived != null) {
+                                            artReceived.dataValues.createdDttm = formatDate(artReceived.dataValues.createdDttm);
+                                            statusCount++;
+                                        }
+
+                                        const sampleSent = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, STATUS_TYPES.STATUS_TYPES_ID.DELAY);
+                                        if (sampleSent != null) {
+                                            sampleSent.dataValues.createdDttm = formatDate(sampleSent.dataValues.createdDttm);
+                                            statusCount++;
+                                        }
+
+                                        const purchaseDeadline = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, STATUS_TYPES.STATUS_TYPES_ID.PRINTING);
+                                        if (purchaseDeadline != null) {
+                                            purchaseDeadline.dataValues.createdDttm = formatDate(purchaseDeadline.dataValues.createdDttm);
+                                            statusCount++;
+                                            // find the latest status which has status print or delay and display that
+                                        }
+
+                                        const printDelayStatus = await models.sequelize.query('select s.*,st.type from statuses s ' +
+                                            ' inner join schools sch on s.schoolFk = sch.id ' +
+                                            ' inner join statusTypes st on s.statusTypeFk = st.id ' +
+                                            ' where sch.id = :schoolId ' +
+                                            ' and (s.statusTypeFk = 9 or s.statusTypeFk =10 )' +
+                                            ' order by s.createdDttm desc, s.statusTypeFk desc LIMIT 1',
+                                            { replacements: { schoolId: school.id }, type: models.sequelize.QueryTypes.SELECT });
+
+                                        if (printDelayStatus.length > 0) {
+                                            statusCount++;
+                                            printDelayStatus = printDelayStatus[0];
+                                            printDelayStatus.createdDttm = formatDate(printDelayStatus.createdDttm);
+                                        } else
+                                            printDelayStatus = null;
+
+
+                                        const delivery = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, STATUS_TYPES.STATUS_TYPES_ID.CONTRIBUTION_SENT);
+                                        if (delivery != null) {
+                                            delivery.dataValues.createdDttm = formatDate(delivery.dataValues.createdDttm);
+                                            statusCount++;
+                                        }
+
+                                        //TODO - This whole method NEEDS to be looked at properly as this doesnt point to a valid statustype 
+                                        const confirmCharity = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, 14);
+                                        if (confirmCharity != null) {
+                                            confirmCharity.dataValues.createdDttm = formatDate(confirmCharity.dataValues.createdDttm);
+                                            statusCount++;
+                                        }
+
+                                        const sentCharity = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, 15);
+                                        if (sentCharity != null) {
+                                            sentCharity.dataValues.createdDttm = formatDate(sentCharity.dataValues.createdDttm);
+                                            statusCount++;
+                                        }
+
+                                        const response = await schoolUtility.getSchoolStatusByStatusTypeId(school.id, STATUS_TYPES.STATUS_TYPES_ID.COMPLETE);
+                                        if (response != null) {
+                                            response.dataValues.createdDttm = formatDate(response.dataValues.createdDttm);
+                                            statusCount++;
+                                        }
+
+                                        var displayParentSection = kid == null ? false : true;
+
+                                        models.sequelize.query("select st.type from statuses s " +
+                                            " inner join statusTypes st on s.statusTypeFk = st.id " +
+                                            " where s.schoolFk = :schoolId " +
+                                            " order by createdDttm desc LIMIT 1",
+                                            {
+                                                replacements: {
+                                                    schoolId: school.id
+                                                }, type: models.sequelize.QueryTypes.SELECT
+                                            }).then(currentStatus => {
+                                                console.log(currentStatus);
+                                                res.render('organiserDashboard2', {
+                                                    user: req.user, orderedPercentage: orderedPercentage,
+
+                                                    kidTotal: kidTotal, orderedKidTotal: orderedKidTotal, displayParentSection: displayParentSection, numberOfBasketItems: basketItems.length + basketItems2.length, subTotal: subTotal,
+                                                    deadLineDttm: deadlineDetails.deadLineDttm, daysLeft: deadlineDetails.daysLeft, daysLeftSign: deadlineDetails.daysLeftSign, school: school,
+                                                    registered: registered, artSent: artSent, artReceived: artReceived,
+                                                    sampleSent: sampleSent, purchaseDeadline: purchaseDeadline, printDelayStatus: printDelayStatus,
+                                                    delivery: delivery, confirmCharity: confirmCharity, sentCharity: sentCharity, response: response,
+                                                    currentStatus: currentStatus[0].type, statusCount: statusCount
+                                                });
+                                            })
+                                    })
+
+
+                                });
+                            });
+                        });
+                })
+
+        })
 
 
     }
@@ -589,8 +376,8 @@ exports.addToBasket2 = async function(req,res)
             where:{
                 id:packageId
             }
-        }).then(package=>{
-            var cost  = parseInt(quantity,10) * parseFloat(package.price);
+        }).then(p=>{
+            var cost  = parseInt(quantity,10) * parseFloat(p.price);
 
             models.productItem.findOne({
                 where:{
@@ -740,8 +527,8 @@ exports.addToBasket = function(req,res)
             where:{
                 id:packageId
             }
-        }).then(package=>{
-            var cost  = parseInt(quantity,10) * parseFloat(package.price);
+        }).then(p=>{
+            var cost  = parseInt(quantity,10) * parseFloat(p.price);
             if(packageId == 3 )
             {   
                 var path;
@@ -1443,9 +1230,9 @@ exports.updateBasketItemQuantity = async function(req,res)
             where:{
                 id:basketItem.packageFk
             }
-        }).then(async package=>{
+        }).then(async p=>{
 
-            var newCost = newQuantity * (parseFloat(package.price));
+            var newCost = newQuantity * (parseFloat(p.price));
 
             return await models.basketItem.update({
                 quantity:newQuantity,
@@ -1632,94 +1419,94 @@ exports.getProductItem = function(req,res)
     })
 }
 
-exports.productItem = function(req,res)
-{
-    var productId = req.query.productId;
-    var accountId = req.user.id;
-    // change this to include price
-    models.product.findOne({
-        where:{
-            id:productId
-        }
-    }).then(product=>{
+// exports.productItem = function(req,res)
+// {
+//     var productId = req.query.productId;
+//     var accountId = req.user.id;
+//     // change this to include price
+//     models.product.findOne({
+//         where:{
+//             id:productId
+//         }
+//     }).then(product=>{
 
-        models.package.findOne({
-            where:{
-                productTypeFk:product.productTypeFk
-            }
-        }).then(package=>{
+//         models.package.findOne({
+//             where:{
+//                 productTypeFk:product.productTypeFk
+//             }
+//         }).then(package=>{
             
-            models.sequelize.query('select pi.* from products p ' + 
-            ' inner join productItems pi on pi.productFk = p.id ' +
-            ' where p.id = :productId ' + 
-            ' and pi.accountFk = :accountId ', {replacements:{productId:productId,
-                                        accountId:accountId},type:models.sequelize.QueryTypes.SELECT})
-                                        .then(productItem=>{
+//             models.sequelize.query('select pi.* from products p ' + 
+//             ' inner join productItems pi on pi.productFk = p.id ' +
+//             ' where p.id = :productId ' + 
+//             ' and pi.accountFk = :accountId ', {replacements:{productId:productId,
+//                                         accountId:accountId},type:models.sequelize.QueryTypes.SELECT})
+//                                         .then(productItem=>{
 
 
                                             
-                        models.basketItem.findAll({
-                            where:{
-                                accountFk:accountId,
-                                purchaseBasketFk:null
-                            }
-                        }).then(basketItems=>{
+//                         models.basketItem.findAll({
+//                             where:{
+//                                 accountFk:accountId,
+//                                 purchaseBasketFk:null
+//                             }
+//                         }).then(basketItems=>{
         
-                            models.sequelize.query('select * from basketitems b ' + 
-                            ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
-                            ' where b.accountFk = :accountId ' + 
-                            ' and pb.status = :pending' , {replacements:{
-                             accountId: req.user.id, pending:'Pending'
-                                 }, type: models.sequelize.QueryTypes.SELECT 
-                             }).then(async basketItems2=>{
+//                             models.sequelize.query('select * from basketitems b ' + 
+//                             ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
+//                             ' where b.accountFk = :accountId ' + 
+//                             ' and pb.status = :pending' , {replacements:{
+//                              accountId: req.user.id, pending:'Pending'
+//                                  }, type: models.sequelize.QueryTypes.SELECT 
+//                              }).then(async basketItems2=>{
     
-                                var subTotal = 0;
-                                basketItems.forEach(basketItem=>{
-                                    subTotal = subTotal + parseFloat(basketItem.cost);
-                                })
+//                                 var subTotal = 0;
+//                                 basketItems.forEach(basketItem=>{
+//                                     subTotal = subTotal + parseFloat(basketItem.cost);
+//                                 })
 
-                                basketItems2.forEach(baskeItem2=>{
-                                    subTotal = subTotal + parseFloat(baskeItem2.cost);
-                                })
-                                var numberOfBasketItems = basketItems.length + basketItems2.length;
+//                                 basketItems2.forEach(baskeItem2=>{
+//                                     subTotal = subTotal + parseFloat(baskeItem2.cost);
+//                                 })
+//                                 var numberOfBasketItems = basketItems.length + basketItems2.length;
 
-                                var kid = await models.kid.findOne({
-                                    where:{
-                                        parentAccountFk:accountId
-                                    }
-                                });
-                                if(productItem.length == 0 )
-                                {
-                                        models.productItem.create({
-                                            productFk:productId,
-                                            pdfPath:product.defaultPdfPath,
-                                            accountFk:accountId
-                                        }).then((newProductItem)=>{
+//                                 var kid = await models.kid.findOne({
+//                                     where:{
+//                                         parentAccountFk:accountId
+//                                     }
+//                                 });
+//                                 if(productItem.length == 0 )
+//                                 {
+//                                         models.productItem.create({
+//                                             productFk:productId,
+//                                             pdfPath:product.defaultPdfPath,
+//                                             accountFk:accountId
+//                                         }).then((newProductItem)=>{
 
-                                            res.render('productItem', {user:req.user,productItem:newProductItem,
-                                                product:product,displayParentSection:true, package:package,numberOfBasketItems:numberOfBasketItems, kidId: kid != null ? kid.id : null});
-                                        })
+//                                             res.render('productItem', {user:req.user,productItem:newProductItem,
+//                                                 product:product,displayParentSection:true, package:package,numberOfBasketItems:numberOfBasketItems, kidId: kid != null ? kid.id : null});
+//                                         })
                                 
-                                }
-                                else
-                                {
-                                    res.render('productItem', {user:req.user,productItem:productItem[0],
-                                        product:product,displayParentSection:true, package,package,numberOfBasketItems:numberOfBasketItems,kidId:kid != null ? kid.id : null});
+//                                 }
+//                                 else
+//                                 {
+//                                     res.render('productItem', {user:req.user,productItem:productItem[0],
+//                                         product:product,displayParentSection:true, package,package,numberOfBasketItems:numberOfBasketItems,kidId:kid != null ? kid.id : null});
 
-                                }
-                             })
+//                                 }
+//                              })
 
                                             
-                         })
-            })
-        })
-    })
-    // get the type
-    // switch case
-    // create product item if one doesnt exist
-    // other wise return the existing one
+//                          })
+//             })
+//         })
+//     })
+//     // get the type
+//     // switch case
+//     // create product item if one doesnt exist
+//     // other wise return the existing one
     
-}
+// }
 
 exports.validateShippingDetails = async function(req,res)
 {
@@ -2127,9 +1914,9 @@ exports.getPackageWithId = async function(req,res)
         where:{
             id: packageId
         }
-    }).then(package=>{
+    }).then(p=>{
         
-        return res.json({'package':package});
+        return res.json({'package':p});
     })
 }
 

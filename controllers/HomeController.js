@@ -1,8 +1,8 @@
-const basketController = require('../controllers/BasketController');
-const kidController = require('../controllers/KidController');
 
-exports.login = function(req,res)
-{
+const kidController = require('../controllers/KidController');
+const basketUtility = require('../utility/basket/basketUtility');
+
+exports.login = function(req,res) {
   var reset = req.query.reset;
   var confirm = req.query.confirmAmount;
   
@@ -12,19 +12,16 @@ exports.login = function(req,res)
     res.render('home4', {user:req.user, confirm:confirm});
 }
 
-exports.home = async function(req,res)
-{
+exports.home = async function(req,res) {
   res.render('home5');
 }
 
-exports.terms = async function(req,res)
-{
+exports.terms = async function(req,res) {
   const account = req.user;
   var basketItemsDetails = null;
   var isKidsLinkedToAccount = null;
-  if(account != null)
-  {
-    basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+  if(account != null) {
+    basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
     isKidsLinkedToAccount = await kidController.isKidLinkedToAccountId(account.id);
   }
 
@@ -39,7 +36,7 @@ exports.privacy = async function(req,res)
   var isKidsLinkedToAccount = null;
   if(account != null)
   {
-    basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+    basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
     isKidsLinkedToAccount = await kidController.isKidLinkedToAccountId(account.id);
   }
 
@@ -52,9 +49,8 @@ exports.about =  async function(req,res)
   const account = req.user;
   var basketItemsDetails = null;
   var isKidsLinkedToAccount = null;
-  if(account != null)
-  {
-    basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+  if(account != null) {
+    basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
     isKidsLinkedToAccount = await kidController.isKidLinkedToAccountId(account.id);
   }
 
@@ -67,9 +63,8 @@ exports.faqs = async function(req,res)
   const account = req.user;
   var basketItemsDetails = null;
   var isKidsLinkedToAccount = null;
-  if(account != null)
-  {
-    basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+  if(account != null) {
+    basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
     isKidsLinkedToAccount = await kidController.isKidLinkedToAccountId(account.id);
   }
   

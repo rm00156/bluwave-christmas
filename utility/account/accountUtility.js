@@ -1,4 +1,5 @@
 const models = require('../../models');
+const generalUtility = require('../../utility/general/generalUtility');
 
 async function createAccount(accountDetail) {
 
@@ -48,10 +49,40 @@ async function getNumberOfSignUpsToday() {
     return result.length == 0 ? 0 : result[0].numberOfSignUpsToday;
 }
 
+async function updateAccountNameAndNumber(accountId, name, telephoneNo) {
+    await models.account.update({
+        name: name,
+        telephoneNo: telephoneNo,
+        versionNo: models.sequelize.literal('versionNo + 1')
+    }, {
+        where: {
+            id: accountId
+        }
+    });
+}
+
+async function getNewAccountCode() {
+    var code = generalUtility.makeCode();
+
+    var account = await getAccountByNumber(code);
+
+    if (account == null)
+        return code;
+
+    return await getNewAccountCode();
+}
+
+async function getAllAccounts() {
+    return await models.account.findAll();
+}
+
 module.exports = {
     createAccount,
     getAccountById,
     getAccountByNumber,
     getNumberOfCustomers,
-    getNumberOfSignUpsToday
+    getNumberOfSignUpsToday,
+    updateAccountNameAndNumber,
+    getNewAccountCode,
+    getAllAccounts
 }

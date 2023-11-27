@@ -6,7 +6,7 @@ const Queue = require('bull');
 const signupController = require('../controllers/SignUpController');
 const dashboardController = require('../controllers/DashboardController');
 const queueController = require('../controllers/QueueController');
-
+const schoolUtility = require('../utility/school/schoolUtility');
 const nodeSchedule = require('node-schedule');
 // Connect to a local redis intance locally, and the Heroku-provided URL in production
 // let REDIS_URL = process.env.REDISCLOUD_URL || 'redis://127.0.0.1:6379';
@@ -1496,8 +1496,8 @@ exports.viewPackages2 = async function()
 
     let packages = new Array();
 
-    packagesResult.forEach(package=>{
-      packages.push(package);
+    packagesResult.forEach(p=>{
+      packages.push(p);
     });
 
     return packages;
@@ -1654,25 +1654,16 @@ exports.getSchoolScreen = async function(req, res)
 
   var nextSteps = new Array();
   var school = school[0];
-  if(school.nextTypeFk == null)
-  {
-      if(school.typeId == 8)
-      {
-        nextSteps.push({id:9,type:'Delay'});
-        nextSteps.push({id:10,type:'Printing'});
-      }
+  if(school.nextTypeFk == null) {
+    if(school.typeId == 8) {
+      nextSteps.push({id:9,type:'Delay'});
+      nextSteps.push({id:10,type:'Printing'});
+    }
     
   }
-  else
-  {
-   await models.statusType.findOne({
-      where:{
-          id:school.nextTypeFk
-      }
-    }).then(statusType=>{
-      nextSteps.push({id:school.nextTypeFk,type:statusType.type})
-    })
-    
+  else {
+    const statusType = await schoolUtility.getStatusTypeById(school.nextTypeFk);
+    nextSteps.push({id:school.nextTypeFk,type:statusType.type});
   }
 
   models.sequelize.query('select c.*, y.year from classes c ' + 

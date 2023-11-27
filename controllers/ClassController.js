@@ -1,22 +1,17 @@
 const models = require('../models');
 var kidController = require('../controllers/KidController');
-var schoolController = require('../controllers/SchoolController');
+
 var queueController = require('../controllers/QueueController');
 var orderController = require('../controllers/OrderController');
-var adminController = require('../controllers/AdminController');
 
+const schoolUtility = require('../utility/school/schoolUtility');
+const orderUtility = require('../utility/order/orderUtility');
+const adminUtility = require('../utility/admin/adminUtility');
 const PDFMerge = require('pdf-merge');
 const aws = require('aws-sdk');
 // const process.env = require('../process.env/process.env.json');
 const archiver = require('archiver');
-// const REDIS_URL = process.env.REDISCLOUD_URL || 'redis://127.0.0.1:6379';
-// // const Redis = require('ioredis');
-// // const client = new Redis(REDIS_URL, {
-// //     lazyConnect: true,
-// //     tls: {
-// //         rejectUnauthorized: false
-// //     }
-// // });
+
 const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs-extra');
@@ -39,20 +34,6 @@ async function getClassById(id)
     return await models.class.findOne({
         where:{
             id:id
-        }
-    });
-}
-
-exports.getClassByNumber = async function(number)
-{
-    return await getClassByNumber(number);
-}
-
-async function getClassByNumber(number)
-{
-    return await models.class.findOne({
-        where:{
-            classNumber:number
         }
     });
 }
@@ -86,14 +67,14 @@ exports.getClassScreen = async function(req,res)
 {
     var classNumber = req.query.classNumber;
 
-    var schoolClass = await getClassByNumber(classNumber);
+    var schoolClass = await schoolUtility.getClassByNumber(classNumber);
     var classId = schoolClass.id;
     var kids = await kidController.getKidsByClassId(classId);
     var orderDetails = await getOrderDetailsForAllKidsFromClassId(classId, kids.length);
     var orders = await orderController.getOrdersForClassId(classId);
-    var backgroundSetting = await adminController.getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await adminController.getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('adminClass', {user:req.user, schoolClass:schoolClass, backgroundSetting:backgroundSetting,
          kids:kids, orderDetails:orderDetails, orders:orders, ordersNotShipped:ordersNotShipped,
@@ -101,21 +82,10 @@ exports.getClassScreen = async function(req,res)
  
 }
 
-exports.getClassAndSchoolByNumber = async function(classNumber, schoolNumber)
-{
-    var result = await models.sequelize.query('select s.id as schoolId, c.id as classId from classes c ' + 
-                ' inner join schools s on c.schoolFk = s.id ' + 
-                ' where c.classNumber = :classNumber ' + 
-                ' and s.schoolNumber = :schoolNumber ', 
-                {replacements:{ schoolNumber: schoolNumber, classNumber:classNumber},
-                type: models.sequelize.QueryTypes.SELECT});
-    return result.length == 0 ? null : result[0];
-}
-
 exports.getClassOrderInstruction = async function(req,res)
 {
     var classId = req.query.classId;
-    var deadline = await schoolController.getSchoolDeadlineFromClassId(classId);
+    var deadline = await schoolUtility.getSchoolDeadlineFromClassId(classId);
 
     if(deadline == null)
         return res.json({error:'No deadline has been set for the school'});
@@ -127,7 +97,7 @@ exports.getClassOrderInstruction = async function(req,res)
 exports.getSchoolOrderInstruction = async function(req,res)
 {
     var schoolId = req.query.schoolId;
-    var deadline = await schoolController.getSchoolDeadlineBySchoolId(schoolId);
+    var deadline = await schoolUtility.getSchoolDeadlineBySchoolId(schoolId);
 
     if(deadline == null)
         return res.json({error:'No deadline has been set for the school'});
@@ -343,7 +313,7 @@ exports.processClassOrderInstruction = async function(classId, deadlineId, progr
 
 async function createOrderInstruction(schoolClass, schoolDeadline, createFl, progress, job)
 {
-    var school = await schoolController.getSchoolFromSchoolId(schoolClass.schoolFk);
+    var school = await schoolUtility.getSchoolFromSchoolId(schoolClass.schoolFk);
     var now = Date.now();
 
     var unparsedDeadLine = schoolDeadline.deadLineDttm;
@@ -485,7 +455,7 @@ hbs.registerHelper('dateFormat', (value,format)=>{
 async function getOrderFormDetailsForClassId(classId)
 {
     var schoolClass = await getClassById(classId);
-    var school = await schoolController.getSchoolFromClassId(classId);
+    var school = await schoolUtility.getSchoolFromClassId(classId);
 
     var query = 'select distinct b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk from products p ' +
         ' inner join productTypes pt on p.productTypeFk = pt.id ' +
@@ -968,65 +938,3 @@ exports.getPurchasedOrders = async function(req,res)
     res.json({id:job.id});
 }
 
-exports.getGiveBackAmountDetailsForClassByClassId = async function(classId)
-{
-    // orders linked to a class
-    var query = 'select distinct b.id, pv.name, pt.type, b.quantity as quantity, b.cost  from classes c ' +
-        ' inner join productItems pi on pi.classFk = c.id ' + 
-        ' inner join productVariants pv on pi.productVariantFk = pv.id ' + 
-        ' inner join products p on pv.productFk = p.id ' +
-        ' inner join productTypes pt on p.productTypeFk = pt.id ' +
-        ' inner join basketItems b on b.productItemFk = pi.id ' + 
-        ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
-        ' where pb.status = :completed ' + 
-        ' and c.id = :classId ';
-    
-    var result = await models.sequelize.query(query,
-    {replacements:{classId:classId, completed:'Completed'}, type: models.sequelize.QueryTypes.SELECT});
-
-    var giveBackTotal = 0;
-    var photoPackQuantity = 0;
-    var photoPackGiveBack = 0;
-    var photoTotalCost = 0
-    var standardPackQuantity = 0;
-    var standardPackGiveBack = 0;
-    var standardTotalCost = 0;
-    var calendarQuantity = 0;
-    var calendarGiveBack = 0;
-    var calendarTotalCost = 0;
-    result.forEach(item =>{
-
-        if(item.name == 'Photo Pack')
-        {
-            photoPackQuantity = photoPackQuantity + parseFloat(item.quantity);
-            photoPackGiveBack = photoPackGiveBack + (parseFloat(item.quantity) * 0.8);
-            photoTotalCost = photoTotalCost + parseFloat(item.cost);
-        }
-        else if(item.name == 'Standard')
-        {
-            standardPackQuantity = standardPackQuantity + parseFloat(item.quantity);
-            standardPackGiveBack = standardPackGiveBack + (parseFloat(item.quantity) * 0.7);
-            standardTotalCost = standardTotalCost + parseFloat(item.cost);
-        }
-        else if(item.type == 'Calendars')
-        {
-            calendarQuantity = calendarQuantity + parseFloat(item.quantity);
-            calendarGiveBack = calendarGiveBack + (parseFloat(item.quantity) * 0.4);
-            calendarTotalCost = calendarTotalCost + parseFloat(item.cost);
-        }
-    });
-
-    giveBackTotal = photoPackGiveBack + standardPackGiveBack + calendarGiveBack;
-
-    var array = {giveBackTotal: giveBackTotal.toFixed(2), photoPackGiveBack: photoPackGiveBack.toFixed(2),
-                photoPackQuantity: photoPackQuantity.toFixed(0), photoPackGiveBackPer: 0.80, standardPackGiveBackPer: 0.70,
-                standardPackGiveBack:standardPackGiveBack.toFixed(2),
-                standardPackQuantity:standardPackQuantity.toFixed(0),
-                calendarGiveBack:calendarGiveBack.toFixed(2),
-                calendarQuantity:calendarQuantity.toFixed(0), calendarGiveBackPer: 0.40,
-                calendarTotalCost:calendarTotalCost.toFixed(2), photoTotalCost:photoTotalCost.toFixed(2),
-                standardTotalCost:standardTotalCost.toFixed(2)
-            };
-    
-    return array;
-}

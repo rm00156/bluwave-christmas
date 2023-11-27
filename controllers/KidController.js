@@ -1,13 +1,16 @@
 const models = require('../models');
-const basketController = require('../controllers/BasketController');
 const dadController = require('../controllers/DadController');
 const productController = require('../controllers/ProductController');
 const classController = require('../controllers/ClassController');
-const schoolController = require('../controllers/SchoolController');
 const orderController = require('../controllers/OrderController');
 const accountUtility = require('../utility/account/accountUtility');
-const adminController = require('../controllers/AdminController');
 const queueController = require('../controllers/QueueController');
+const schoolUtility = require('../utility/school/schoolUtility');
+const kidUtility = require('../utility/kid/kidUtility');
+const classUtility = require('../utility/class/classUtility');
+const basketUtility = require('../utility/basket/basketUtility');
+const orderUtility = require('../utility/order/orderUtility');
+const adminUtility = require('../utility/admin/adminUtility');
 
 exports.getKidsFromAccountId = async function(accountId)
 {
@@ -73,8 +76,7 @@ async function isKidLinkedToAccountId(accountId)
     return kid != null;
 }
 
-exports.linkKid = async function(req,res)
-{
+exports.linkKid = async function(req,res) {
     var account = req.user;
     var month = req.query.month;
     var age = req.query.age;
@@ -82,7 +84,7 @@ exports.linkKid = async function(req,res)
     var code = req.query.code;
 
     var isKidLinkedToAccount = await isKidLinkedToAccountId(account.id);
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
 
    
     res.render('linkKid3',{user:req.user,basketItemsDetails:basketItemsDetails, isKidLinkedToAccount:isKidLinkedToAccount, 
@@ -98,18 +100,16 @@ exports.createNewCard = async function(req,res)
     return res.json({id:job.id, basket:basket});
 }
 
-exports.processLinkKids = async function(req,res)
-{
+exports.processLinkKids = async function(req,res) {
     var account = req.user;
     var months = req.body.months;
     var years = req.body.years;
     var name = req.body.name;
     var classCode = req.body.classCode;
-    var schoolCode = req.body.schoolCode;
     var basket = req.body.basket;
 
     months = (months == '') ? 0 : months;
-    var classAndSchool = await classController.getClassAndSchoolByNumber(classCode, schoolCode);
+    var classAndSchool = await classUtility.getClassAndSchoolByClassNumber(classCode);
 
     if(classAndSchool == null)
     {
@@ -140,21 +140,9 @@ async function createKid(name, years, months, classId, account)
 
     var code = await getNewKidCode();
     var kid = null;
-    try
-    {
-        kid =  await models.kid.create({
-            name:name,
-            age:years,
-            month: months,
-            classFk: classId,
-            parentAccountFk: account.id,
-            code:code,
-            versionNo: 1,
-            deleteFl: false
-        },t);
-    }
-    catch(error)
-    {
+    try {
+        kid = await kidUtility.createKid(name, years, months, classId, account.id, code);
+    } catch(error) {
         console.log(error);
         return await t.rollback();
     }
@@ -272,14 +260,14 @@ exports.getKidProductItemsScreen = async function(req,res)
 
     var kid = await getKidByCode(kidNumber);
     var schoolClass = await classController.getClassById(kid.classFk);
-    var school = (schoolClass == null) ? null : await schoolController.getSchoolFromSchoolId(schoolClass.schoolFk);
+    var school = (schoolClass == null) ? null : await schoolUtility.getSchoolFromSchoolId(schoolClass.schoolFk);
     var productItems = await productController.getProductItemsForKidNumber(kidNumber);
     var accountId = kid.parentAccountFk;
     var orders = await orderController.getOrdersForAccountId(accountId);
     var account = await accountUtility.getAccountById(accountId);
-    var backgroundSetting = await adminController.getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await adminController.getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('kidProductItems', {user:req.user, productItems:productItems, backgroundSetting:backgroundSetting, kid:kid, school:school,
             schoolClass:schoolClass, schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction, ordersNotShipped:ordersNotShipped, orderHistory:orders, account:account});

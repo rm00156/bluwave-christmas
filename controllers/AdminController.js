@@ -3,25 +3,26 @@ var dadController = require('../controllers/DadController');
 var productController = require('../controllers/ProductController');
 var kidController = require('../controllers/KidController');
 var classController = require('../controllers/ClassController');
-var schoolController = require('../controllers/SchoolController');
 var accountUtility = require('../utility/account/accountUtility');
 var orderController = require('../controllers/OrderController');
-var basketController = require('../controllers/BasketController');
-// const process.env = require('../process.env/process.env.json');
+const schoolUtility = require('../utility/school/schoolUtility');
+const basketUtility = require('../utility/basket/basketUtility');
+const orderUtility = require('../utility/order/orderUtility');
+const adminUtility = require('../utility/admin/adminUtility');
 
 exports.getAdminDashboardPage = async function(req,res)
 {
     var orderDetails = await orderController.getTotalOrderDetails();
     var numberOfCustomers = await accountUtility.getNumberOfCustomers();
-    var giveBackDetails = await schoolController.getGiveBackAmount();
-    var numberOfSchools = await schoolController.getNumberOfSchools();
-    var schoolDashboardStatus = await schoolController.getSchoolDashboardStatus();
-    var schoolProgressDetails = await schoolController.getSchoolProgressDetails();
+    var giveBackDetails = await schoolUtility.getGiveBackAmount();
+    var numberOfSchools = await schoolUtility.getNumberOfSchools();
+    var schoolDashboardStatus = await schoolUtility.getSchoolDashboardStatus();
+    var schoolProgressDetails = await schoolUtility.getSchoolProgressDetails();
     var topFivePerformingProductVariants = await orderController.getTopFivePerformingProductVariants();
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
     var numberOfLinkedKids = await kidController.getNumberOfLinkedKids();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
     var subTotalToday = await orderController.getSubTotalOfAllOrdersToday();
     var averageTimeFromSignUpToPurchaseInMinutes = await orderController.getAverageTimeFromSignUpToPurchaseInMinutes();
     var numberOfSignUpsToday = await accountUtility.getNumberOfSignUpsToday();
@@ -38,9 +39,9 @@ exports.getAdminDashboardPage = async function(req,res)
 exports.getAdminAccountPage = async function(req,res)
 {
     var accountTypes = await models.accountType.findAll({});
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('adminAccounts', {user: req.user, backgroundSetting: backgroundSetting,
          ordersNotShipped:ordersNotShipped, accountTypes:accountTypes, schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction});
@@ -87,26 +88,7 @@ exports.searchAccounts = async function(req,res)
                   })
 }
 
-exports.getNewAccountCode = async function()
-{
-    return await getNewAccountCode();
-}
 
-async function getNewAccountCode()
-{
-    var code = dadController.makeCode();
-
-    var account = await models.account.findOne({
-        where:{
-            accountNumber: code
-        }
-    });
-
-    if(account == null)
-        return code;
-    
-    return await getNewAccountCode();
-}
 
 exports.getProductItemScreen = async function(req,res)
 {
@@ -129,11 +111,11 @@ exports.getProductItemScreen = async function(req,res)
         schoolClass = await classController.getClassById(kid.classFk);
 
     if(schoolClass != null)
-        school = await schoolController.getSchoolFromSchoolId(schoolClass.schoolFk);
+        school = await schoolUtility.getSchoolFromSchoolId(schoolClass.schoolFk);
 
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('adminProductItem', {user:req.user,productItem:productItem, product:product, account:account, backgroundSetting:backgroundSetting,
         productVariants:productVariants, ordersNotShipped:ordersNotShipped, productVariant:productVariant,
@@ -152,13 +134,13 @@ exports.getAccountDetailsPage = async function(req,res)
         }
     });
 
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
 
     var kids = await kidController.getKidsForAccountId(account.id);
-    var school = await schoolController.getSchoolFromAccountId(account.id);
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var school = await schoolUtility.getSchoolFromAccountId(account.id);
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('adminAccountDetail', {user:req.user, account:account, basketItemsDetails:basketItemsDetails, ordersNotShipped:ordersNotShipped,
          kids:kids, productItems:productItems, backgroundSetting:backgroundSetting, orderHistory: orders, 
@@ -167,9 +149,9 @@ exports.getAccountDetailsPage = async function(req,res)
 
 exports.getKidsSearchScreen = async function(req,res)
 {
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('adminKids',{user:req.user,schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction,
          ordersNotShipped:ordersNotShipped, backgroundSetting:backgroundSetting})
@@ -220,9 +202,9 @@ exports.searchKidsResults = async function(req,res)
 
 exports.getOrdersSearchScreen = async function(req,res)
 {
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('newAdminOrders', {user:req.user, ordersNotShipped:ordersNotShipped,
         schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction, backgroundSetting:backgroundSetting})
@@ -334,21 +316,6 @@ exports.searchOrdersResults = async function(req, res)
     res.json({result:orders});
 }
 
-exports.getBackgroundSetting = async function(accountId)
-{
-    return await getBackgroundSetting(accountId);
-}
-
-async function getBackgroundSetting(accountId)
-{
-    return await models.setting.findOne({
-        where:{
-            name:'Background Color',
-            accountFk: accountId
-        }
-    });
-}
-
 exports.setBackground = async function(req,res)
 {
     var value = req.body.value;
@@ -365,23 +332,6 @@ exports.setBackground = async function(req,res)
 
     res.json({});
 }
-
-exports.getOrdersNotShipped = async function()
-{
-    return await getOrdersNotShipped();
-}
-
-async function getOrdersNotShipped()
-{
-    return await models.sequelize.query('select distinct pb.*, DATE_FORMAT(pb.purchaseDttm, "%Y-%m-%d %H:%i:%s") as purchasedDttm, DATE_FORMAT(pb.shippedDttm, "%Y-%m-%d %H:%i:%s") as shippedDttm  from purchaseBaskets pb ' + 
-        ' inner join basketItems b on b.purchaseBasketFk = pb.id ' +
-        ' where pb.status = :completed ' + 
-        ' and pb.shippedFl = false ' + 
-        ' and pb.shippingAddressFk is not null ' +
-        ' and pb.deleteFl = false ',
-        {replacements:{completed: 'Completed'}, type: models.sequelize.QueryTypes.SELECT});
-}
-
 
 exports.setShipped = async function(req,res)
 {
@@ -403,9 +353,9 @@ exports.setShipped = async function(req,res)
 
 exports.ordersNotShipped = async function(req,res)
 {
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('ordersNotShipped',{user:req.user, backgroundSetting:backgroundSetting, 
         schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction, ordersNotShipped:ordersNotShipped});
@@ -413,11 +363,11 @@ exports.ordersNotShipped = async function(req,res)
 
 exports.getKidsLinkedToSchoolScreen = async function(req,res)
 {
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
-    var schoolDetails = await schoolController.getKidsLinkedToSchools();
+    var schoolDetails = await schoolUtility.getNumberOfKidsLinkedToEachSchool();
 
     res.render('linkedToSchools',{user:req.user,schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction,
          ordersNotShipped:ordersNotShipped, backgroundSetting:backgroundSetting, schoolDetails:schoolDetails})
@@ -425,9 +375,9 @@ exports.getKidsLinkedToSchoolScreen = async function(req,res)
 
 exports.getRevenueChartScreen = async function(req,res)
 {
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('revenueChart',{user:req.user,schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction,
         ordersNotShipped:ordersNotShipped, backgroundSetting:backgroundSetting});
@@ -444,9 +394,9 @@ exports.getRevenues = async function(req,res)
 
 exports.getAccountsWithBasketItems = async function(req,res)
 {
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     var accounts = await models.sequelize.query('select distinct a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at from basketitems b ' +
                         ' inner join accounts a on b.accountFk = a.id  where purchaseBasketfk is null ' +
@@ -476,9 +426,9 @@ exports.getAccountsWithBasketItems = async function(req,res)
 
 exports.getAccountsLinkedNoOrder = async function(req,res)
 {
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     var accounts = await models.sequelize.query('select distinct s.name as school, a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at  from productitems pi ' +
         ' inner join accounts a on pi.accountFk = a.id ' + 
@@ -494,9 +444,9 @@ exports.getAccountsLinkedNoOrder = async function(req,res)
 
 exports.getAccountsLinkedNoOrderButUploadedPicture = async function(req,res)
 {
-    var backgroundSetting = await getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     var accounts = await models.sequelize.query('select distinct a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at  from productitems pi ' +
             ' inner join accounts a on pi.accountFk = a.id where classFk is not null ' +
