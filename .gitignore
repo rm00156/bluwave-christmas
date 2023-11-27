@@ -1,5 +1,5 @@
-.env,
-sqlscripts,
+.env
+sqlscripts
 node_modules
 .DS_Store
-config
+config/
