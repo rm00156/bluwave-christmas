@@ -1,6 +1,6 @@
 const models = require('../models');
 const aws = require('aws-sdk');
-const config = require('../config/config.json');
+// const config = require('../process.env/process.env.json');
 const validator = require('../validators/signup');
 const Queue = require('bull');
 const signupController = require('../controllers/SignUpController');
@@ -19,11 +19,11 @@ const nodeSchedule = require('node-schedule');
 // });
 var fs = require('fs');
 const readline = require("readline");
-//create config file
+//create process.env file
 aws.config.update({
-  secretAccessKey: config.secretAccessKey,
-  accessKeyId:config.accessKeyId,
-  region: config.region
+  secretAccessKey: process.env.secretAccessKey,
+  accessKeyId:process.env.accessKeyId,
+  region: process.env.region
 });
 
 exports.charityAmountBackTask = async function(req,res)
@@ -413,11 +413,11 @@ exports.addCalendarPicture = async function(req,res)
   });
   var date = Date.now();
   var suffix =(req.files.file.mimeType == 'image/png') ? 'png' : 'jpg';
-  let s3CalendarPicturePath = config.s3BucketPath + "Calendar/Pictures/" + date + '_' + fileName + '.' + suffix;
+  let s3CalendarPicturePath = process.env.s3BucketPath + "Calendar/Pictures/" + date + '_' + fileName + '.' + suffix;
   
   const s3 = new aws.S3();
   var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: req.files.file.data,
     Key: 'Calendar/Pictures/' + date + '_' + fileName + '.' + suffix,
     ACL:'public-read'
@@ -455,11 +455,11 @@ exports.addPicture = async function(req,res)
   });
   var date = Date.now();
   var suffix =(req.files.file.mimeType == 'image/png') ? 'png' : 'jpg';
-  let s3PicturePath = config.s3BucketPath + "Pictures/" + date + '_' + fileName + '.' + suffix;
+  let s3PicturePath = process.env.s3BucketPath + "Pictures/" + date + '_' + fileName + '.' + suffix;
 
   const s3 = new aws.S3();
   var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: req.files.file.data,
     Key: 'Pictures/' + date + '_' + fileName + '.' + suffix,
     ACL:'public-read'
@@ -516,11 +516,11 @@ exports.addArtwork = async function(req,res)
   });
   var date = Date.now();
   var suffix =(req.files.file.mimeType == 'image/png') ? 'png' : 'jpg';
-  let s3PicturePath = config.s3BucketPath + "Artwork/" + date + '_' + fileName + '.' + suffix;
+  let s3PicturePath = process.env.s3BucketPath + "Artwork/" + date + '_' + fileName + '.' + suffix;
 
   const s3 = new aws.S3();
   var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: req.files.file.data,
     Key: 'Artwork/' + date + '_' + fileName + '.' + suffix,
     ACL:'public-read'
@@ -561,11 +561,11 @@ exports.uploadCalendarPicture = async function(req,res)
   });
   var date = Date.now();
   var suffix =(req.files.file.mimeType == 'image/png') ? 'png' : 'jpg';
-  let s3CalendarPicturePath = config.s3BucketPath +"Calendar/Pictures/" + date + '_' + fileName + '.' + suffix;
+  let s3CalendarPicturePath = process.env.s3BucketPath +"Calendar/Pictures/" + date + '_' + fileName + '.' + suffix;
   
   const s3 = new aws.S3();
   var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: req.files.file.data,
     Key: 'Calendar/Pictures/' + date + '_' + fileName + '.' + suffix,
     ACL:'public-read'
@@ -593,11 +593,11 @@ exports.uploadPicture = async function(req,res)
   });
   var date = Date.now();
   var suffix =(req.files.file.mimeType == 'image/png') ? 'png' : 'jpg';
-  let s3PicturePath = config.s3BucketPath +"Pictures/" + date + '_' + fileName + '.' + suffix;
+  let s3PicturePath = process.env.s3BucketPath +"Pictures/" + date + '_' + fileName + '.' + suffix;
 
   const s3 = new aws.S3();
   var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: req.files.file.data,
     Key: 'Pictures/' + date + '_' + fileName + '.' + suffix,
     ACL:'public-read'
@@ -632,11 +632,11 @@ exports.uploadArtwork = async function(req,res)
   });
   var date = Date.now();
   var suffix =(req.files.file.mimeType == 'image/png') ? 'png' : 'jpg';
-  let s3PicturePath = config.s3BucketPath +"Artwork/" + date + '_' + fileName + '.' + suffix;
+  let s3PicturePath = process.env.s3BucketPath +"Artwork/" + date + '_' + fileName + '.' + suffix;
 
   const s3 = new aws.S3();
   var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: req.files.file.data,
     Key: 'Artwork/' + date + '_' + fileName + '.' + suffix,
     ACL:'public-read'
@@ -1189,10 +1189,10 @@ exports.createKid = async function(req, res)
       });
       
       var suffix =(req.files.artwork.mimeType == 'image/png') ? 'png' : 'jpg';
-      let s3ArtworkPath = config.s3BucketPath +"Artwork/" + date + '_' + fileName + '.' + suffix;
+      let s3ArtworkPath = process.env.s3BucketPath +"Artwork/" + date + '_' + fileName + '.' + suffix;
   
       var params = {
-      Bucket:config.bucketName,
+      Bucket:process.env.bucketName,
       Body: req.files.artwork.data,
       Key: 'Artwork/' + date + '_' + fileName + '.' + suffix,
       ACL:'public-read'
@@ -1248,7 +1248,7 @@ const createNewKid = function(res,code, name, age, month, classId,s3ArtworkPath,
         code:code,
         deleteFl:false
       }).save().then(kid=>{
-        // var s3Bucket = config.s3BucketPath + 'Calendar/';
+        // var s3Bucket = process.env.s3BucketPath + 'Calendar/';
         // models.calendar.build({
         //   kidFk:kid.id,
         //   landscapeRedPath: s3Bucket + 'defaultLandscapeRed.pdf',
@@ -1460,7 +1460,7 @@ exports.createPackage=  async function(req,res)
  
   const s3 = new aws.S3();
   var params = {
-    Bucket:config.bucketName,
+    Bucket:process.env.bucketName,
     Body: req.files.fileToUpload.data,
     Key: 'Packages/' + req.files.fileToUpload.name,
     ACL:'public-read'
@@ -1478,7 +1478,7 @@ exports.createPackage=  async function(req,res)
 
 await s3UploadPromise;
 
-let s3Path = config.s3BucketPath+"Packages/" + req.files.fileToUpload.name;
+let s3Path = process.env.s3BucketPath+"Packages/" + req.files.fileToUpload.name;
 
 models.package.build({
   name: req.body.packageName,

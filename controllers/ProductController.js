@@ -8,7 +8,7 @@ const defaultDummyImagePath = 'https://kidscards4christmas.s3.eu-west-2.amazonaw
 const aws = require('aws-sdk');
 const puppeteer = require('puppeteer');
 const hbs = require('handlebars');
-const config = require('../config/config.json');
+// const process.env = require('../process.env/process.env.json');
 const path = require('path');
 const fs = require('fs-extra');
 const Queue = require('bull');
@@ -668,7 +668,7 @@ async function generateProductItemPdf(data, productVariantItem)
     const s3 = new aws.S3();
     let s3FileLocation = fileLocation + Date.now() + "_" + filename;
     var params = {
-      Bucket:config.bucketName,
+      Bucket:process.env.bucketName,
       Body: buffer,
       Key: s3FileLocation,
       ACL:'public-read'
@@ -685,7 +685,7 @@ async function generateProductItemPdf(data, productVariantItem)
     });
 
     await s3UploadPromise;
-    var s3Path = config.s3BucketPath + s3FileLocation;
+    var s3Path = process.env.s3BucketPath + s3FileLocation;
 
     return s3Path;
 }
@@ -820,9 +820,9 @@ async function getProductByName(name)
 }
 
 aws.config.update({
-    secretAccessKey: config.secretAccessKey,
-    accessKeyId:config.accessKeyId,
-    region: config.region
+    secretAccessKey: process.env.secretAccessKey,
+    accessKeyId:process.env.accessKeyId,
+    region: process.env.region
 });
 
 const compile = async function(templateName, data)

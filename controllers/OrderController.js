@@ -6,24 +6,24 @@ const classController = require('../controllers/ClassController');
 const schoolController = require('../controllers/SchoolController');
 
 const env = process.env.NODE_ENV || "development";
-var stripe = env == 'development' ? require('stripe')('sk_test_oocjKxN1BASDuQytDpSoGxuq00eLIkMdHA') : require('stripe')('sk_live_QFzR9S5RNpGFonKOM6Hyrg8I00Zq2InXUj');
-const endpointSecret = env == 'development' ? 'whsec_fnn7C1Dq14S8Sw3bg4wwh8nHEt85rbOn' : 'whsec_XMtxjcaS6U8baW3PggwRDlJZPTL68vfA';
+var stripe = require('stripe')(process.env.stripe_server);
+const endpointSecret = process.env.endpointSecret;
 const PDFMerge = require('pdf-merge');
 const aws = require('aws-sdk');
-const config = require('../config/config.json');
+// const process.env = require('../process.env/process.env.json');
 const archiver = require('archiver');
 
 const fs = require('fs-extra');
 
 aws.config.update({
-    secretAccessKey: config.secretAccessKey,
-    accessKeyId:config.accessKeyId,
-    region: config.region
+    secretAccessKey: process.env.secretAccessKey,
+    accessKeyId:process.env.accessKeyId,
+    region: process.env.region
   });
 
 // const fs = require('fs-extra');
 // const path = require('path');
-// const config = require('../config/config.json');
+// const process.env = require('../process.env/process.env.json');
 // const nodeMailer = require('nodemailer');
 
 exports.getParentOrders = async function(req,res)
@@ -462,7 +462,7 @@ exports.getOrderDetailsGroupByTypeForId = async function(purchaseBasketId, job)
 
     const s3 = new aws.S3();
     var params = {
-        Bucket:config.bucketName,
+        Bucket:process.env.bucketName,
     };
                 
     var path = null;
@@ -548,7 +548,7 @@ exports.getOrderDetailsGroupByTypeForId = async function(purchaseBasketId, job)
 
     var s3Stream = fs.createReadStream(fileName);
     params = {
-        Bucket:config.bucketName,
+        Bucket:process.env.bucketName,
         Body: s3Stream,
         Key: fileName,
         ACL:'public-read'
@@ -570,7 +570,7 @@ exports.getOrderDetailsGroupByTypeForId = async function(purchaseBasketId, job)
     progress++;
     job.progress(progress);
 
-    return {pdfPath:config.s3BucketPath + fileName};
+    return {pdfPath:process.env.s3BucketPath + fileName};
 }
 
 exports.generateOrderDetails = async function(req,res)
