@@ -10,12 +10,14 @@ module.exports = function(sequelize, Sequelize) {
 
         email:{
             type: Sequelize.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
 
         schoolNumber:{
             type: Sequelize.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
  
         name: {

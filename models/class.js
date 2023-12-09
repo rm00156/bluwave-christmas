@@ -10,7 +10,8 @@ module.exports = function(sequelize, Sequelize) {
 
         classNumber:{
             type: Sequelize.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
  
         name: {

@@ -1,97 +1,36 @@
 const models = require('../models');
 const productController = require('../controllers/ProductController');
 const parentController = require('../controllers/ParentController');
-// const process.env = require('../process.env/process.env.json');
-const { product } = require('puppeteer');
+const basketUtility = require('../utility/basket/basketUtility');
+const productItemUtility = require('../utility/product/productItemUtility');
+const productUtility = require('../utility/product/productUtility');
+const JOHN_DOE = 'John Doe';
 
-exports.getBasketItemsDetailsForAccountId = async function(accountId)
-{
-    return await getBasketItemsDetailsForAccountId(accountId);
-}
 
-async function getBasketItemsDetailsForAccountId(accountId)
-{
-    var basketItems = await models.sequelize.query('select pv.price, p.id as productId, pv.name as productVariantName, pi.id as productItemId, p.name as productName, b.id as basketItemId, b.* from  basketitems b ' + 
-    ' inner join productItems pi on b.productItemFk = pi.id ' +
-    ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
-    ' inner join products p on pv.productFk = p.id ' +
-    ' where b.accountFk = :accountId ' + 
-    ' and purchaseBasketFk is null'  , {replacements:{
-      accountId: accountId
-          }, type: models.sequelize.QueryTypes.SELECT 
-    });
-
-    var subTotal = 0;
-    basketItems.forEach(basketItem=>{
-        subTotal = subTotal + parseFloat(basketItem.price) * basketItem.quantity;
-    });
-
-    var basketItems2 = await models.sequelize.query('select pv.price, pi.id as productItemId, p.id as productId, pv.name as productVariantName, p.name as productName, b.id as basketItemId,  b.* from basketitems b ' + 
-    ' inner join productItems pi on b.productItemFk = pi.id ' +
-    ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
-    ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
-    ' inner join products p on pv.productFk = p.id ' +
-    ' where b.accountFk = :accountId ' + 
-    ' and pb.status = :pending' , {replacements:{
-    accountId: accountId, pending:'Pending'
-            }, type: models.sequelize.QueryTypes.SELECT 
-        });
-
-    basketItems2.forEach(basketItem=>{
-        subTotal = subTotal + parseFloat(basketItem.price) * basketItem.quantity;
-        basketItems.push(basketItem);
-    });
-
-    return {
-        basketItems: basketItems,
-        subTotal: subTotal
-    }
-}
-
-exports.addToBasket = async function(req,res)
-{
+exports.addToBasket = async function(req,res) {
     var quantity = req.body.quantity;
     var productItemId = req.body.productItemId;
     var accountId = req.user.id;
     
-    var productItem = await productController.getProductItemById(productItemId);
-    var productVariant = await models.productVariant.findOne({
-        where:{
-            id: productItem.productVariantFk,
-        }
-    });
+    var productItem = await productItemUtility.getProductItemById(productItemId);
+    var productVariant = await productUtility.getProductVariantById(productItem.productVariantFk);
 
     var cost = parseInt(quantity,10) * parseFloat(productVariant.price);
     var doesProductItemStillHaveDefaultPictures = await productController.doesProductItemStillHaveDefaultPictures(productItem);
-    if(doesProductItemStillHaveDefaultPictures && ((productVariant.productFk == 1 || productVariant.productFk == 2 || productVariant.productFk == 4) || productVariant.orderNo == 2) )
-    {
+    if(doesProductItemStillHaveDefaultPictures && ((productVariant.productFk == 1 || productVariant.productFk == 2 || productVariant.productFk == 4) || productVariant.orderNo == 2) ) {
         res.json({error:"Please add picture to the card before attempting to add to basket"})
     }
-    else if(productItem.text1 == 'John Doe')
-    {
+    else if(productItem.text1 == JOHN_DOE) {
         res.json({error:"Please update name to add to basket"})
-    }
-    else
-    {
+    } else {
         var path = productItem.pdfPath;
         var fileName = path.replace(process.env.s3BucketPath,'');
 
-        await models.basketItem.create({
-            path:path,
-            productItemFk: productItemId,
-            text1:productItem.text1,
-            fileName:fileName,
-            quantity: quantity,
-            accountFk: accountId,
-            cost:cost,
-            picture:productItem.picture1Path,
-            displayItem1:productItem.displayItem1,
-            displayItem2:productItem.displayItem2,
-            displayItem3:productItem.displayItem3,
-            deleteFl: false,
-            versionNo:1});
+        await basketUtility.createBasketItem(accountId, path, productItemId, productItem.text1,
+            fileName, quantity, cost, productItem.picture1Path, productItem.displayItem1, productItem.displayItem2,
+            productItem.displayItem3);
         
-        var basketItemDetails = await getBasketItemsDetailsForAccountId(productItem.accountFk);
+        var basketItemDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(productItem.accountFk);
         res.json({numberOfBasketItems:basketItemDetails.basketItems.length,subTotal:basketItemDetails.subTotal.toFixed(2)});
     
     }   
@@ -100,7 +39,7 @@ exports.addToBasket = async function(req,res)
 exports.basket = async function(req,res)
 {
     var account = req.user;
-    var basketItemsDetails = await getBasketItemsDetailsForAccountId(account.id);
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
     var isDisplayShippingSectionDetail = await parentController.isDisplayShippingSectionDetail(account.id);
     // var displayMessage = isDisplayShippingSectionDetail.displayMessage ? 'true' : 'false';
     // isDisplayShippingSection
@@ -207,7 +146,7 @@ exports.mightLike = async function(req,res)
 {
     var accountId = req.user.id;
 
-    var basketItems = await getBasketItemsDetailsForAccountId(accountId);
+    var basketItems = await basketUtility.getCurrentBasketItemsDetailsForAccountId(accountId);
 
     var productIds = new Array();
 

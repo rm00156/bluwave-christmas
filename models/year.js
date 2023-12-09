@@ -11,6 +11,18 @@ module.exports = function(sequelize, Sequelize) {
         year: {
             type: Sequelize.STRING,
             allowNull: false
+        },
+        
+        deleteFl:{
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
+
+        versionNo:{
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            defaultValue: 1
         }
     },{
         timestamps:false

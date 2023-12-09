@@ -1,9 +1,12 @@
 const models = require('../models');
 const basketController = require('../controllers/BasketController');
 const queueController = require('../controllers/QueueController');
-const adminController = require('../controllers/AdminController');
 const classController = require('../controllers/ClassController');
-const schoolController = require('../controllers/SchoolController');
+const schoolUtility = require('../utility/school/schoolUtility');
+const basketUtility = require('../utility/basket/basketUtility');
+const orderUtility = require('../utility/order/orderUtility');
+const adminUtility = require('../utility/admin/adminUtility');
+const {PURCHASE_BASKET_STATUS} = require('../utility/basket/purchaseBasketStatus');
 
 const env = process.env.NODE_ENV || "development";
 var stripe = require('stripe')(process.env.stripe_server);
@@ -21,17 +24,12 @@ aws.config.update({
     region: process.env.region
   });
 
-// const fs = require('fs-extra');
-// const path = require('path');
-// const process.env = require('../process.env/process.env.json');
-// const nodeMailer = require('nodemailer');
 
-exports.getParentOrders = async function(req,res)
-{
+exports.getParentOrders = async function(req,res) {
     var accountId = req.query.accountId;
     
     accountId = accountId == undefined ? req.user.id : accountId;
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(accountId);
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(accountId);
     var orders = await getOrdersForAccountId(accountId);
     res.render('parentOrders', {user:req.user, basketItemsDetails:basketItemsDetails, orderHistory: orders});
 }
@@ -40,7 +38,7 @@ exports.getParentOrder = async function(req,res)
 {
     var account = req.user;
     var orderNumber = req.query.orderNumber;
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
     var orderDetails = await getOrderDetailsForOrderNumber(orderNumber);
     var deliveryOption = await models.deliveryOption.findOne();
     res.render('parentOrder', {user:account, basketItemsDetails:basketItemsDetails, order: orderDetails, deliveryOption:deliveryOption, refunds:[]});
@@ -51,9 +49,9 @@ exports.getAdminOrder = async function(req,res)
     var orderNumber = req.query.orderNumber;
     var orderDetails = await getOrderDetailsForOrderNumber(orderNumber);
     var deliveryOption = await models.deliveryOption.findOne();
-    var backgroundSetting = await adminController.getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await adminController.getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolController.getSchoolsRequiringGiveBackAction();
+    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
+    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('newAdminOrder', {user:req.user, ordersNotShipped:ordersNotShipped, order: orderDetails, backgroundSetting:backgroundSetting,
          deliveryOption:deliveryOption, refunds:[], schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction});
@@ -122,24 +120,7 @@ async function getOrdersForAccountId(accountId)
     
 }
 
-async function getOrderDetailsForKidNumber(kidNumber)
-{
-    var orderNumber = await models.sequelize.query('select distinct pb.orderNumber from basketItems b ' + 
-                    ' inner join productItems pi on b.productItemFk = pi.id ' + 
-                    ' inner join productVariants pv on pi.productVariantFk = pv.id ' + 
-                    ' inner join products p on pv.productFk = p.id ' + 
-                    ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
-                    ' inner join kids on pi.kidFk = k.id ' +
-                    ' where pb.status = :completed ' + 
-                    ' and k.code = :kidNumber', {replacements:{completed:'Completed', kidNumber: kidNumber},
-                    type: models.sequelize.QueryTypes.SELECT});
-    
-    return await getOrderDetailsForOrderNumber(orderNumber);
-   
-}
-
-exports.purchase = async function(req,res)
-{
+exports.purchase = async function(req,res) {
     // transaction history page 
     var total = req.body.total;
     var subTotal = req.body.subTotal;
@@ -151,43 +132,16 @@ exports.purchase = async function(req,res)
     var url = req.body.url;
 
     var shippingId = await handleShippingDetails(isShipping,req);
-    var data;
-    if((isShipping == 'true'))
-    {
-        data ={createdDttm: Date.now(),
-            status:'Pending',
-            total: purchaseTotal,
-            subTotal: subTotal,
-            shippingAddressFk:shippingId,
-            deliveryPrice:deliveryPrice,
-            deliveryName: deliveryName,
-            shippedFl:false
-        }
-       
-    }
-    else
-    {
-        data ={createdDttm: Date.now(),
-            status:'Pending',
-            total: purchaseTotal,
-            subTotal: subTotal,
-            deliveryPrice:deliveryPrice,
-            deliveryName: deliveryName,
-            shippingAddressFk:shippingId,
-            shippedFl:false}
-    }
-    
-    models.purchaseBasket.create(
-        data
-    ).then(purchaseBasket=>{
 
-        basketItemIds = basketItemIds.split('\'').join('');
-        basketItemIds = JSON.parse(basketItemIds);
-        console.log(basketItemIds);
-        models.sequelize.query('update basketitems set purchaseBasketFk = :purchaseBasketId ' + 
-                    ' where id in (:basketItems)', {replacements:{purchaseBasketId:purchaseBasket.id,basketItems:basketItemIds},
-                type:models.sequelize.QueryTypes.UPDATE})
-        .then(async ()=>{
+    const purchaseBasket = await basketUtility.createPurchaseBasket(PURCHASE_BASKET_STATUS.PENDING, 
+        purchaseTotal, subTotal, deliveryPrice, deliveryName, shippingId);
+    
+
+    basketItemIds = basketItemIds.split('\'').join('');
+    basketItemIds = JSON.parse(basketItemIds);
+    console.log(basketItemIds);
+    await basketUtility.setBasketItemsToPurchaseBasketId(purchaseBasket.id, basketItemIds);
+
            
             models.sequelize.query('select b.*, pv.name as productVariantName, p.name as productName, pv.price from basketItems b ' + 
             ' inner join productItems pi on b.productItemFk = pi.id ' +
@@ -223,8 +177,7 @@ exports.purchase = async function(req,res)
                     res.json({session:session});
    
                 }) 
-        })
-    })
+
 }
 
 exports.sessionCompleted = async function(req,res)
@@ -396,9 +349,8 @@ async function handleShippingDetails(isShipping,req)
         return null;
 } 
 
-exports.purchaseSuccessful = async function(req,res)
-{
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(req.user.id);
+exports.purchaseSuccessful = async function(req,res) {
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(req.user.id);
     res.render('purchaseSuccessful2', {user:req.user, basketItemsDetails:basketItemsDetails});
 }
 

@@ -1,7 +1,10 @@
 let throng = require('throng');
 let Queue = require("bull");
 const path = require('path');
-
+const notProduction = process.env.NODE_ENV != 'production';
+if(notProduction) {
+  require('dotenv').config();
+}
 const fs = require('fs-extra');
 const moment = require('moment');
 // const process.env = require('./process.env/process.env.json');
@@ -17,11 +20,13 @@ const env = process.env.NODE_ENV || "development";
 const urlPrefix = env == 'development' ? 'http://localhost:4000' : process.env.website;
 const productController = require('./controllers/ProductController.js');
 const kidController = require('./controllers/KidController.js');
-const schoolController = require('./controllers/SchoolController.js');
 const classController = require('./controllers/ClassController.js');
 const orderController = require('./controllers/OrderController.js');
 
+const schoolUtility = require('./utility/school/schoolUtility.js');
+const productItemUtility = require('./utility/product/productItemUtility.js');
 const testEmail = 'rmillermcpherson4@gmail.com';
+const STATUS_TYPES = require('./utility/school/statusTypes.js');
 const redis = require('redis');
 // Spin up multiple processes to handle jobs to take advantage of more CPU cores
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info
@@ -267,12 +272,11 @@ async function updateAndGenerate(productItemId, productId, name, age, month, dis
   var progress = 1;
   job.progress(progress);
 
-  var productItem = await productController.getProductItemById(productItemId);
+  var productItem = await productItemUtility.getProductItemById(productItemId);
   var productItems; 
   var kidId = productItem.kidFk;
   var kid = null;
-  if(kidId != null)
-  {
+  if(kidId != null) {
     await models.kid.update({
       name: name,
       age: age,
@@ -286,16 +290,13 @@ async function updateAndGenerate(productItemId, productId, name, age, month, dis
 
     kid = await kidController.getKidById(kidId);
     productItems = await productController.getProductItemsWithProductForKid(productId, kidId);
-  }
-  else
-  {
+  } else {
     productItems = await productController.getProductItemsWithProductForAccountAndNotWithKid(productId, productItem.accountFk);
   }
   progress++;
   job.progress(progress);
-
-  for(var i = 0; i < productItems.length; i++)
-  {
+  console.log('REEECE')
+  for(var i = 0; i < productItems.length; i++) {
     var item = productItems[i];
     await models.productItem.update({
       text1: name,
@@ -315,8 +316,9 @@ async function updateAndGenerate(productItemId, productId, name, age, month, dis
   progress++;
   job.progress(progress);
 
+  console.log('ZITA')
   await productController.generateUpdateProductItem(kid, productId, productItem.accountFk);
-    
+  console.log('ALYSSA')
 
   progress++;
   job.progress(progress);
@@ -366,7 +368,7 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
     job.progress(progress);
 
     // uploaded cropped image
-    var productItem = await productController.getProductItemById(productItemId);
+    var productItem = await productItemUtility.getProductItemById(productItemId);
     var kidId = productItem.kidFk;
     var accountId = productItem.accountFk;
     var existingProductItems = await productController.getProductItemsWithProductForAccount(productId, productItem.accountFk, kidId);
@@ -909,17 +911,9 @@ async function schoolNoResponseDeadline(school)
   var window = new Date();
   window.setDate(date.getDate() + 3);
 
-  if(window.getTime() < Date.now())
-  {
+  if(window.getTime() < Date.now()) {
     // move school to next step
-    
-    await models.status.create({
-      statusTypeFk:7,
-      schoolFk:school.id,
-      createdDttm:Date.now(),
-      deleteFl:false,
-      versionNo:1
-    });
+    await schoolUtility.createNewStatusForSchoolId(school.id, STATUS_TYPES.STATUS_TYPES_ID.PRINTING);
     // TO-DO send email maybe to customer
     // TO-DO send email to bluwave
   }
@@ -958,186 +952,15 @@ async function charity()
   }
 }
 
-async function sendGiveBackAmountEmailToSchool(school)
-{
-  var giveBackAmountBreakDownPerClass = await schoolController.getGiveBackAmountBreakDownPerClass(school.id);
+async function sendGiveBackAmountEmailToSchool(school) {
+  var giveBackAmountBreakDownPerClass = await schoolUtility.getGiveBackAmountBreakDownPerClass(school.id);
   var totalGiveBackAmount = giveBackAmountBreakDownPerClass.totalGiveBackAmount;
   
-  await models.charityAmount.create({
-    schoolFk:school.id,
-    amount:totalGiveBackAmount,
-    confirmedFl:false,
-    createdDttm:Date.now(),
-    deleteFl: false,
-    versionNo: 1
-  });
-
+  await schoolUtility.createCharityAmount(school.id, totalGiveBackAmount);
   await sendCharityEmail(school);
-
 }
 
-
-async function getPurchasesForClass(schoolClass, result)
-{
-  var standard = await method2('Standard Pack',schoolClass);
-  var photo = await method2('Photo Pack',schoolClass);
-  var calendar = await method2('Calendar',schoolClass);
-
-  var givebackTotal = (parseFloat(standard.giveback) + parseFloat(photo.giveback) + parseFloat(calendar.giveback)).toFixed(2);
-  result.push({schoolClass:schoolClass.name, standard:standard,photo:photo, calendar:calendar, givebackTotal:givebackTotal});
-
-  return result;
-}
-
-
-function method2(packageName, schoolClass)
-{
-  return models.sequelize.query('select b.quantity, p.price from basketitems b ' + 
-  ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
-  ' inner join kids k on b.kidFk = k.id ' + 
-  ' inner join packages p on b.packageFk = p.id ' +
-  ' where pb.status = :completed ' +
-  ' and k.classFk = :classId ' + 
-  ' and p.name = :name' 
-   ,{replacements:{completed:'Completed',classId:schoolClass.id, name:packageName}, type:models.sequelize.QueryTypes.SELECT})
-    .then( packageItems=>{
-
-      var givebackPer;
-      if(packageName == 'Standard Pack')
-      {
-          givebackPer = 1.50;
-      }
-      else if( packageName == 'Photo Pack')
-      {
-        givebackPer = 2.00;
-      }
-      else
-      {
-        givebackPer =0.50;
-      }
-
-      var data = {quantity:0,total:0.00,givebackPer:givebackPer,giveback:0.00};
-      if(packageItems.length > 0)
-      {
-        var quantity = 0;
-        var price = packageItems[0].price;
-
-        packageItems.forEach(packageItem=>{
-
-          quantity = quantity + packageItem.quantity;
-        });
-
-        var total = quantity * price;
-        
-
-        var giveback = quantity * givebackPer;
-        data.quantity = quantity;
-        data.total = total.toFixed(2);
-        data.giveback = giveback.toFixed(2);
-       
-      }
-      
-        return data;
-    })
-}
-
-async function eachPurchaseSchoolClass(array,callback,result)
-{
-  for(var i = 0; i <array.length ; i++)
-    {
-       
-      result = await callback(array[i],result);
-    }
-}
-
-// async function getPurchaseClassesForSchool(school)
-// {
-
-//     var classes = await models.sequelize.query('select distinct c.* from basketitems b ' + 
-//                       ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
-//                       ' inner join productItems pi on b.productItemFk = pi.id ' +
-//                       ' inner join kids k on pi.kidFk = k.id ' + 
-//                       ' inner join classes c on k.classFk = c.id ' +
-//                       ' where pb.status = :completed ' + 
-//                       ' and c.schoolFk = :schoolId' ,{replacements:{completed:'Completed',schoolId:school.id}, type:models.sequelize.QueryTypes.SELECT});
-
-//     if(classes.length > 0 )
-//     {
-//       console.log(classes);
-//       var result = new Array();
-//       await eachPurchaseSchoolClass(classes, getPurchasesForClass,result);
-//                             console.log(result);
-//                             var totalGiveback = 0;
-//                             result.forEach(item=>{
-//                               totalGiveback = totalGiveback + parseFloat(item.givebackTotal);
-//                             });
-
-//                             var numberOfClasses = classes.length;
-//                             var count = 0;
-//                             var pageArray = new Array();
-//                             var pageInnerArray = new Array();
-//                             while( numberOfClasses > 0)
-//                             {
-//                               if( count % 4 == 0 && count != 0 )
-//                               {
-//                                   pageArray.push(pageInnerArray);
-//                                   pageInnerArray = new Array();
-//                               }
-
-//                               pageInnerArray.push(result[count]);
-//                               numberOfClasses--;
-//                               if(numberOfClasses == 0)
-//                                 pageArray.push(pageInnerArray);
-                              
-//                               count++;
-//                             }
-
-//                             var pageNumber = 1;
-//                             var numberOfPages = pageArray.length;
-//                             let files = new Array();
-//                             var finalPage =false;
-//                             for( var i =0; i<numberOfPages; i++)
-//                             {
-//                               if(pageNumber == numberOfPages)
-//                                 finalPage = true;
-//                               var x = await generateCharityConfirmPdf(pageArray[i], totalGiveback.toFixed(2),school.name, pageNumber, numberOfPages, finalPage);
-//                               files.push(x);
-//                               pageNumber++;
-//                             }
-
-//                             console.log(result);
-
-//                             let now = Date.now();
-//                             // prod upload the file use file path
-//                             var createdPdfFilename = process.cwd() + '/tmp/'  + now + '_charity.pdf';
-//                             var buffer = await PDFMerge(files, {output:createdPdfFilename});
-//                             files.forEach(file=>{
-//                               fs.unlink(file);
-//                           });
-                          
-//                               // send email to school with the file attached
-
-//                               models.charityAmount.build({
-//                                 schoolFk:school.id,
-//                                 amount:totalGiveback.toFixed(2),
-//                                 confirmedFl:false,
-//                                 createdDttm:Date.now()
-//                               }).save().then(async ()=>{
-
-//                                 await sendCharityEmail(school, totalGiveback.toFixed(2), createdPdfFilename);
-
-//                               })
-
-//                             // check number of classes bre
-
-//                           //  await generateCharityConfirmPdf(result, totalGiveback.toFixed(2),school.name, pageNumber, numberOfPages);
-//                           }
-                         
-//                         // })
-// }
-
-async function sendCharityEmail(school)
-{
+async function sendCharityEmail(school) {
   var smtpTransport = nodeMailer.createTransport({
     host:process.env.mailServer_host,
     port:587,
@@ -1172,19 +995,11 @@ smtpTransport.sendMail(mailOptions,async function(errors,res){
   console.log(res);
 
    await createEmail('Charity',errors,account.id);
-    if(!errors)
-    {
+    if(!errors) {
       // TO-DO  save model detailing that email has been sent
         // create new status moving the 
   
-      await models.status.create({
-        statusTypeFk:10,
-        createdDttm:Date.now(),
-        schoolFk: school.id,
-        deleteFl: false,
-        versionNo: 1
-      })
-
+      await schoolUtility.createNewStatusForSchoolId(school.id, STATUS_TYPES.STATUS_TYPES_ID.WAITING_FOR_CHARITABLE_CONTRIBUTION_RESPONSE);
 
       mailOptions.to = (env == 'development') ? testEmail : process.env.mailServer_email;
 
@@ -1271,16 +1086,9 @@ async function delayRecurringTask()
       var window = new Date();
       window.setDate(delayDttm.getDate() + 3);
 
-      if( window.getTime() < Date.now())
-      {
-        await models.status.create({
-          statusTypeFk:7,
-          schoolFk:school.id,
-          createdDttm: Date.now(),
-          versionNo:1,
-          deleteFl: false
-        });
+      if( window.getTime() < Date.now()) {
 
+        await schoolUtility.createNewStatusForSchoolId(school.id, PRINTING_STATUS_TYPE_ID);
         await sendDelayEmail(school.id);
         
       }
@@ -1289,8 +1097,7 @@ async function delayRecurringTask()
 
 }
 
-async function deadlineRecurringTask()
-{
+async function deadlineRecurringTask() {
   var deadlines = await models.sequelize.query('select d.* from deadlines d ' +
               ' inner join schools s on d.schoolFk = s.id ' + 
               ' where d.emailSentFl = false ' + 
@@ -1299,43 +1106,21 @@ async function deadlineRecurringTask()
               ' and d.delayFl = false ', {replacements:{beforeMidnight:' 23:59:59'}, type:models.sequelize.QueryTypes.SELECT}).catch(err=>{
                 console.log(err)
               })
-                // .then(deadlines=>{
-  console.log(deadlines);
 
-  for( var i = 0; i < deadlines.length; i++ )
-  {
+  for( var i = 0; i < deadlines.length; i++) {
     var deadline = deadlines[i];
   
     var schoolId = deadline.schoolFk;
 
     // if no purchase deadline step, create one else just create waiting step
 
-    var purchaseDeadlineStatus = await models.status.findOne({
-      where:{
-        statusTypeFk:4,
-        schoolFk:schoolId
-      }
-    });
+    var purchaseDeadlineStatus = await schoolUtility.getSchoolStatusByStatusTypeId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.PURCHASE_DEADLINE);
 
-    if(purchaseDeadlineStatus == null)
-    {
-      await models.status.create({
-        schoolFk:schoolId,
-        statusTypeFk:4,
-        createdDttm:Date.now(),
-        deleteFl: false,
-        versionNo:1
-      });
+    if(purchaseDeadlineStatus == null) {
+      await schoolUtility.createNewStatusForSchoolId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.PURCHASE_DEADLINE);
     }
 
-    await models.status.create({
-      schoolFk:schoolId,
-      statusTypeFk:5,
-      createdDttm:Date.now(),
-      deleteFl: false,
-      versionNo:1
-    });
-
+    await schoolUtility.createNewStatusForSchoolId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.WAITING_FOR_CUSTOMER_RESPONSE);
     await sendDeadlineEmail(schoolId);
   }
                  
@@ -1669,7 +1454,7 @@ async function sendPurchaseEmail( bluwave, basketItems, orderNumber, date, total
   {
     template = 'purchaseEmail';
     var basketItem = basketItems[0];
-    var school = await schoolController.getSchoolFromBasketItemId(basketItem.basketItemId);
+    var school = await schoolUtility.getSchoolFromBasketItemId(basketItem.basketItemId);
     
     var postCode = school.postCode;
 
@@ -3237,7 +3022,7 @@ async function sendSchoolReadyForPrintingReminder()
 
 async function sendCharityAmountConfirmedSendToSchoolReminder()
 {
-  var schools = await schoolController.getSchoolsRequiringGiveBackAction();
+  var schools = await schoolUtility.getSchoolsRequiringGiveBackAction();
   if(schools.length > 0)
   {
     var smtpTransport = nodeMailer.createTransport({

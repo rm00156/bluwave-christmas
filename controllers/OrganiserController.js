@@ -1,21 +1,22 @@
 const models = require('../models');
 const schoolController = require('../controllers/SchoolController');
 const kidController = require('../controllers/KidController');
-const basketController = require('../controllers/BasketController');
-const statusController = require('../controllers/StatusController');
 const classController = require('../controllers/ClassController');
+const schoolUtility = require('../utility/school/schoolUtility');
+const basketUtility = require('../utility/basket/basketUtility');
+
 const validator = require('../validators/signup');
 
 
 exports.classesScreen = async function( req,res )
 {
     var accountId = req.user.id;
-    var school = await schoolController.getSchoolFromAccountId(accountId);
-    var orderDetails = await schoolController.getOrderDetailsForAllKidsFromSchoolId(school.id);
+    var school = await schoolUtility.getSchoolFromAccountId(accountId);
+    var orderDetails = await schoolUtility.getOrderDetailsForAllKidsFromSchoolId(school.id);
     var isKidLinkedToAccount = await kidController.isKidLinkedToAccountId(accountId);
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(accountId);
-    var classes = await schoolController.getClassesForSchoolId(school.id);
-    var statusTypeDetails = await statusController.getStatusTypeDetailsForSchoolId(school.id);
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(accountId);
+    var classes = await schoolUtility.getClassesForSchoolId(school.id);
+    var statusTypeDetails = await schoolUtility.getStatusTypeDetailsForSchoolId(school.id);
     
     res.render('schoolParticipants3',{user:req.user,orderDetails: orderDetails, displayParentSection:isKidLinkedToAccount,
         basketItemsDetails:basketItemsDetails, classes:classes, school:school, statusTypeDetails:statusTypeDetails});
@@ -262,14 +263,14 @@ exports.loadOrganiserDashboard = async function(req,res)
     }); 
     school = school[0];
 
-    var orderDetails = await schoolController.getOrderDetailsForAllKidsFromSchoolId(school.id);
+    var orderDetails = await schoolUtility.getOrderDetailsForAllKidsFromSchoolId(school.id);
     var isKidLinkedToAccount = await kidController.isKidLinkedToAccountId(account.id);
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
-    var deadlineDetails = await schoolController.getDeadlineDetailsForSchoolId(school.id);
-    var statusTypeDetails = await statusController.getStatusTypeDetailsForSchoolId(school.id);
-    var classes = await schoolController.getClassesForSchoolId(school.id);
-    var giveBackAmount = await schoolController.getGiveBackAmount(school.id);
-    var charityAmount = await schoolController.getCharityAmount(school.id);
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
+    var deadlineDetails = await schoolUtility.getDeadlineDetailsForSchoolId(school.id);
+    var statusTypeDetails = await schoolUtility.getStatusTypeDetailsForSchoolId(school.id);
+    var classes = await schoolUtility.getClassesForSchoolId(school.id);
+    var giveBackAmount = await schoolUtility.getGiveBackAmount(school.id);
+    var charityAmount = await schoolUtility.getCharityAmount(school.id);
     
     res.render('organiserDashboard3', {user:req.user, orderDetails: orderDetails, displayParentSection:isKidLinkedToAccount,basketItemsDetails:basketItemsDetails,
         deadlineDetails:deadlineDetails,school:school, giveBackAmount:giveBackAmount,
@@ -280,8 +281,8 @@ exports.getSchoolDetailsPage = async function(req,res)
 {
     var schoolNumber = req.query.schoolNumber;
     var user = req.user;
-    var school = await schoolController.getSchoolFromSchoolNumber(schoolNumber)
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(user.id);
+    var school = await schoolUtility.getSchoolFromSchoolNumber(schoolNumber)
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(user.id);
 
     res.render('schoolDetails',{user:req.user, school:school, user:req.user, basketItemsDetails:basketItemsDetails })
 }
@@ -306,24 +307,23 @@ exports.editSchoolDetails = async function(req,res)
     }
 }
 
-exports.getClassScreen = async function(req,res)
-{
+exports.getClassScreen = async function(req,res) {
   const classNumber = req.query.number;
 
   const account = req.user;
-  var schoolClass = await classController.getClassByNumber(classNumber);
+  var schoolClass = await schoolUtility.getClassByNumber(classNumber);
   if(schoolClass == null)
     return res.redirect('/organiserDashboard');
   
-  var school = await schoolController.getSchoolFromAccountId(account.id);
+  var school = await schoolUtility.getSchoolFromAccountId(account.id);
   var classId = schoolClass.id;
   
-  var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+  var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
   var isKidLinkedToAccount = await kidController.isKidLinkedToAccountId(account.id);
 
   var kids = await kidController.getKidsByClassId(classId);
   var orderDetails = await classController.getOrderDetailsForAllKidsFromClassId(classId, kids.length);
-  var deadlineDetails = await schoolController.getDeadlineDetailsForSchoolId(school.id);
+  var deadlineDetails = await schoolUtility.getDeadlineDetailsForSchoolId(school.id);
   var deadLineDttm = deadlineDetails.deadLineDttm;
 
   res.render('organiserClass',{user:account,orderDetails: orderDetails, deadLineDttm:deadLineDttm, displayParentSection:isKidLinkedToAccount,

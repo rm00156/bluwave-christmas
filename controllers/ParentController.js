@@ -1,22 +1,17 @@
 const models = require('../models');
 const basketController = require('../controllers/BasketController');
 const kidController = require('../controllers/KidController');
+const basketUtility = require('../utility/basket/basketUtility');
 
-exports.getParentScreen = async function(req,res)
-{
+exports.getParentScreen = async function(req,res) {
     const account = req.user;
-    var basketItemsDetails = await basketController.getBasketItemsDetailsForAccountId(account.id);
+    var basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
     var isKidsLinkedToAccount = await kidController.isKidLinkedToAccountId(account.id);
 
     var kids = await kidController.getKidsFromAccountId(account.id);
     res.render('parentDashboard3',{user:account, basketItemsDetails:basketItemsDetails,
         isKidsLinkedToAccount:isKidsLinkedToAccount, kids:kids});
                         
-}
-
-async function getAllProductItemsForAccount(accountId)
-{
-    await models.sequelize.query('select * from productItems ')
 }
 
 exports.isDisplayShippingSectionDetail = async function(accountId)
