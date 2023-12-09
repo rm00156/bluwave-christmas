@@ -1,6 +1,16 @@
 name: Jest Tests
 
-on: [pull_request]
+on:
+  pull_request:
+    branches:
+      - master
+
+env:
+  test_database: test_db
+  username: root
+  password:
+  database_host: localhost
+  database_dialect: mysql
 
 jobs:
   test:
@@ -8,10 +18,23 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 21
+
+      - name: Set up MySql
+        uses: shogo82148/actions-setup-mysql@v1
+        with:
+          mysql-version: "8.0"
+      
+      - name: Create test-db
+        run: mysql -uroot -e 'CREATE DATABASE IF NOT EXISTS test_db'
+      
       - name: Install dependencies
         run: npm install
 
       - name: Run Jest tests
-        run: npm test
+        run: npm run test

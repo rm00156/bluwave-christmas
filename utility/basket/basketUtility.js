@@ -36,7 +36,7 @@ async function createPurchaseBasket(status, total, subTotal, deliveryPrice, deli
 }
 
 async function setBasketItemsToPurchaseBasketId(purchaseBasketId, basketItemIds) {
-    await models.sequelize.query('update basketitems set purchaseBasketFk = :purchaseBasketId ' +
+    await models.sequelize.query('update basketItems set purchaseBasketFk = :purchaseBasketId ' +
         ' where id in (:basketItems)', {
             replacements: { purchaseBasketId: purchaseBasketId, basketItems: basketItemIds },
         type: models.sequelize.QueryTypes.UPDATE
@@ -44,7 +44,7 @@ async function setBasketItemsToPurchaseBasketId(purchaseBasketId, basketItemIds)
 }
 
 async function getCurrentBasketItemsDetailsNoPurchaseBasketForAccountId(accountId) {
-    return await models.sequelize.query('select pv.price, p.id as productId, pv.name as productVariantName, pi.id as productItemId, p.name as productName, b.id as basketItemId, b.* from  basketitems b ' +
+    return await models.sequelize.query('select pv.price, p.id as productId, pv.name as productVariantName, pi.id as productItemId, p.name as productName, b.id as basketItemId, b.* from  basketItems b ' +
         ' inner join productItems pi on b.productItemFk = pi.id ' +
         ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
         ' inner join products p on pv.productFk = p.id ' +
@@ -57,7 +57,7 @@ async function getCurrentBasketItemsDetailsNoPurchaseBasketForAccountId(accountI
 }
 
 async function getCurrentBasketItemsDetailsWithPurchaseBasketForAccountId(accountId) {
-    return await models.sequelize.query('select pv.price, pi.id as productItemId, p.id as productId, pv.name as productVariantName, p.name as productName, b.id as basketItemId,  b.* from basketitems b ' +
+    return await models.sequelize.query('select pv.price, pi.id as productItemId, p.id as productId, pv.name as productVariantName, p.name as productName, b.id as basketItemId,  b.* from basketItems b ' +
         ' inner join productItems pi on b.productItemFk = pi.id ' +
         ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
