@@ -1,76 +1,74 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var School = sequelize.define('school', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
+module.exports = function (sequelize, Sequelize) {
+  const School = sequelize.define('school', {
 
-        email:{
-            type: Sequelize.STRING,
-            allowNull: false,
-            unique: true
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        schoolNumber:{
-            type: Sequelize.STRING,
-            allowNull: false,
-            unique: true
-        },
- 
-        name: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+    email: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+    },
 
-        address: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+    schoolNumber: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+    },
 
-        postCode: {
-            type: Sequelize.STRING,
-            allowNull: false,  
-        },
+    name: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        number: {
-            type: Sequelize.STRING,
-            allowNull: true
-        },
-        additionalInfo:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    address: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        numberOfKidsPerClass:{
-            type:Sequelize.INTEGER,
-            allowNull:false
-        },
+    postCode: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        organiserAccountFk: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            unique: true
-        },
+    number: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    additionalInfo: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+    numberOfKidsPerClass: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
-        
-    },{
-        timestamps:false
-    });
- 
-    return School;
- 
-}
+    organiserAccountFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      unique: true,
+    },
+
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return School;
+};

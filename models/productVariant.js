@@ -1,65 +1,62 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var ProductVariant = sequelize.define('productVariant', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
-        
-        name: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+module.exports = function (sequelize, Sequelize) {
+  const ProductVariant = sequelize.define('productVariant', {
 
-        orderNo: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        productFk:{
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
+    name: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        productVariantTypeFk:{
-            type: Sequelize.STRING,
-            allowNull: true
-        },
+    orderNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        price: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+    productFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        templateFk: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
+    productVariantTypeFk: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        defaultPdf:{
-            type: Sequelize.STRING,
-            allowNull: true
-        },
+    price: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+    templateFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
-        
-    },{
-        timestamps:false
-    }
-);
- 
-    return ProductVariant;
- 
-}
+    defaultPdf: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return ProductVariant;
+};

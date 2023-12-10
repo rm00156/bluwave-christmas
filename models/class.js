@@ -1,67 +1,64 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var Class = sequelize.define('class', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
+module.exports = function (sequelize, Sequelize) {
+  const Class = sequelize.define('class', {
 
-        classNumber:{
-            type: Sequelize.STRING,
-            allowNull: false,
-            unique: true
-        },
- 
-        name: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        schoolFk: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
+    classNumber: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+    },
 
-        yearFk:{
-            type: Sequelize.STRING,
-            allowNull:false
-        },
+    name: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        proofPath:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    schoolFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        cardsPath:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    yearFk: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        printFormPath:
+    proofPath: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+
+    cardsPath: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+
+    printFormPath:
         {
-            type:Sequelize.STRING,
-            allowNull: true
-            
-        },
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+          type: Sequelize.STRING,
+          allowNull: true,
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
+        },
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
 
-        
-    },{
-        timestamps:false
-    });
- 
-    return Class;
- 
-}
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return Class;
+};

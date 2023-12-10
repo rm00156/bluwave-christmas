@@ -1,90 +1,87 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var BasketItem = sequelize.define('basketItem', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
+module.exports = function (sequelize, Sequelize) {
+  const BasketItem = sequelize.define('basketItem', {
 
-        productItemFk:{
-            type: Sequelize.INTEGER,
-            allowNull : false
-        },
-        
-        quantity:{
-            type:Sequelize.INTEGER,
-            allowNull:false
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        text1:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    productItemFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        accountFk:{
-            type:Sequelize.INTEGER,
-            allowNull:false
-        },
+    quantity: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        purchaseBasketFk:{
-            type:Sequelize.INTEGER,
-            allowNull:true
-        } ,
+    text1: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        cost:{
-            type:Sequelize.STRING,
-            allowNull:false
-        },
+    accountFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        path:{
-            type:Sequelize.STRING,
-            allowNull:false
-        },
-        fileName:{
-            type:Sequelize.STRING,
-            allowNull:false
-        },
+    purchaseBasketFk: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
 
-        displayItem1:
+    cost: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+
+    path: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    fileName: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+
+    displayItem1:
         {
-            type:Sequelize.STRING,
-            allowNull:true
+          type: Sequelize.STRING,
+          allowNull: true,
         },
-        displayItem2:
+    displayItem2:
         {
-            type:Sequelize.STRING,
-            allowNull:true
+          type: Sequelize.STRING,
+          allowNull: true,
         },
-        displayItem3:
+    displayItem3:
         {
-            type:Sequelize.STRING,
-            allowNull:true
+          type: Sequelize.STRING,
+          allowNull: true,
         },
 
-        picture:{
-            type:Sequelize.STRING,
-            allowNull:false
-        },
+    picture: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
-        
-    },{
-        timestamps:false
-    }
-);
- 
-    return BasketItem;
- 
-}
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return BasketItem;
+};

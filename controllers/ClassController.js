@@ -1,12 +1,3 @@
-const models = require('../models');
-var kidController = require('../controllers/KidController');
-
-var queueController = require('../controllers/QueueController');
-var orderController = require('../controllers/OrderController');
-
-const schoolUtility = require('../utility/school/schoolUtility');
-const orderUtility = require('../utility/order/orderUtility');
-const adminUtility = require('../utility/admin/adminUtility');
 const PDFMerge = require('pdf-merge');
 const aws = require('aws-sdk');
 // const process.env = require('../process.env/process.env.json');
@@ -17,927 +8,878 @@ const path = require('path');
 const fs = require('fs-extra');
 const hbs = require('handlebars');
 const moment = require('moment');
+const adminUtility = require('../utility/admin/adminUtility');
+const queueController = require('./QueueController');
+const orderController = require('./OrderController');
+const orderUtility = require('../utility/order/orderUtility');
+const schoolUtility = require('../utility/school/schoolUtility');
+const kidUtility = require('../utility/kid/kidUtility');
+const models = require('../models');
+const classUtility = require('../utility/class/classUtility');
 
 aws.config.update({
-    secretAccessKey: process.env.secretAccessKey,
-    accessKeyId:process.env.accessKeyId,
-    region: process.env.region
+  secretAccessKey: process.env.secretAccessKey,
+  accessKeyId: process.env.accessKeyId,
+  region: process.env.region,
+});
+
+exports.getOrderDetailsForAllKidsFromClassId = async function (classId, totalKids) {
+  return await getOrderDetailsForAllKidsFromClassId(classId, totalKids);
+};
+
+async function getOrderDetailsForAllKidsFromClassId(classId, totalKids) {
+  const orders = await models.sequelize.query(
+    'select count(distinct pb.id) as orderCount from purchasebaskets pb '
+            + ' inner join basketItems b on b.purchaseBasketFk = pb.id '
+            + ' inner join productItems pi on b.productItemFk = pi.id '
+            + ' inner join classes c on pi.classFk = c.id '
+            + ' where c.id = :classId '
+            + ' and pb.status = :completed ',
+    { replacements: { classId, completed: 'Completed' }, type: models.sequelize.QueryTypes.SELECT },
+  );
+
+  const details = {
+    orderCount: orders[0].orderCount,
+    totalKids,
+  };
+
+  return details;
+}
+
+exports.getClassScreen = async function (req, res) {
+  const { classNumber } = req.query;
+
+  const schoolClass = await schoolUtility.getClassByNumber(classNumber);
+  const classId = schoolClass.id;
+  const kids = await kidUtility.getKidsFromClassId(classId);
+  const orderDetails = await getOrderDetailsForAllKidsFromClassId(classId, kids.length);
+  const orders = await orderController.getOrdersForClassId(classId);
+  const backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
+  const ordersNotShipped = await orderUtility.getOrdersNotShipped();
+  const schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
+
+  res.render('adminClass', {
+    user: req.user,
+    schoolClass,
+    backgroundSetting,
+    kids,
+    orderDetails,
+    orders,
+    ordersNotShipped,
+    schoolsRequiringGiveBackAction,
+  });
+};
+
+exports.getClassOrderInstruction = async function (req, res) {
+  const { classId } = req.query;
+  const deadline = await schoolUtility.getSchoolDeadlineFromClassId(classId);
+
+  if (deadline == null) return res.json({ error: 'No deadline has been set for the school' });
+
+  const job = await queueController.addClassOrderInstructionJob(classId, deadline.id);
+  res.json({ id: job.id });
+};
+
+exports.getSchoolOrderInstruction = async function (req, res) {
+  const { schoolId } = req.query;
+  const deadline = await schoolUtility.getSchoolDeadlineBySchoolId(schoolId);
+
+  if (deadline == null) return res.json({ error: 'No deadline has been set for the school' });
+
+  const job = await queueController.addSchoolOrderInstructionJob(schoolId);
+  res.json({ id: job.id });
+};
+
+exports.processSchoolOrderInstruction = async function (schoolId, job) {
+  return await processSchoolOrderInstruction(schoolId, job);
+};
+
+const processSchoolOrderInstruction = async function (schoolId, job) {
+  const classes = await models.class.findAll({
+    where: {
+      schoolFk: schoolId,
+    },
   });
 
-exports.getClassById = async function(id)
-{
-    return await getClassById(id);
-}
+  const school = await models.school.findOne({
+    where: {
+      id: schoolId,
+    },
+  });
 
-async function getClassById(id)
-{
-    return await models.class.findOne({
-        where:{
-            id:id
-        }
-    });
-}
+  const deadline = await models.deadLine.findOne({
+    where: {
+      schoolFk: schoolId,
+    },
+  });
 
-exports.getOrderDetailsForAllKidsFromClassId = async function(classId, totalKids)
-{
-    return await getOrderDetailsForAllKidsFromClassId(classId, totalKids);
-}
+  const params = {
+    Bucket: process.env.bucketName,
+  };
 
-async function getOrderDetailsForAllKidsFromClassId(classId, totalKids)
-{
-    var orders = await models.sequelize.query('select count(distinct pb.id) as orderCount from purchasebaskets pb ' +
-            ' inner join basketItems b on b.purchaseBasketFk = pb.id ' +
-            ' inner join productItems pi on b.productItemFk = pi.id ' +
-            ' inner join classes c on pi.classFk = c.id ' +
-            ' where c.id = :classId ' +
-            ' and pb.status = :completed ',
-    {replacements:{classId:classId, completed:'Completed'},type:models.sequelize.QueryTypes.SELECT});
+  const s3 = new aws.S3();
+  const files = [];
 
-    var details = {
-        orderCount: orders[0].orderCount,
-        totalKids: totalKids
-    }
+  let progress = 1;
+  for (let i = 0; i < classes.length; i++) {
+    const json = await processClassOrderInstruction(classes[i].id, deadline.id, progress, i + 1, job);
 
-    return details;
-
-    
-}
-
-exports.getClassScreen = async function(req,res)
-{
-    var classNumber = req.query.classNumber;
-
-    var schoolClass = await schoolUtility.getClassByNumber(classNumber);
-    var classId = schoolClass.id;
-    var kids = await kidController.getKidsByClassId(classId);
-    var orderDetails = await getOrderDetailsForAllKidsFromClassId(classId, kids.length);
-    var orders = await orderController.getOrdersForClassId(classId);
-    var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
-    var ordersNotShipped = await orderUtility.getOrdersNotShipped();
-    var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
-
-    res.render('adminClass', {user:req.user, schoolClass:schoolClass, backgroundSetting:backgroundSetting,
-         kids:kids, orderDetails:orderDetails, orders:orders, ordersNotShipped:ordersNotShipped,
-        schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction})
- 
-}
-
-exports.getClassOrderInstruction = async function(req,res)
-{
-    var classId = req.query.classId;
-    var deadline = await schoolUtility.getSchoolDeadlineFromClassId(classId);
-
-    if(deadline == null)
-        return res.json({error:'No deadline has been set for the school'});
-
-    var job = await queueController.addClassOrderInstructionJob(classId,deadline.id);
-    res.json({id:job.id});
-}
-
-exports.getSchoolOrderInstruction = async function(req,res)
-{
-    var schoolId = req.query.schoolId;
-    var deadline = await schoolUtility.getSchoolDeadlineBySchoolId(schoolId);
-
-    if(deadline == null)
-        return res.json({error:'No deadline has been set for the school'});
-
-    var job = await queueController.addSchoolOrderInstructionJob(schoolId);
-    res.json({id:job.id});
-}
-
-exports.processSchoolOrderInstruction = async function(schoolId, job)
-{
-    return await processSchoolOrderInstruction(schoolId, job);
-}
-
-const processSchoolOrderInstruction = async function(schoolId, job)
-{
-    var classes = await models.class.findAll({
-        where:{
-            schoolFk: schoolId
-        }
-    });
-
-    var school = await models.school.findOne({
-        where:{
-            id:schoolId
-        }
-    })
-
-    var deadline = await models.deadLine.findOne({
-        where:{
-          schoolFk:schoolId
-        }
-    });
- 
-    var params = {
-        Bucket:process.env.bucketName,
-    };
-
-    const s3 = new aws.S3();
-    var files = [];
-
-    var progress = 1;
-    for( var i = 0; i < classes.length; i++ )
-    {
-        var json = await processClassOrderInstruction(classes[i].id, deadline.id, progress, i + 1, job);
-        
-        var file = await downloadFiles(json.pdfPath, params, i, s3);
-        progress = json.progress;
-        files.push(file);
-        console.log(progress)
-    }
-
-    
-    progress++;
-    job.progress(progress);
-
-    var now = Date.now();
-
-    var coverFileName = process.cwd() + '/' + await generateCoverSheetForSchoolOrderInstructions(school, classes, now);
-    files.unshift(coverFileName);
-    var purchaseBuffer = await PDFMerge(files, {output: process.cwd() + '/tmp/'  + now + '_school_order_instruction.pdf'}).catch(err=>{
-        console.log(err)
-    });
-
-    files.forEach(file=>{
-        fs.unlink(file);
-    })
-
-    var fileName = 'SchoolOrderInstruction' +'/' + school.name + now + '_school_order_instruction.pdf'
-    params.Key = fileName;
-    params.ACL = 'public-read' ;
-    params.Body = purchaseBuffer;
-
-    var pdfPath = process.env.s3BucketPath + fileName;
-    var s3UploadPromise = new Promise(function(resolve, reject) {
-    s3.upload(params, function(err, data) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(data);
-            }
-        });
-    });
-    await s3UploadPromise;
-
-    progress++;
-    job.progress(progress);
-
+    const file = await downloadFiles(json.pdfPath, params, i, s3);
+    progress = json.progress;
+    files.push(file);
     console.log(progress);
-    var schoolOrderInstruction = await models.schoolOrderInstruction.findOne({
-        where:{
-            schoolFk: schoolId
-        }
+  }
+
+  progress++;
+  job.progress(progress);
+
+  const now = Date.now();
+
+  const coverFileName = `${process.cwd()}/${await generateCoverSheetForSchoolOrderInstructions(school, classes, now)}`;
+  files.unshift(coverFileName);
+  const purchaseBuffer = await PDFMerge(files, { output: `${process.cwd()}/tmp/${now}_school_order_instruction.pdf` }).catch((err) => {
+    console.log(err);
+  });
+
+  files.forEach((file) => {
+    fs.unlink(file);
+  });
+
+  const fileName = 'SchoolOrderInstruction' + `/${school.name}${now}_school_order_instruction.pdf`;
+  params.Key = fileName;
+  params.ACL = 'public-read';
+  params.Body = purchaseBuffer;
+
+  const pdfPath = process.env.s3BucketPath + fileName;
+  const s3UploadPromise = new Promise((resolve, reject) => {
+    s3.upload(params, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
     });
+  });
+  await s3UploadPromise;
 
-    if(schoolOrderInstruction == null)
-    {
-        await models.schoolOrderInstruction.create({
-            schoolFk: schoolId,
-            createdDttm: Date.now(),
-            pdfPath: pdfPath,
-            versionNo: 1,
-            deleteFl: false
-        })
-    }
-    else
-    {
-        await models.schoolOrderInstruction.update({
-            createdDttm: Date.now(),
-            pdfPath: pdfPath,
-            versionNo: models.sequelize.literal('versionNo + 1')
-        }, {
-            where:{
-                schoolFk: schoolId
-            }
-        })
-    }
+  progress++;
+  job.progress(progress);
 
+  console.log(progress);
+  const schoolOrderInstruction = await models.schoolOrderInstruction.findOne({
+    where: {
+      schoolFk: schoolId,
+    },
+  });
 
-    progress++;
-    job.progress(progress);
-    return {pdfPath:pdfPath,progress:progress };
+  if (schoolOrderInstruction == null) {
+    await models.schoolOrderInstruction.create({
+      schoolFk: schoolId,
+      createdDttm: Date.now(),
+      pdfPath,
+      versionNo: 1,
+      deleteFl: false,
+    });
+  } else {
+    await models.schoolOrderInstruction.update({
+      createdDttm: Date.now(),
+      pdfPath,
+      versionNo: models.sequelize.literal('versionNo + 1'),
+    }, {
+      where: {
+        schoolFk: schoolId,
+      },
+    });
+  }
+
+  progress++;
+  job.progress(progress);
+  return { pdfPath, progress };
+};
+
+async function generateCoverSheetForSchoolOrderInstructions(school, classes, now) {
+  const data = { school: school.name, classTotal: classes.length, numberOfKidsPerClass: school.numberOfKidsPerClass };
+  const filename = `tmp/CoverOrderInstruction_${school.name}_${now}.pdf`;
+  const browser = await puppeteer.launch({
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+    ],
+  });
+  console.log(filename);
+  const page = await browser.newPage();
+
+  const content = await compile('schoolOrderInstruction', data);
+  await page.setContent(content);
+
+  await page.pdf({
+    path: filename,
+    printBackground: true,
+    format: 'A4',
+  });
+
+  await browser.close();
+
+  return filename;
 }
 
-async function generateCoverSheetForSchoolOrderInstructions(school, classes, now)
-{
-    var data = {school:school.name, classTotal: classes.length, numberOfKidsPerClass: school.numberOfKidsPerClass };
-    var filename =  "tmp/CoverOrderInstruction_" + school.name + '_'+ now + ".pdf";
-    const browser = await puppeteer.launch({
-        'headless': 'new',
-        'args' : [
-            '--no-sandbox',
-            '--disable-setuid-sandbox'
-        ]
-        });
-    console.log(filename)
-    const page = await browser.newPage();
-
-    const content = await compile('schoolOrderInstruction', data);
-    await page.setContent(content);
-    
-    await page.pdf({
-        path:filename,
-        printBackground:true ,
-        format:'A4'
-    });
-            
-    await browser.close();
-
-    return filename;
-}
-
-const downloadFiles = async function(filePath, params, i,s3)
-{
-    var now = Date.now();
-    const fileName = filePath.replace(process.env.s3BucketPath,'');
-    params.Key = fileName;
-    var file;
-    const tempFile = 'tmp' +'/SchoolOrderInstruction' + i + '_' + now +'.pdf';
-    var s3DownloadPromise = new Promise((resolve,reject)=>{
+const downloadFiles = async function (filePath, params, i, s3) {
+  const now = Date.now();
+  const fileName = filePath.replace(process.env.s3BucketPath, '');
+  params.Key = fileName;
+  let file;
+  const tempFile = 'tmp' + `/SchoolOrderInstruction${i}_${now}.pdf`;
+  const s3DownloadPromise = new Promise((resolve, reject) => {
     file = fs.createWriteStream(tempFile);
-    var stream = s3.getObject(params).createReadStream();
+    const stream = s3.getObject(params).createReadStream();
     stream.pipe(file);
 
-    stream.on('finish',resolve);
+    stream.on('finish', resolve);
+  });
+
+  await s3DownloadPromise;
+  console.log(`file ${file}`);
+  return `${process.cwd()}/${tempFile}`;
+};
+
+const processClassOrderInstruction = async function (classId, deadlineId, progress, classNumber, job) {
+  const classOrderInstruction = await models.classOrderInstruction.findOne({
+    where: {
+      classFk: classId,
+    },
+  });
+
+  progress++;
+  job.progress(progress);
+
+  const schoolClass = await classUtility.getClassById(classId);
+  const schoolDeadline = await models.deadLine.findOne({
+    where: {
+      id: deadlineId,
+    },
+  });
+
+  if (classOrderInstruction == null) {
+    // means that no orderinstruction has been created before
+    // create order instruction
+    return await createOrderInstruction(schoolClass, schoolDeadline, true, progress, job);
+  }
+
+  if (classOrderInstruction.deadLineDttm.toString() == schoolDeadline.deadLineDttm.toString()) {
+    // means order instruction has been created before and we would be generating the exact same copy
+    progress = (5 * classNumber) + 1;
+    job.progress(progress);
+    console.log(progress);
+    return { pdfPath: classOrderInstruction.pdfPath, progress };
+  }
+
+  return await createOrderInstruction(schoolClass, schoolDeadline, false, progress, job);
+};
+
+exports.processClassOrderInstruction = async function (classId, deadlineId, progress, classNumber, job) {
+  return await processClassOrderInstruction(classId, deadlineId, progress, classNumber, job);
+};
+
+async function createOrderInstruction(schoolClass, schoolDeadline, createFl, progress, job) {
+  const school = await schoolUtility.getSchoolFromSchoolId(schoolClass.schoolFk);
+  const now = Date.now();
+
+  const unparsedDeadLine = schoolDeadline.deadLineDttm;
+
+  let month = unparsedDeadLine.getMonth() + 1;
+  month = month < 10 ? `0${month}` : month;
+  let days = unparsedDeadLine.getDate();
+  days = days < 10 ? `0${days}` : days;
+  const years = unparsedDeadLine.getFullYear();
+
+  const deadline = `${years}-${month}-${days}`;
+
+  const data = {
+    class: schoolClass.name,
+    classNumber: schoolClass.classNumber,
+    school: school.name,
+    schoolNumber: school.schoolNumber,
+    deadline,
+  };
+  progress++;
+  job.progress(progress);
+
+  const filename = `tmp/OrderInstruction_${schoolClass.name}_${now}.pdf`;
+  const browser = await puppeteer.launch({
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+    ],
+  });
+  console.log(filename);
+  const page = await browser.newPage();
+
+  const content = await compile('orderInstructions2', data);
+  await page.setContent(content);
+  const buffer = await page.pdf({
+    path: filename,
+    landscape: true,
+    printBackground: true,
+    format: 'A4',
+  });
+
+  await browser.close();
+  progress++;
+  job.progress(progress);
+
+  const s3 = new aws.S3();
+  const params = {
+    Bucket: process.env.bucketName,
+    Body: buffer,
+    Key: filename,
+    ACL: 'public-read',
+  };
+
+  const s3UploadPromise = new Promise((resolve, reject) => {
+    s3.upload(params, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
     });
-    
-    await s3DownloadPromise;
-    console.log('file ' + file);
-    return process.cwd() + '/' + tempFile;
+  });
+
+  await s3UploadPromise;
+
+  progress++;
+  job.progress(progress);
+  let classOrderInstruction;
+  if (createFl) {
+    classOrderInstruction = await models.classOrderInstruction.create({
+      classFk: schoolClass.id,
+      deadLineDttm: schoolDeadline.deadLineDttm,
+      createdDttm: Date.now(),
+      pdfPath: process.env.s3BucketPath + filename,
+      deleteFl: false,
+      versionNo: 1,
+
+    });
+  } else {
+    await models.classOrderInstruction.update({
+      deadLineDttm: schoolDeadline.deadLineDttm,
+      createdDttm: Date.now(),
+      pdfPath: process.env.s3BucketPath + filename,
+      versionNo: models.sequelize.literal('versionNo + 1'),
+    }, {
+      where: {
+        classFk: schoolClass.id,
+      },
+    });
+
+    classOrderInstruction = await models.classOrderInstruction.findOne({
+      where: {
+        classFk: schoolClass.id,
+      },
+    });
+  }
+
+  progress++;
+  job.progress(progress);
+
+  return { pdfPath: classOrderInstruction.pdfPath, progress };
 }
 
-const processClassOrderInstruction = async function(classId, deadlineId, progress, classNumber, job)
-{
-    var classOrderInstruction = await models.classOrderInstruction.findOne({
-        where:{
-            classFk: classId,
-        }
+exports.getCreateOrderInstructionJob = async function (req, res) {
+  const { id } = req.query;
+  const job = await queueController.getJobId(id);
+
+  if (job === null) {
+    res.status(404).end();
+  } else {
+    const state = await job.getState();
+    const progress = job._progress;
+    const reason = job.failedReason;
+    const instructionPath = (job.returnvalue == null) ? undefined : (job.returnvalue).pdfPath;
+    const { process } = job.data;
+    console.log(job.returnvalue);
+    res.json({
+      id, state, progress, reason, instructionPath, process,
     });
+  }
+};
 
-    progress++;
-    job.progress(progress);
-
-    var schoolClass = await getClassById(classId);
-    var schoolDeadline = await models.deadLine.findOne({
-        where:{
-            id:deadlineId
-        }
-    });
-
-    if(classOrderInstruction == null)
-    {
-        // means that no orderinstruction has been created before
-        // create order instruction
-       return await createOrderInstruction(schoolClass, schoolDeadline, true, progress, job);
-    }
-
-    if(classOrderInstruction.deadLineDttm.toString() == schoolDeadline.deadLineDttm.toString())
-    {
-        // means order instruction has been created before and we would be generating the exact same copy
-        progress =(5 * classNumber) + 1;
-        job.progress(progress);
-        console.log(progress)
-        return {pdfPath:classOrderInstruction.pdfPath, progress:progress};
-    }
-
-    return await createOrderInstruction(schoolClass, schoolDeadline, false, progress, job);     
-    
-}
-
-exports.processClassOrderInstruction = async function(classId, deadlineId, progress, classNumber, job)
-{
-    return await processClassOrderInstruction(classId, deadlineId, progress, classNumber, job);
-}
-
-async function createOrderInstruction(schoolClass, schoolDeadline, createFl, progress, job)
-{
-    var school = await schoolUtility.getSchoolFromSchoolId(schoolClass.schoolFk);
-    var now = Date.now();
-
-    var unparsedDeadLine = schoolDeadline.deadLineDttm;
-
-    var month =unparsedDeadLine.getMonth() + 1;
-    month = month <10 ? '0' + month : month;
-    var days = unparsedDeadLine.getDate();
-    days = days <10 ? '0' + days : days;
-    var years = unparsedDeadLine.getFullYear();
-
-    var deadline = years + '-' + month + '-' + days;
-
-    var data = {
-                    class:schoolClass.name, 
-                    classNumber:schoolClass.classNumber,
-                    school:school.name,
-                    schoolNumber:school.schoolNumber,
-                    deadline: deadline
-                }
-    progress++;
-    job.progress(progress);
-
-    var filename =  "tmp/OrderInstruction_" + schoolClass.name + '_'+ now + ".pdf";
-    const browser = await puppeteer.launch({
-        'headless': 'new',
-        'args' : [
-            '--no-sandbox',
-            '--disable-setuid-sandbox'
-        ]
-        });
-    console.log(filename)
-    const page = await browser.newPage();
-
-    const content = await compile('orderInstructions2', data);
-    await page.setContent(content);
-    const buffer = await page.pdf({
-        path:filename,
-        landscape:true,
-        printBackground:true ,
-        format:'A4'
-    });
-            
-    await browser.close();
-    progress++;
-    job.progress(progress);
-
-    const s3 = new aws.S3();
-    var params = {
-        Bucket:process.env.bucketName,
-        Body: buffer,
-        Key: filename,
-        ACL:'public-read'
-      };
-
-    var s3UploadPromise = new Promise(function(resolve, reject) {
-        s3.upload(params, function(err, data) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(data);
-            }
-        });
-    });
-
-    await s3UploadPromise;
-
-    progress++;
-    job.progress(progress);
-    var classOrderInstruction;
-    if(createFl)
-    {
-        classOrderInstruction = await models.classOrderInstruction.create({
-            classFk:schoolClass.id,
-            deadLineDttm: schoolDeadline.deadLineDttm,
-            createdDttm: Date.now(),
-            pdfPath: process.env.s3BucketPath + filename,
-            deleteFl: false,
-            versionNo: 1
-    
-        })
-    }
-    else
-    {
-        await models.classOrderInstruction.update({
-            deadLineDttm: schoolDeadline.deadLineDttm,
-            createdDttm: Date.now(),
-            pdfPath: process.env.s3BucketPath + filename,
-            versionNo: models.sequelize.literal('versionNo + 1')
-        },{
-            where:{
-                classFk: schoolClass.id
-            }
-        });
-
-        classOrderInstruction = await models.classOrderInstruction.findOne({
-            where:{
-                classFk:schoolClass.id
-            }
-        })
-    }
-
-    progress++;
-    job.progress(progress);
-
-    return  {pdfPath:classOrderInstruction.pdfPath, progress:progress};
-}
-
-exports.getCreateOrderInstructionJob = async function(req,res)
-{
-    var id = req.query.id;
-    var job = await queueController.getJobId(id);
-  
-    if (job === null) {
-      res.status(404).end();
-    } else {
-        var state = await job.getState();
-        var progress = job._progress;
-        var reason = job.failedReason;
-        var instructionPath = (job.returnvalue == null) ? undefined : (job.returnvalue).pdfPath;
-        var process = job.data.process;
-        console.log(job.returnvalue);
-        res.json({ id, state, progress, reason, instructionPath, process });
-    }
-}
-
-
-const compile = async function(templateName, data)
-{
+const compile = async function (templateName, data) {
   const filePath = path.join(process.cwd(), 'templates', `${templateName}.hbs`);
-  const html = await fs.readFile(filePath,'utf-8');
+  const html = await fs.readFile(filePath, 'utf-8');
 
   return hbs.compile(html)(data);
-}
+};
 
-hbs.registerHelper('dateFormat', (value,format)=>{
+hbs.registerHelper('dateFormat', (value, format) => {
   console.log('formatting', value, format);
   return moment(value).format(format);
 });
 
-async function getOrderFormDetailsForClassId(classId)
-{
-    var schoolClass = await getClassById(classId);
-    var school = await schoolUtility.getSchoolFromClassId(classId);
+async function getOrderFormDetailsForClassId(classId) {
+  const schoolClass = await classUtility.getClassById(classId);
+  const school = await schoolUtility.getSchoolFromClassId(classId);
 
-    var query = 'select distinct b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk from products p ' +
-        ' inner join productTypes pt on p.productTypeFk = pt.id ' +
-        ' inner join productVariants pv on pv.productFk = p.id ' +
-        ' inner join productItems pi on pi.productVariantFk = pv.id ' +
-        ' inner join basketItems b on b.productItemFk = pi.id ' +
-        ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
-        ' inner join classes c on pi.classFk = c.id ' +
-        ' where pb.status = :completed ' +
-        ' and pt.type = :christmasType ' +                          
-        ' and c.id = :classId ' +
-        ' and pb.shippingAddressFk is null ';
+  let query = 'select distinct b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk from products p '
+        + ' inner join productTypes pt on p.productTypeFk = pt.id '
+        + ' inner join productVariants pv on pv.productFk = p.id '
+        + ' inner join productItems pi on pi.productVariantFk = pv.id '
+        + ' inner join basketItems b on b.productItemFk = pi.id '
+        + ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id '
+        + ' inner join classes c on pi.classFk = c.id '
+        + ' where pb.status = :completed '
+        + ' and pt.type = :christmasType '
+        + ' and c.id = :classId '
+        + ' and pb.shippingAddressFk is null ';
 
-    var cardsFromClass = await models.sequelize.query(query,
-                {replacements:{classId:classId, completed:'Completed', christmasType:'Christmas Cards'},
-                 type: models.sequelize.QueryTypes.SELECT});
+  const cardsFromClass = await models.sequelize.query(
+    query,
+    {
+      replacements: { classId, completed: 'Completed', christmasType: 'Christmas Cards' },
+      type: models.sequelize.QueryTypes.SELECT,
+    },
+  );
 
-    
-    query = 'select distinct b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk  from purchaseBaskets pb ' +
-    ' inner join basketItems b on b.purchaseBasketFk = pb.id ' + 
-    ' inner join productItems pi on b.productItemFk = pi.id  ' +
-    ' inner join productVariants pv on pi.productVariantFk = pv.id  ' +
-    ' inner join products p on pv.productFk = p.id  ' +
-    ' where pb.status = :completed ' +
-    ' and pi.classFk is null ' +
-    ' and pb.shippingAddressFk is null '
-    ' and pi.accountFk in ( ' +
-    ' select distinct b.accountFk from classes c ' +
-    ' inner join classes c1 on c1.schoolFk = c.schoolFk ' +
-    ' inner join productItems pi on pi.classFk = c1.id  ' +
-    ' inner join basketItems b on b.productItemFk = pi.id  ' +
-    ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id  ' +
-    ' inner join kids k on pi.kidFk = k.id  ' +
-    ' where c.id = :classId ' +
-    ' and pb.status = :completed)';
+  query = 'select distinct b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk  from purchaseBaskets pb '
+    + ' inner join basketItems b on b.purchaseBasketFk = pb.id '
+    + ' inner join productItems pi on b.productItemFk = pi.id  '
+    + ' inner join productVariants pv on pi.productVariantFk = pv.id  '
+    + ' inner join products p on pv.productFk = p.id  '
+    + ' where pb.status = :completed '
+    + ' and pi.classFk is null '
+    + ' and pb.shippingAddressFk is null ';
+  ' and pi.accountFk in ( '
+    + ' select distinct b.accountFk from classes c '
+    + ' inner join classes c1 on c1.schoolFk = c.schoolFk '
+    + ' inner join productItems pi on pi.classFk = c1.id  '
+    + ' inner join basketItems b on b.productItemFk = pi.id  '
+    + ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id  '
+    + ' inner join kids k on pi.kidFk = k.id  '
+    + ' where c.id = :classId '
+    + ' and pb.status = :completed)';
 
-    var cardsNotPartOfAnyClass = await models.sequelize.query(query,
-            {replacements:{classId:classId, completed:'Completed', christmasType:'Christmas Cards'},
-                type: models.sequelize.QueryTypes.SELECT});
-    
+  const cardsNotPartOfAnyClass = await models.sequelize.query(
+    query,
+    {
+      replacements: { classId, completed: 'Completed', christmasType: 'Christmas Cards' },
+      type: models.sequelize.QueryTypes.SELECT,
+    },
+  );
 
-    query = ' select b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk, a.name as parentName from purchaseBaskets pb '  + 
-            ' inner join basketItems b on b.purchaseBasketFk = pb.id ' + 
-            ' inner join productItems pi on b.productItemFk = pi.id ' +
-            ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
-            ' inner join products p on pv.productFk = p.id ' +  
-            ' inner join accounts a on b.accountFk = a.id ' +
-            ' where pb.status = :completed ' +
-            ' and pi.kidFk is null ' + 
-            ' and pi.classFk = :classId ' +
-            ' and pb.shippingAddressFk is null ';
+  query = ' select b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk, a.name as parentName from purchaseBaskets pb '
+            + ' inner join basketItems b on b.purchaseBasketFk = pb.id '
+            + ' inner join productItems pi on b.productItemFk = pi.id '
+            + ' inner join productVariants pv on pi.productVariantFk = pv.id '
+            + ' inner join products p on pv.productFk = p.id '
+            + ' inner join accounts a on b.accountFk = a.id '
+            + ' where pb.status = :completed '
+            + ' and pi.kidFk is null '
+            + ' and pi.classFk = :classId '
+            + ' and pb.shippingAddressFk is null ';
 
-    var calendarsLinkedToClass = await models.sequelize.query(query,
-        {replacements:{classId:classId, completed:'Completed'},
-            type: models.sequelize.QueryTypes.SELECT});
+  const calendarsLinkedToClass = await models.sequelize.query(
+    query,
+    {
+      replacements: { classId, completed: 'Completed' },
+      type: models.sequelize.QueryTypes.SELECT,
+    },
+  );
 
-    query = 'select distinct b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk, a.name as parentName  from purchaseBaskets pb ' +
-            ' inner join basketItems b on b.purchaseBasketFk = pb.id  ' +
-            ' inner join productItems pi on b.productItemFk = pi.id ' +
-            ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
-            ' inner join products p on pv.productFk = p.id ' +
-            ' inner join accounts a on b.accountFk = a.id ' +
-            ' where pb.status = :completed ' +
-            ' and pi.kidFk is null ' +
-            ' and pi.classFk is null ' +
-            ' and pb.shippingAddressFk is null ' +
-            ' and pi.accountFk in ( ' +
-            ' select distinct b.accountFk from products p ' +
-            ' inner join productTypes pt on p.productTypeFk = pt.id ' +
-            ' inner join productVariants pv on pv.productFk = p.id ' +
-            ' inner join productItems pi on pi.productVariantFk = pv.id ' +
-            ' inner join basketItems b on b.productItemFk = pi.id ' +
-            ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id  ' +
-            ' inner join kids k on pi.kidFk = k.id ' +
-            ' inner join classes c on k.classFk = c.id ' +
-            ' where pt.type = :christmasType ' + 
-            ' and pb.status = :completed ' +
-            ' and c.id = :classId)';
+  query = 'select distinct b.*, pv.name as productVariant, p.name as product, pb.orderNumber, pi.classFk, a.name as parentName  from purchaseBaskets pb '
+            + ' inner join basketItems b on b.purchaseBasketFk = pb.id  '
+            + ' inner join productItems pi on b.productItemFk = pi.id '
+            + ' inner join productVariants pv on pi.productVariantFk = pv.id '
+            + ' inner join products p on pv.productFk = p.id '
+            + ' inner join accounts a on b.accountFk = a.id '
+            + ' where pb.status = :completed '
+            + ' and pi.kidFk is null '
+            + ' and pi.classFk is null '
+            + ' and pb.shippingAddressFk is null '
+            + ' and pi.accountFk in ( '
+            + ' select distinct b.accountFk from products p '
+            + ' inner join productTypes pt on p.productTypeFk = pt.id '
+            + ' inner join productVariants pv on pv.productFk = p.id '
+            + ' inner join productItems pi on pi.productVariantFk = pv.id '
+            + ' inner join basketItems b on b.productItemFk = pi.id '
+            + ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id  '
+            + ' inner join kids k on pi.kidFk = k.id '
+            + ' inner join classes c on k.classFk = c.id '
+            + ' where pt.type = :christmasType '
+            + ' and pb.status = :completed '
+            + ' and c.id = :classId)';
 
-    var calendarsNotLinkedToClass = await models.sequelize.query(query,
-        {replacements:{classId:classId, completed:'Completed', christmasType:'Christmas Cards'},
-            type: models.sequelize.QueryTypes.SELECT});
+  const calendarsNotLinkedToClass = await models.sequelize.query(
+    query,
+    {
+      replacements: { classId, completed: 'Completed', christmasType: 'Christmas Cards' },
+      type: models.sequelize.QueryTypes.SELECT,
+    },
+  );
 
-    var cards = [];
-    var calendars = [];
+  const cards = [];
+  const calendars = [];
 
-    cardsFromClass.forEach(card => {
-        cards.push(card);
-    });
+  cardsFromClass.forEach((card) => {
+    cards.push(card);
+  });
 
-    cardsNotPartOfAnyClass.forEach(card => {
-        cards.push(card);
-    });
+  cardsNotPartOfAnyClass.forEach((card) => {
+    cards.push(card);
+  });
 
-    calendarsLinkedToClass.forEach(calendar => {
-        calendars.push(calendar);
-    });
+  calendarsLinkedToClass.forEach((calendar) => {
+    calendars.push(calendar);
+  });
 
-    calendarsNotLinkedToClass.forEach(calendar => {
-        calendars.push(calendar);
-    });
-    
+  calendarsNotLinkedToClass.forEach((calendar) => {
+    calendars.push(calendar);
+  });
 
-    return {cards:cards, calendars:calendars, school:school, schoolClass:schoolClass};
+  return {
+    cards, calendars, school, schoolClass,
+  };
 }
 
-exports.generateOrdersPdf = async function(classId, job)
-{
-    var progress = 1;
-    job.progress(progress);
+exports.generateOrdersPdf = async function (classId, job) {
+  let progress = 1;
+  job.progress(progress);
 
-    var orderFormDetails = await getOrderFormDetailsForClassId(classId);
-    var cards = orderFormDetails.cards;
-    var calendars = orderFormDetails.calendars;
-    var schoolClass = orderFormDetails.schoolClass;
-    var school = orderFormDetails.school;
-    
-    progress++;
-    job.progress(progress);
+  const orderFormDetails = await getOrderFormDetailsForClassId(classId);
+  const { cards } = orderFormDetails;
+  const { calendars } = orderFormDetails;
+  const { schoolClass } = orderFormDetails;
+  const { school } = orderFormDetails;
 
-    const s3 = new aws.S3();
-    var params = {
-        Bucket:process.env.bucketName,
-    };
+  progress++;
+  job.progress(progress);
 
-    var path = null;
+  const s3 = new aws.S3();
+  let params = {
+    Bucket: process.env.bucketName,
+  };
 
-    if(cards.length > 0)
-        path = await downloadPurchasedFiles(cards[0], params, 0, s3);
-    
-    progress++;
-    job.progress(progress);
+  let path = null;
 
-    if(cards.length > 1)
-    {
-        var files = new Array();
-        var now = Date.now();
-        files = await asyncForEachDownload(cards,downloadPurchasedFiles,params,files,s3);
+  if (cards.length > 0) path = await downloadPurchasedFiles(cards[0], params, 0, s3);
 
-        path = process.cwd() + '/tmp/'  + now + '_purchased.pdf';
-        await PDFMerge(files, {output: path});
-        files.forEach(file=>{
-            fs.unlink(file);
-        });
-    }
+  progress++;
+  job.progress(progress);
 
-    progress++;
-    job.progress(progress);
-
-    var path2 = null;
-
-    if(calendars.length > 0)
-        path2 = await downloadPurchasedFiles(calendars[0], params, 0, s3);
-
-    progress++;
-    job.progress(progress);
-
-    if(calendars.length > 1)
-    {
-        var files = new Array();
-        var now = Date.now();
-        files = await asyncForEachDownload(calendars,downloadPurchasedFiles,params,files,s3);
-
-        path2 = process.cwd() + '/tmp/'  + now + '_calendars_purchased.pdf';
-
-        await PDFMerge(files, {output: path2});
-        files.forEach(file=>{
-            fs.unlink(file);
-        });
-    }
-
-    progress++;
-    job.progress(progress);
-
-    var dir = './tmp/' + now + '_purchases';
-
-    if (!fs.existsSync(dir)){
-        fs.mkdirSync(dir, { recursive: true });
-    }
-
-    if(path != null)
-    {
-        fs.rename(path, dir + '/cards.pdf', function (err) {
-            if (err) throw err
-        });
-    }
- 
-    if(path2 != null)
-    {
-        fs.rename(path2, dir + '/calendars.pdf', function (err) {
-            if (err) throw err
-        })
-    }
-    
-    progress++;
-    job.progress(progress);
-
-    const archive = archiver('zip', { zlib: { level: 9 }});
-    var fileName = 'tmp/' + school.name + '_' + schoolClass.name + '_' + now + 'purchase_result.zip'
-    const stream = fs.createWriteStream(fileName);
-
-    var archivePromise = new Promise((resolve, reject) => {
-        archive.directory(dir, false).on('error', err => reject(err)).pipe(stream);
-
-        stream.on('close', () => resolve());
-        archive.finalize();
-    });
-
-    await archivePromise;
-
-    var s3Stream = fs.createReadStream(fileName);
-    params = {
-        Bucket:process.env.bucketName,
-        Body: s3Stream,
-        Key: fileName,
-        ACL:'public-read'
-      };
-
-    var s3UploadPromise = new Promise(function(resolve, reject) {
-        s3.upload(params, function(err, data) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(data);
-            }
-        });
-    });
-
-    await s3UploadPromise;
-    await stream.on('close', () => resolve());
-    progress++;
-    job.progress(progress);
-
-    return {pdfPath:process.env.s3BucketPath + fileName};
-}
-
-exports.downloadPurchasedFiles = async function(purchasedFile, params, i,s3)
-{
-    return await downloadPurchasedFiles(purchasedFile, params, i,s3);
-}
-
-const downloadPurchasedFiles = async function(purchasedFile, params, i,s3)
-{
+  if (cards.length > 1) {
+    var files = new Array();
     var now = Date.now();
-    const cardFileName = purchasedFile.fileName;
-    params.Key = cardFileName;
-    var file;
-    const tempFile = 'tmp' +'/Purchased_' +i + '_' + now +'.pdf';
-    var s3DownloadPromise = new Promise((resolve,reject)=>{
+    files = await asyncForEachDownload(cards, downloadPurchasedFiles, params, files, s3);
+
+    path = `${process.cwd()}/tmp/${now}_purchased.pdf`;
+    await PDFMerge(files, { output: path });
+    files.forEach((file) => {
+      fs.unlink(file);
+    });
+  }
+
+  progress++;
+  job.progress(progress);
+
+  let path2 = null;
+
+  if (calendars.length > 0) path2 = await downloadPurchasedFiles(calendars[0], params, 0, s3);
+
+  progress++;
+  job.progress(progress);
+
+  if (calendars.length > 1) {
+    var files = new Array();
+    var now = Date.now();
+    files = await asyncForEachDownload(calendars, downloadPurchasedFiles, params, files, s3);
+
+    path2 = `${process.cwd()}/tmp/${now}_calendars_purchased.pdf`;
+
+    await PDFMerge(files, { output: path2 });
+    files.forEach((file) => {
+      fs.unlink(file);
+    });
+  }
+
+  progress++;
+  job.progress(progress);
+
+  const dir = `./tmp/${now}_purchases`;
+
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  if (path != null) {
+    fs.rename(path, `${dir}/cards.pdf`, (err) => {
+      if (err) throw err;
+    });
+  }
+
+  if (path2 != null) {
+    fs.rename(path2, `${dir}/calendars.pdf`, (err) => {
+      if (err) throw err;
+    });
+  }
+
+  progress++;
+  job.progress(progress);
+
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  const fileName = `tmp/${school.name}_${schoolClass.name}_${now}purchase_result.zip`;
+  const stream = fs.createWriteStream(fileName);
+
+  const archivePromise = new Promise((resolve, reject) => {
+    archive.directory(dir, false).on('error', (err) => reject(err)).pipe(stream);
+
+    stream.on('close', () => resolve());
+    archive.finalize();
+  });
+
+  await archivePromise;
+
+  const s3Stream = fs.createReadStream(fileName);
+  params = {
+    Bucket: process.env.bucketName,
+    Body: s3Stream,
+    Key: fileName,
+    ACL: 'public-read',
+  };
+
+  const s3UploadPromise = new Promise((resolve, reject) => {
+    s3.upload(params, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+
+  await s3UploadPromise;
+  await stream.on('close', () => resolve());
+  progress++;
+  job.progress(progress);
+
+  return { pdfPath: process.env.s3BucketPath + fileName };
+};
+
+exports.downloadPurchasedFiles = async function (purchasedFile, params, i, s3) {
+  return await downloadPurchasedFiles(purchasedFile, params, i, s3);
+};
+
+const downloadPurchasedFiles = async function (purchasedFile, params, i, s3) {
+  const now = Date.now();
+  const cardFileName = purchasedFile.fileName;
+  params.Key = cardFileName;
+  let file;
+  const tempFile = 'tmp' + `/Purchased_${i}_${now}.pdf`;
+  const s3DownloadPromise = new Promise((resolve, reject) => {
     file = fs.createWriteStream(tempFile);
-    var stream = s3.getObject(params).createReadStream();
+    const stream = s3.getObject(params).createReadStream();
     stream.pipe(file);
 
-    stream.on('finish',resolve);
-    });
+    stream.on('finish', resolve);
+  });
 
-    
-    await s3DownloadPromise;
-    return process.cwd() + '/'+tempFile;
-}
+  await s3DownloadPromise;
+  return `${process.cwd()}/${tempFile}`;
+};
 
-exports.asyncForEachDownload = async function(array, callback,params, files,s3)
-{
-    return await asyncForEachDownload(array, callback,params, files,s3);
-}
+exports.asyncForEachDownload = async function (array, callback, params, files, s3) {
+  return await asyncForEachDownload(array, callback, params, files, s3);
+};
 
-const asyncForEachDownload = async function(array, callback,params, files,s3)
-{
-    for(let i= 0 ;i<array.length; i++)
-    {
-       var fileName = await callback(array[i], params, i,s3);
-       files.push(fileName);
+const asyncForEachDownload = async function (array, callback, params, files, s3) {
+  for (let i = 0; i < array.length; i++) {
+    const fileName = await callback(array[i], params, i, s3);
+    files.push(fileName);
+  }
+
+  return files;
+};
+
+exports.generateOrderForm = async function (req, res) {
+  const { classId } = req.body;
+  const orderFormDetails = await getOrderFormDetailsForClassId(classId);
+  const { cards } = orderFormDetails;
+  const { calendars } = orderFormDetails;
+
+  if (cards.length == 0 && calendars.length == 0) return res.json({ error: 'No purchases to be delivered to the school have been made' });
+  const job = await queueController.addOrderFormJob(classId);
+  res.json({ id: job.id });
+};
+
+exports.generatePrintForm = async function (classId, job) {
+  let progress = 1;
+  job.progress(progress);
+
+  const orderFormDetails = await getOrderFormDetailsForClassId(classId);
+  const { cards } = orderFormDetails;
+  const { calendars } = orderFormDetails;
+  const { school } = orderFormDetails;
+  const { schoolClass } = orderFormDetails;
+
+  const cardsArray = new Array();
+  let innerList = new Array();
+  const calendarsArray = new Array();
+  let calendarsInnerList = new Array();
+  let calendarsCount = 0;
+  let count = 0;
+
+  let numberOfCards = cards.length;
+
+  progress++;
+  job.progress(progress);
+
+  while (numberOfCards > 0) {
+    if (count % 10 == 0 && count != 0) {
+      cardsArray.push(innerList);
+      innerList = new Array();
     }
 
-    return files;
-}
+    innerList.push(cards[count]);
 
-exports.generateOrderForm = async function(req,res)
-{
-    var classId = req.body.classId;
-    var orderFormDetails = await getOrderFormDetailsForClassId(classId);
-    var cards = orderFormDetails.cards;
-    var calendars = orderFormDetails.calendars;
+    numberOfCards--;
+    if (numberOfCards == 0) cardsArray.push(innerList);
+    count++;
+  }
 
-    if(cards.length == 0 && calendars.length == 0)
-        return res.json({error:'No purchases to be delivered to the school have been made'});
-    var job = await queueController.addOrderFormJob(classId);
-    res.json({id:job.id});
-}
-
-exports.generatePrintForm = async function(classId, job)
-{
-    var progress = 1;
-    job.progress(progress);
-
-    var orderFormDetails = await getOrderFormDetailsForClassId(classId);
-    var cards = orderFormDetails.cards;
-    var calendars = orderFormDetails.calendars;
-    var school = orderFormDetails.school;
-    var schoolClass = orderFormDetails.schoolClass;
-
-    var cardsArray = new Array();
-    var innerList = new Array();
-    var calendarsArray = new Array();
-    var calendarsInnerList = new Array();
-    var calendarsCount = 0;
-    var count = 0;
-
-    var numberOfCards = cards.length;
-    
-    progress++;
-    job.progress(progress);
-
-    while( numberOfCards > 0 )
-    {
-        if( count % 10 == 0 && count != 0)
-        {
-            cardsArray.push(innerList);
-            innerList = new Array();
-        }
-        
-        innerList.push(cards[count]);
-
-        numberOfCards--;
-        if(numberOfCards == 0)
-            cardsArray.push(innerList);
-        count++;
+  let numberOfCalendars = calendars.length;
+  while (numberOfCalendars > 0) {
+    if (calendarsCount % 10 == 0 && calendarsCount != 0) {
+      calendarsArray.push(calendarsInnerList);
+      calendarsInnerList = new Array();
     }
 
-    var numberOfCalendars = calendars.length;
-    while(numberOfCalendars > 0)
-    {
-        if( calendarsCount % 10 == 0 && calendarsCount != 0)
-        {
-            calendarsArray.push(calendarsInnerList);
-            calendarsInnerList = new Array();
-        }
-        
-        calendarsInnerList.push(calendars[calendarsCount]);
+    calendarsInnerList.push(calendars[calendarsCount]);
 
-        numberOfCalendars--;
-        if(numberOfCalendars == 0)
-            calendarsArray.push(calendarsInnerList);
-        calendarsCount++;
-    }
+    numberOfCalendars--;
+    if (numberOfCalendars == 0) calendarsArray.push(calendarsInnerList);
+    calendarsCount++;
+  }
 
-    progress++;
-    job.progress(progress);
+  progress++;
+  job.progress(progress);
 
-    var pageNumber = 1;
-    var numberOfPages = cardsArray.length + calendarsArray.length;
-    let files = new Array();
-    for(var i = 0; i < cardsArray.length; i++)
-    {
-        console.log(cardsArray[i])
-        var x = await generatePrintFormPage(cardsArray[i], school, schoolClass, pageNumber, numberOfPages);
-        console.log(x)
-        files.push(x);
-        pageNumber++;
-    }
+  let pageNumber = 1;
+  const numberOfPages = cardsArray.length + calendarsArray.length;
+  const files = new Array();
+  for (var i = 0; i < cardsArray.length; i++) {
+    console.log(cardsArray[i]);
+    var x = await generatePrintFormPage(cardsArray[i], school, schoolClass, pageNumber, numberOfPages);
+    console.log(x);
+    files.push(x);
+    pageNumber++;
+  }
 
-    progress++;
-    job.progress(progress);
+  progress++;
+  job.progress(progress);
 
-    for(var i = 0; i < calendarsArray.length; i++)
-    {
-        var x = await generateCalendarsFormPage(calendarsArray[i], school, schoolClass, pageNumber, numberOfPages);
-        files.push(x);
-        pageNumber++;
-    }
+  for (var i = 0; i < calendarsArray.length; i++) {
+    var x = await generateCalendarsFormPage(calendarsArray[i], school, schoolClass, pageNumber, numberOfPages);
+    files.push(x);
+    pageNumber++;
+  }
 
-    progress++;
-    job.progress(progress);
-    var now = Date.now();
-    // prod upload the file use file path
-    var buffer = await PDFMerge(files, {output: process.cwd() + '/tmp/'  + now + '_printForm.pdf'});
-    
-    files.forEach(file=>{
-        fs.unlink(file);
-    });
+  progress++;
+  job.progress(progress);
+  const now = Date.now();
+  // prod upload the file use file path
+  const buffer = await PDFMerge(files, { output: `${process.cwd()}/tmp/${now}_printForm.pdf` });
 
+  files.forEach((file) => {
+    fs.unlink(file);
+  });
 
-    progress++;
-    job.progress(progress);
+  progress++;
+  job.progress(progress);
 
-    const s3 = new aws.S3();
-    var s3FileLocation = school.name + '/' + schoolClass.name + '/' + now + "_printForm.pdf";
+  const s3 = new aws.S3();
+  const s3FileLocation = `${school.name}/${schoolClass.name}/${now}_printForm.pdf`;
 
-    var params = {
-    Bucket:process.env.bucketName,
+  const params = {
+    Bucket: process.env.bucketName,
     Body: buffer,
     Key: s3FileLocation,
-    ACL:'public-read'
-    };
+    ACL: 'public-read',
+  };
 
-    var s3UploadPromise = new Promise(function(resolve, reject) {
-    s3.upload(params, function(err, data) 
-    {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(data);
-        }
-        });
+  const s3UploadPromise = new Promise((resolve, reject) => {
+    s3.upload(params, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
     });
+  });
 
-    await s3UploadPromise;
+  await s3UploadPromise;
 
-    progress++;
-    job.progress(progress);
+  progress++;
+  job.progress(progress);
 
-    var s3Path = process.env.s3BucketPath + s3FileLocation;
-    return s3Path;
+  const s3Path = process.env.s3BucketPath + s3FileLocation;
+  return s3Path;
+};
+
+async function generatePrintFormPage(array, school, schoolClass, pageNumber, numberOfPages) {
+  const data = {
+    className: schoolClass.name,
+    schoolName: school.name,
+    basketItems: array,
+    pageNumber,
+    numberOfPages,
+  };
+
+  return await printForm(data, pageNumber, 'printForm');
 }
 
-async function generatePrintFormPage(array, school, schoolClass, pageNumber, numberOfPages)
-{
-    var data = {
-                className:schoolClass.name,
-                schoolName:school.name,
-                basketItems:array,
-                pageNumber:pageNumber,
-                numberOfPages:numberOfPages
-    }
+async function generateCalendarsFormPage(array, school, schoolClass, pageNumber, numberOfPages) {
+  const data = {
+    className: schoolClass.name,
+    schoolName: school.name,
+    basketItems: array,
+    pageNumber,
+    numberOfPages,
+  };
 
-    return await printForm(data, pageNumber,'printForm');
+  return await printForm(data, pageNumber, 'printExtrasForm');
 }
 
-async function generateCalendarsFormPage(array, school, schoolClass, pageNumber,numberOfPages)
-{
-    var data = {
-                className:schoolClass.name,
-                schoolName:school.name,
-                basketItems:array,
-              pageNumber:pageNumber,
-              numberOfPages:numberOfPages
-        }
+const printForm = async function (data, i, template) {
+  const date = Date.now();
+  const filename = `tmp/reece_${date}_${i}.pdf`;
+  const browser = await puppeteer.launch({
+    pipe: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+    ],
+  });
+  const page = await browser.newPage();
+  const content = await compile(template, data);
+  await page.setContent(content);
 
-    return await printForm( data, pageNumber,'printExtrasForm' );
-}
+  await page.pdf({
+    path: filename,
+    printBackground: true,
+    format: 'A4',
+  });
 
-const printForm  = async function(data, i,template)
-{   
-    var date = Date.now();
-    let filename =  "tmp/reece_" + date + '_' + i + ".pdf";
-    const browser = await puppeteer.launch({
-        'headless': 'new',
-      pipe:true,
-       'args' : [
-         '--no-sandbox',
-         '--disable-setuid-sandbox'
-       ]
-     });
-     const page= await browser.newPage();
-     const content = await compile(template, data);
-     await page.setContent(content);
+  browser.close();
 
-     await page.pdf({
-         path:filename,
-       printBackground:true ,
-       format:'A4'
-     });
+  return filename;
+};
 
-     browser.close();
+exports.getPurchasedOrders = async function (req, res) {
+  const { classId } = req.body;
 
-     return filename;
-    
-}
+  const orderFormDetails = await getOrderFormDetailsForClassId(classId);
+  const { cards } = orderFormDetails;
+  const { calendars } = orderFormDetails;
 
-exports.getPurchasedOrders = async function(req,res)
-{
-    var classId = req.body.classId;
-
-    var orderFormDetails = await getOrderFormDetailsForClassId(classId);
-    var cards = orderFormDetails.cards;
-    var calendars = orderFormDetails.calendars;
-
-    if(cards.length == 0 && calendars.length == 0)
-        return res.json({error:'No purchases have been made'});
-    var job = await queueController.addPurchaseOrdersJob(classId);
-    res.json({id:job.id});
-}
-
+  if (cards.length == 0 && calendars.length == 0) return res.json({ error: 'No purchases have been made' });
+  const job = await queueController.addPurchaseOrdersJob(classId);
+  res.json({ id: job.id });
+};

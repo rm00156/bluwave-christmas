@@ -1,64 +1,79 @@
 const models = require('../../models');
-const { PRODUCT_TYPES, PRODUCT_TYPE_NAME } = require('../../utility/product/productTypes');
+const { PRODUCT_TYPES, PRODUCT_TYPE_NAME } = require('../product/productTypes');
 
 async function getOrdersNotShipped() {
-    return await models.sequelize.query('select distinct pb.*, DATE_FORMAT(pb.purchaseDttm, "%Y-%m-%d %H:%i:%s") as purchasedDttm, DATE_FORMAT(pb.shippedDttm, "%Y-%m-%d %H:%i:%s") as shippedDttm  from purchaseBaskets pb ' + 
-        ' inner join basketItems b on b.purchaseBasketFk = pb.id ' +
-        ' where pb.status = :completed ' + 
-        ' and pb.shippedFl = false ' + 
-        ' and pb.shippingAddressFk is not null ' +
-        ' and pb.deleteFl = false ',
-        {replacements:{completed: 'Completed'}, type: models.sequelize.QueryTypes.SELECT});
+  return models.sequelize.query(
+    'select distinct pb.*, DATE_FORMAT(pb.purchaseDttm, "%Y-%m-%d %H:%i:%s") as purchasedDttm, DATE_FORMAT(pb.shippedDttm, "%Y-%m-%d %H:%i:%s") as shippedDttm  from purchaseBaskets pb '
+        + ' inner join basketItems b on b.purchaseBasketFk = pb.id '
+        + ' where pb.status = :completed '
+        + ' and pb.shippedFl = false '
+        + ' and pb.shippingAddressFk is not null '
+        + ' and pb.deleteFl = false ',
+    { replacements: { completed: 'Completed' }, type: models.sequelize.QueryTypes.SELECT },
+  );
 }
 
 async function getGiveBackAmountDetailsFromOrderDetails(orderItemDetails) {
+  let giveBackTotal = 0;
+  let photoPackQuantity = 0;
+  let photoPackGiveBack = 0;
+  let photoTotalCost = 0;
+  let standardPackQuantity = 0;
+  let standardPackGiveBack = 0;
+  let standardTotalCost = 0;
+  let calendarQuantity = 0;
+  let calendarGiveBack = 0;
+  let calendarTotalCost = 0;
 
-    var giveBackTotal = 0;
-    var photoPackQuantity = 0;
-    var photoPackGiveBack = 0;
-    var photoTotalCost = 0
-    var standardPackQuantity = 0;
-    var standardPackGiveBack = 0;
-    var standardTotalCost = 0;
-    var calendarQuantity = 0;
-    var calendarGiveBack = 0;
-    var calendarTotalCost = 0;
+  orderItemDetails.forEach((item) => {
+    if (item.name === PRODUCT_TYPE_NAME.PHOTO_PACK) {
+      photoPackQuantity += parseFloat(item.quantity);
+      photoPackGiveBack += (parseFloat(item.quantity) * 0.8);
+      photoTotalCost += parseFloat(item.cost);
+    } else if (item.name === PRODUCT_TYPE_NAME.STANDARD_PACK) {
+      standardPackQuantity += parseFloat(item.quantity);
+      standardPackGiveBack += (parseFloat(item.quantity) * 0.7);
+      standardTotalCost += parseFloat(item.cost);
+    } else if (item.type === PRODUCT_TYPES.CALENDARS) {
+      calendarQuantity += parseFloat(item.quantity);
+      calendarGiveBack += (parseFloat(item.quantity) * 0.4);
+      calendarTotalCost += parseFloat(item.cost);
+    }
+  });
 
-    orderItemDetails.forEach(item => {
-        if (item.name == PRODUCT_TYPE_NAME.PHOTO_PACK) {
-            photoPackQuantity = photoPackQuantity + parseFloat(item.quantity);
-            photoPackGiveBack = photoPackGiveBack + (parseFloat(item.quantity) * 0.8);
-            photoTotalCost = photoTotalCost + parseFloat(item.cost);
-        }
-        else if (item.name == PRODUCT_TYPE_NAME.STANDARD_PACK) {
-            standardPackQuantity = standardPackQuantity + parseFloat(item.quantity);
-            standardPackGiveBack = standardPackGiveBack + (parseFloat(item.quantity) * 0.7);
-            standardTotalCost = standardTotalCost + parseFloat(item.cost);
-        }
-        else if (item.type == PRODUCT_TYPES.CALENDARS) {
-            calendarQuantity = calendarQuantity + parseFloat(item.quantity);
-            calendarGiveBack = calendarGiveBack + (parseFloat(item.quantity) * 0.4);
-            calendarTotalCost = calendarTotalCost + parseFloat(item.cost);
-        }
-    });
+  giveBackTotal = photoPackGiveBack + standardPackGiveBack + calendarGiveBack;
 
-    giveBackTotal = photoPackGiveBack + standardPackGiveBack + calendarGiveBack;
+  const array = {
+    giveBackTotal: giveBackTotal.toFixed(2),
+    photoPackGiveBack: photoPackGiveBack.toFixed(2),
+    photoPackQuantity: photoPackQuantity.toFixed(0),
+    photoPackGiveBackPer: 0.80,
+    standardPackGiveBackPer: 0.70,
+    standardPackGiveBack: standardPackGiveBack.toFixed(2),
+    standardPackQuantity: standardPackQuantity.toFixed(0),
+    calendarGiveBack: calendarGiveBack.toFixed(2),
+    calendarQuantity: calendarQuantity.toFixed(0),
+    calendarGiveBackPer: 0.40,
+    calendarTotalCost: calendarTotalCost.toFixed(2),
+    photoTotalCost: photoTotalCost.toFixed(2),
+    standardTotalCost: standardTotalCost.toFixed(2),
+  };
 
-    var array = {
-        giveBackTotal: giveBackTotal.toFixed(2), photoPackGiveBack: photoPackGiveBack.toFixed(2),
-        photoPackQuantity: photoPackQuantity.toFixed(0), photoPackGiveBackPer: 0.80, standardPackGiveBackPer: 0.70,
-        standardPackGiveBack: standardPackGiveBack.toFixed(2),
-        standardPackQuantity: standardPackQuantity.toFixed(0),
-        calendarGiveBack: calendarGiveBack.toFixed(2),
-        calendarQuantity: calendarQuantity.toFixed(0), calendarGiveBackPer: 0.40,
-        calendarTotalCost: calendarTotalCost.toFixed(2), photoTotalCost: photoTotalCost.toFixed(2),
-        standardTotalCost: standardTotalCost.toFixed(2)
-    };
+  return array;
+}
 
-    return array;
+async function getOrdersForAccountId(accountId) {
+  return models.sequelize.query('select distinct pb.* from basketItems b '
+                        + ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id '
+                        + ' where pb.status = :completed '
+                        + ' and b.accountFk = :accountId', {
+    replacements: { completed: 'Completed', accountId },
+    type: models.sequelize.QueryTypes.SELECT,
+  });
 }
 
 module.exports = {
-    getOrdersNotShipped,
-    getGiveBackAmountDetailsFromOrderDetails
-}
+  getOrdersNotShipped,
+  getGiveBackAmountDetailsFromOrderDetails,
+  getOrdersForAccountId,
+};

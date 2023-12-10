@@ -1,54 +1,41 @@
 const models = require('../models');
 
-exports.isLoggedIn = (req, res, next )=>{
+exports.isLoggedIn = (req, res, next) => {
+  if (req.user) next();
+  else res.redirect('/');
 
-    if(req.user)
-        next();
-    else
-        res.redirect('/');
+  // If you pass any parameter to the next function, express
+  // regards the request as being an error and will skip any
+  // remaining non erro-handling routing and middleware functions
+};
 
-    // If you pass any parameter to the next function, express regards the request as being an error and will skip any 
-    // remaining non erro-handling routing and middleware functions
-}
+exports.hasAdminAuth = (req, res, next) => {
+  if (req.user && req.user.accountTypeFk === 1) next();
+  else res.redirect('/');
+};
 
-exports.hasAdminAuth = (req,res,next)=>{
-    if(req.user && req.user.accountTypeFk == 1)
-        next();
-    else
-        res.redirect('/');
-}
+exports.hasParentAuth = (req, res, next) => {
+  if (req.user && (req.user.accountTypeFk === 2 || req.user.accountTypeFk === 3)) next();
+  else res.redirect('/');
+};
 
-exports.hasParentAuth = (req,res,next)=>{
-    if(req.user && (req.user.accountTypeFk == 2 || req.user.accountTypeFk == 3 ) ) 
-        next();
-    else
-        res.redirect('/');
-}
+exports.hasOrganiserOrAdminAuth = (req, res, next) => {
+  if (req.user && (req.user.accountTypeFk === 1 || req.user.accountTypeFk === 3)) next();
+  else res.redirect('/');
+};
 
-exports.hasOrganiserOrAdminAuth = (req,res,next)=>{
-    if(req.user && (req.user.accountTypeFk == 1 || req.user.accountTypeFk == 3 ) ) 
-        next();
-    else
-        res.redirect('/');
-}
+exports.hasOrganiserAuth = (req, res, next) => {
+  if (req.user && (req.user.accountTypeFk === 3)) next();
+  else res.redirect('/');
+};
 
-
-exports.hasOrganiserAuth = (req,res,next)=>{
-    if(req.user && ( req.user.accountTypeFk == 3) ) 
-        next();
-    else
-        res.redirect('/');
-}
-
-exports.hasDefaultPasswordAuth = (req,res,next)=>{
-    if(req.user && req.user.defaultPassword == false)
-        next();
-    else
-        res.redirect('/updatePassword')
-}
+exports.hasDefaultPasswordAuth = (req, res, next) => {
+  if (req.user && req.user.defaultPassword === false) next();
+  else res.redirect('/updatePassword');
+};
 
 // exports.hasBasketAuth = (req,res,next)=>{
-    
+
 //     models.kid.findOne({
 //         where:{
 //             parentAccountFk:req.user.id
@@ -60,7 +47,7 @@ exports.hasDefaultPasswordAuth = (req,res,next)=>{
 //             if(req.user.accountTypeFk == 2)
 //             {
 //                 res.redirect('/parentDashboard');
-//             } 
+//             }
 //             else
 //             {
 //                 res.redirect('/organiserDashboard');
@@ -71,51 +58,39 @@ exports.hasDefaultPasswordAuth = (req,res,next)=>{
 //             next();
 //         }
 //     })
-    
+
 // }
 
-exports.organiserCreatedCard = async function(req,res,next)
-{
-    var kidId = req.query.id;
+exports.organiserCreatedCard = async function (req, res, next) {
+  const kidId = req.query.id;
 
-    if(req.user.accountTypeFk == 3)
-    {
-        var card = await models.card.findOne({
-            where:{
-                kidFk:kidId
-            }
-        });
-    
-        if(card == null)
-        {
-            var classId = await models.kid.findOne({
-                where:{
-                    id:kidId
-                }
-            }).then(kid=>{
-                return kid.classFk;
-            })
+  if (req.user.accountTypeFk === 3) {
+    const card = await models.card.findOne({
+      where: {
+        kidFk: kidId,
+      },
+    });
 
-            return res.redirect('/classParticipants?classId=' + classId);
-        }
+    if (card == null) {
+      const classId = await models.kid.findOne({
+        where: {
+          id: kidId,
+        },
+      }).then((kid) => kid.classFk);
 
+      return res.redirect(`/classParticipants?classId=${classId}`);
     }
-   
-    return next();
-}
+  }
 
-exports.redirectToDashboard = async function(req,res,next)
-{
-    var account = req.user;
+  return next();
+};
 
-    if(account == null)
-        return next();
-    
-    if(account.accountTypeFk == 1)
-        return res.redirect('/adminDashboard');
-    else if(account.accountTypeFk == 2)
-        return res.redirect('/parentDashboard');
-    else
-        return res.redirect('/organiserDashboard');
-        
-}
+exports.redirectToDashboard = async function (req, res, next) {
+  const account = req.user;
+
+  if (account == null) return next();
+
+  if (account.accountTypeFk === 1) return res.redirect('/adminDashboard');
+  if (account.accountTypeFk === 2) return res.redirect('/parentDashboard');
+  return res.redirect('/organiserDashboard');
+};

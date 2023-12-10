@@ -1,67 +1,63 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var DeadLine = sequelize.define('deadLine', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
- 
-        schoolFk: {
-            type: Sequelize.INTEGER,
-            allowNull:false
-        },
+module.exports = function (sequelize, Sequelize) {
+  const DeadLine = sequelize.define('deadLine', {
 
-        deadLineDttm: {
-            type: Sequelize.DATE,
-            allowNull:false
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        emailSentFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull:false,
-            defualt:false
-        },
+    schoolFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        emailSentDttm:{
-            type:Sequelize.DATE,
-            allowNull:true
-        },
+    deadLineDttm: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
 
-        continueFl:{
-            type:Sequelize.BOOLEAN,
-            allowNull:false
-        },
+    emailSentFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defualt: false,
+    },
 
-        delayFl:{
-            type:Sequelize.BOOLEAN,
-            allowNull:false
-        },
+    emailSentDttm: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
 
-        verificationCode: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+    continueFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+    delayFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
+    verificationCode: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        
-    },{
-        timestamps:false
-    }
-);
- 
-    return DeadLine;
- 
-}
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return DeadLine;
+};

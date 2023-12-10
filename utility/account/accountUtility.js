@@ -1,88 +1,101 @@
 const models = require('../../models');
-const generalUtility = require('../../utility/general/generalUtility');
+const generalUtility = require('../general/generalUtility');
 
 async function createAccount(accountDetail) {
-
-   return await models.account.create({
-        accountNumber: accountDetail.accountNumber,
-        email: accountDetail.email,
-        password: accountDetail.hashPassword,
-        name: accountDetail.name,
-        accountTypeFk: accountDetail.accountTypeId,
-        telephoneNumber: accountDetail.telephoneNumber,
-        defaultPassword: accountDetail.defaultPassword,
-        createdAt: Date.now(),
-        firstLoginFl:true,
-        deleteFl: false,
-        versionNo: 1
-    });
+  return models.account.create({
+    accountNumber: accountDetail.accountNumber,
+    email: accountDetail.email,
+    password: accountDetail.hashPassword,
+    name: accountDetail.name,
+    accountTypeFk: accountDetail.accountTypeId,
+    telephoneNumber: accountDetail.telephoneNumber,
+    defaultPassword: accountDetail.defaultPassword,
+    createdAt: Date.now(),
+    firstLoginFl: true,
+    deleteFl: false,
+    versionNo: 1,
+  });
 }
 
 async function getAccountById(id) {
-    return await models.account.findOne({
-        where:{
-            id:id
-        }
-    })
+  return models.account.findOne({
+    where: {
+      id,
+    },
+  });
 }
 
 async function getAccountByNumber(number) {
-    return await models.account.findOne({
-        where:{
-            accountNumber:number
-        }
-    })
+  return models.account.findOne({
+    where: {
+      accountNumber: number,
+    },
+  });
 }
 
 async function getNumberOfCustomers() {
-    var result = await models.sequelize.query('select count(id) as numberOfCustomers from accounts where accountTypeFk = 2 ' + 
-                            ' or accountTypeFk = 3 and deleteFl = false ',
-                            {type: models.sequelize.QueryTypes.SELECT});
-    
-    return result.length == 0 ? 0 : result[0].numberOfCustomers;
+  const result = await models.sequelize.query(
+    'select count(id) as numberOfCustomers from accounts where accountTypeFk = 2 '
+                            + ' or accountTypeFk = 3 and deleteFl = false ',
+    { type: models.sequelize.QueryTypes.SELECT },
+  );
+
+  return result.length === 0 ? 0 : result[0].numberOfCustomers;
 }
 
 async function getNumberOfSignUpsToday() {
-    var result = await models.sequelize.query('select distinct count(id) as numberOfSignUpsToday from accounts where created_at > curdate() ',
-    {type: models.sequelize.QueryTypes.SELECT});
+  const result = await models.sequelize.query(
+    'select distinct count(id) as numberOfSignUpsToday from accounts where created_at > curdate() ',
+    { type: models.sequelize.QueryTypes.SELECT },
+  );
 
-    return result.length == 0 ? 0 : result[0].numberOfSignUpsToday;
+  return result.length === 0 ? 0 : result[0].numberOfSignUpsToday;
 }
 
 async function updateAccountNameAndNumber(accountId, name, telephoneNo) {
-    await models.account.update({
-        name: name,
-        telephoneNo: telephoneNo,
-        versionNo: models.sequelize.literal('versionNo + 1')
-    }, {
-        where: {
-            id: accountId
-        }
-    });
+  await models.account.update({
+    name,
+    telephoneNo,
+    versionNo: models.sequelize.literal('versionNo + 1'),
+  }, {
+    where: {
+      id: accountId,
+    },
+  });
 }
 
 async function getNewAccountCode() {
-    var code = generalUtility.makeCode();
+  const code = generalUtility.makeCode();
 
-    var account = await getAccountByNumber(code);
+  const account = await getAccountByNumber(code);
 
-    if (account == null)
-        return code;
+  if (account == null) return code;
 
-    return await getNewAccountCode();
+  return getNewAccountCode();
 }
 
 async function getAllAccounts() {
-    return await models.account.findAll();
+  return models.account.findAll();
+}
+
+async function isAccountLinkedToASchoolInScheme(accountId) {
+  const kidsPartOfSchoolScheme = await models.sequelize.query('select k.* from accounts a '
+                    + ' inner join kids k on k.parentAccountFk = a.id '
+                    + ' where k.classFk is not null '
+                    + ' and k.deleteFl = false '
+                    + ' and a.id = :accountId', { replacements: { accountId }, type: models.sequelize.QueryTypes.SELECT });
+
+  return kidsPartOfSchoolScheme.length !== 0;
 }
 
 module.exports = {
-    createAccount,
-    getAccountById,
-    getAccountByNumber,
-    getNumberOfCustomers,
-    getNumberOfSignUpsToday,
-    updateAccountNameAndNumber,
-    getNewAccountCode,
-    getAllAccounts
-}
+  createAccount,
+  getAccountById,
+  getAccountByNumber,
+  getNumberOfCustomers,
+  getNumberOfSignUpsToday,
+  updateAccountNameAndNumber,
+  getNewAccountCode,
+  getAllAccounts,
+  isAccountLinkedToASchoolInScheme,
+};

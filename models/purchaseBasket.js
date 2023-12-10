@@ -1,85 +1,81 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var PurchaseBasket = sequelize.define('purchaseBasket', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
- 
-        createdDttm:{
-            type: Sequelize.DATE,
-            allowNull: false
-        },
+module.exports = function (sequelize, Sequelize) {
+  const PurchaseBasket = sequelize.define('purchaseBasket', {
 
-        purchaseDttm: {
-            type: Sequelize.DATE,
-            allowNull: true
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        status: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+    createdDttm: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
 
-        subTotal:{
-            type: Sequelize.STRING,
-            allowNull:false
-        },
+    purchaseDttm: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
 
-        total:{
-            type: Sequelize.STRING,
-            allowNull:false
-        },
-        
-        orderNumber:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    status: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        shippingAddressFk:{
-            type:Sequelize.INTEGER,
-            allowNull:true
-        },
+    subTotal: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        shippedFl:{
-            type:Sequelize.BOOLEAN,
-            allowNull:false
-        },
-        shippedDttm:{
-            type:Sequelize.DATE,
-            allowNull:true
-        },
+    total: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        deliveryName:{
-            type:Sequelize.STRING,
-            allowNull:false
-        },
+    orderNumber: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        deliveryPrice:{
-            type:Sequelize.STRING,
-            allowNull:false
-        },
+    shippingAddressFk: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
 
+    shippedFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+    shippedDttm: {
+      type: Sequelize.DATE,
+      allowNull: true,
+    },
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+    deliveryName: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
+    deliveryPrice: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        
-    },{
-        timestamps:false
-    });
- 
-    return PurchaseBasket;
- 
-}
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return PurchaseBasket;
+};
