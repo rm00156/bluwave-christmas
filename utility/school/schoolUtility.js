@@ -380,7 +380,7 @@ async function getOrderDetailsForAllKidsFromSchoolId(schoolId) {
     var totalKidsArray = await getAllKidsFromSchoolId(schoolId);
     var totalKids = totalKidsArray.length;
 
-    return await models.sequelize.query('select count(distinct pb.id) as orderCount from purchasebaskets pb ' +
+    return await models.sequelize.query('select count(distinct pb.id) as orderCount from purchaseBaskets pb ' +
         ' inner join basketItems b on b.purchaseBasketFk = pb.id ' +
         ' inner join productItems pi on b.productItemFk = pi.id ' +
         ' inner join classes c on pi.classFk = c.id ' +
@@ -451,14 +451,14 @@ async function getSchoolFromBasketItemId(basketItemId) {
 async function getSchoolDeadlineFromClassId(classId) {
     var result = await models.sequelize.query('select d.* from schools s ' +
         ' inner join classes c on c.schoolFk = s.id ' +
-        ' inner join deadlines d on d.schoolFk = s.id ' +
+        ' inner join deadLines d on d.schoolFk = s.id ' +
         ' where c.id = :classId ',
         { replacements: { classId: classId }, type: models.sequelize.QueryTypes.SELECT });
     return result.length == 0 ? null : result[0];
 }
 
 async function getClassesWithOrdersBySchoolId(schoolId) {
-    return await models.sequelize.query('select distinct c.* from basketitems b ' +
+    return await models.sequelize.query('select distinct c.* from basketItems b ' +
         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
         ' inner join productItems pi on b.productItemFk = pi.id ' +
         ' inner join classes c on pi.classFk = c.id ' +
@@ -521,7 +521,7 @@ async function resetDeadlineDttmForSchoolId(schoolId, deadLineDttm) {
 }
 
 async function getAllDeadlines() {
-    return await models.sequelize.query('select CAST(d.deadLineDttm AS DATE) as deadLine, s.name, s.schoolNumber, d.delayFl from deadlines d ' +
+    return await models.sequelize.query('select CAST(d.deadLineDttm AS DATE) as deadLine, s.name, s.schoolNumber, d.delayFl from deadLines d ' +
         ' inner join schools s on d.schoolFk = s.id ',
         { type: models.sequelize.QueryTypes.SELECT });
 }
