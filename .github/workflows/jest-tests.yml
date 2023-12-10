@@ -13,7 +13,7 @@ env:
   database_dialect: mysql
 
 jobs:
-  test:
+  jest_tests:
     runs-on: ubuntu-latest
 
     steps:
