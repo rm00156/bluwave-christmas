@@ -226,6 +226,7 @@ async function generateCoverSheetForSchoolOrderInstructions(school, classes, now
     var data = {school:school.name, classTotal: classes.length, numberOfKidsPerClass: school.numberOfKidsPerClass };
     var filename =  "tmp/CoverOrderInstruction_" + school.name + '_'+ now + ".pdf";
     const browser = await puppeteer.launch({
+        'headless': 'new',
         'args' : [
             '--no-sandbox',
             '--disable-setuid-sandbox'
@@ -338,6 +339,7 @@ async function createOrderInstruction(schoolClass, schoolDeadline, createFl, pro
 
     var filename =  "tmp/OrderInstruction_" + schoolClass.name + '_'+ now + ".pdf";
     const browser = await puppeteer.launch({
+        'headless': 'new',
         'args' : [
             '--no-sandbox',
             '--disable-setuid-sandbox'
@@ -902,6 +904,7 @@ const printForm  = async function(data, i,template)
     var date = Date.now();
     let filename =  "tmp/reece_" + date + '_' + i + ".pdf";
     const browser = await puppeteer.launch({
+        'headless': 'new',
       pipe:true,
        'args' : [
          '--no-sandbox',

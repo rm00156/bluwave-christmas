@@ -423,7 +423,7 @@ exports.getSubmitBankDetails = async function (req, res) {
 exports.submitConfirmAmount = async function (req, res) {
     var errors = confirmAmountValidator.validateConfirmAmountDetails(errors, req);
 
-    if (errors.sortCode || errors.bankAcc) {
+    if (errors && errors.sortCode || errors.bankAcc) {
         console.log('err');
         return res.json({ errors: errors });
     }
