@@ -439,6 +439,7 @@ async function createProductItemPdf(productItemInfo, job,progress)
 
     var data = {picture:productItemInfo.picture, artwork:productItemInfo.artwork};
     const browser = await puppeteer.launch({
+      'headless': 'new',
       'args' : [
         '--no-sandbox',
         '--disable-setuid-sandbox'
@@ -1252,6 +1253,7 @@ async function sendDeadlineEmail(schoolId)
 async function createCalendar(template, data, width,height)
 {
   const browser = await puppeteer.launch({
+    'headless': 'new',
     'args' : [
       '--no-sandbox',
       '--disable-setuid-sandbox'
@@ -2386,6 +2388,7 @@ const asyncForEach = async function(dataTemp, callback, array,job,processed)
 const createPdf = async function( data, job, processed )
 {
     const browser = await puppeteer.launch({
+      'headless': 'new',
       'args' : [
         '--no-sandbox',
         '--disable-setuid-sandbox'
@@ -2503,6 +2506,7 @@ const createPdf = async function( data, job, processed )
   job.progress(processed);
     processed++;
   const browser3 = await puppeteer.launch({
+    'headless': 'new',
     'args' : [
       '--no-sandbox',
       '--disable-setuid-sandbox'
@@ -2832,6 +2836,7 @@ const createProofForClass = async function(kid,i)
 
     let filename =  "tmp/Proof_"+kid.className+'_' + i+'_'+ now + ".pdf";
     const browser = await puppeteer.launch({
+      'headless': 'new',
         'args' : [
           '--no-sandbox',
           '--disable-setuid-sandbox'
@@ -2888,6 +2893,7 @@ const printForm  = async function(data, i,template)
     var date = Date.now();
     let filename =  "tmp/reece_" + date + '_' + i + ".pdf";
     const browser = await puppeteer.launch({
+      'headless': 'new',
       pipe:true,
        'args' : [
          '--no-sandbox',
