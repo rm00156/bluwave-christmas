@@ -548,9 +548,13 @@ async function generateProductItemPdf(data, productVariantItem) {
             '--disable-setuid-sandbox'
         ]
     });
+    console.log('1')
     const page = await browser.newPage();
+    console.log('2')
     const content = await compile(productVariantItem.templateName, data);
+    console.log('3')
     await page.setContent(content);
+    console.log('4')
     console.log(data)
     var fileLocation = data.school + "/" + data.year + "/" + data.class + "/";
     var filename = data.name + "_" + data.code + ".pdf";
