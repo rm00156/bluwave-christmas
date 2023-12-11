@@ -3,5 +3,4 @@ sqlscripts
 node_modules
 .DS_Store
 config/
-package-lock.json
 .vscode/

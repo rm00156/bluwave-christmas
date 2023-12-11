@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "start": "node ./bin/www",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles",
+    "heroku-postbuild": "mkdir ./.cache && mv /app/.cache/puppeteer ./.cache"
   },
   "engines": {
     "node": "^17.3.0",

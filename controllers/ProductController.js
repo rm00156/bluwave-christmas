@@ -541,7 +541,6 @@ async function createProductItemPdf(data, productVariantItem) {
 
 async function generateProductItemPdf(data, productVariantItem) {
 
-  try {
     const browser = await puppeteer.launch({
         'headless': 'new',
         'args': [
@@ -597,9 +596,6 @@ async function generateProductItemPdf(data, productVariantItem) {
     await s3UploadPromise;
     var s3Path = process.env.s3BucketPath + s3FileLocation;
     return s3Path;
-  } catch(err) {
-    console.log(err)
-  }
 }
 
 async function createProductItemObjectNoKid(productVariantItem, data, s3Path, productItemGroup) {
