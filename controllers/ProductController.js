@@ -473,7 +473,7 @@ async function generateProductItemForKid(kid, productId, dummy, isAccountLinkedT
 
     var productVariants = await getProductVariantsForProductId(productId);
     var array = new Array();
-
+    console.log(productVariants)
     for (var i = 0; i < productVariants.length; i++) {
         var productVariantItem = productVariants[i];
 
@@ -551,10 +551,13 @@ async function generateProductItemPdf(data, productVariantItem) {
     const page = await browser.newPage();
     const content = await compile(productVariantItem.templateName, data);
     await page.setContent(content);
-
+    console.log(data)
     var fileLocation = data.school + "/" + data.year + "/" + data.class + "/";
     var filename = data.name + "_" + data.code + ".pdf";
-    const tempDir = "dataDir/temp/OutBound/" + + fileLocation + filename;
+    
+    console.log(productVariantItem)
+    console.log(fileLocation);
+    console.log(filename)
 
     await page.setViewport({ width: 1400, height: 800, deviceScaleFactor: 2 });
     const buffer = await page.pdf({
