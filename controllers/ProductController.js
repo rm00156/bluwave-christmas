@@ -473,7 +473,6 @@ async function generateProductItemForKid(kid, productId, dummy, isAccountLinkedT
 
     var productVariants = await getProductVariantsForProductId(productId);
     var array = new Array();
-    console.log(productVariants)
     for (var i = 0; i < productVariants.length; i++) {
         var productVariantItem = productVariants[i];
 
@@ -541,6 +540,8 @@ async function createProductItemPdf(data, productVariantItem) {
 }
 
 async function generateProductItemPdf(data, productVariantItem) {
+
+  try {
     const browser = await puppeteer.launch({
         'headless': 'new',
         'args': [
@@ -548,14 +549,12 @@ async function generateProductItemPdf(data, productVariantItem) {
             '--disable-setuid-sandbox'
         ]
     });
-    console.log('1')
     const page = await browser.newPage();
-    console.log('2')
+
     const content = await compile(productVariantItem.templateName, data);
-    console.log('3')
+
     await page.setContent(content);
-    console.log('4')
-    console.log(data)
+
     var fileLocation = data.school + "/" + data.year + "/" + data.class + "/";
     var filename = data.name + "_" + data.code + ".pdf";
     
@@ -598,6 +597,9 @@ async function generateProductItemPdf(data, productVariantItem) {
     await s3UploadPromise;
     var s3Path = process.env.s3BucketPath + s3FileLocation;
     return s3Path;
+  } catch(err) {
+    console.log(err)
+  }
 }
 
 async function createProductItemObjectNoKid(productVariantItem, data, s3Path, productItemGroup) {
