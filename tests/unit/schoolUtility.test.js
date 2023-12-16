@@ -1042,4 +1042,15 @@ describe('school utility tests', () => {
     expect(schoolDetails.accountNumber).toBe(account.accountNumber);
     expect(schoolDetails.email).toBe(account.email);
   });
+
+  it('get schools with name and post code', async () => {
+
+    const { school } = await schoolTestHelper.createNewSchoolWithAccount();
+    const name = school.name;
+    const postCode = school.postCode;
+
+    const getSchool = await schoolUtility.getSchoolWithNameAndPostCode(name, postCode);
+
+    expect(getSchool.id).toBe(school.id);
+  })
 });

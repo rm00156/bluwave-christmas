@@ -8,13 +8,11 @@ const orderUtility = require('../utility/order/orderUtility');
 const adminUtility = require('../utility/admin/adminUtility');
 const { PURCHASE_BASKET_STATUS } = require('../utility/basket/purchaseBasketStatus');
 
-const env = process.env.NODE_ENV || 'development';
 const stripe = require('stripe')(process.env.stripe_server);
 
 const { endpointSecret } = process.env;
 const PDFMerge = require('pdf-merge');
 const aws = require('aws-sdk');
-// const process.env = require('../process.env/process.env.json');
 const archiver = require('archiver');
 
 const fs = require('fs-extra');

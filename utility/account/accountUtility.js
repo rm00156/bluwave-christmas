@@ -88,6 +88,15 @@ async function isAccountLinkedToASchoolInScheme(accountId) {
   return kidsPartOfSchoolScheme.length !== 0;
 }
 
+async function getAccountByEmail(email) {
+  return models.account.findOne({
+    where: {
+      email,
+      deleteFl: false,
+    },
+  });
+}
+
 module.exports = {
   createAccount,
   getAccountById,
@@ -98,4 +107,5 @@ module.exports = {
   getNewAccountCode,
   getAllAccounts,
   isAccountLinkedToASchoolInScheme,
+  getAccountByEmail,
 };

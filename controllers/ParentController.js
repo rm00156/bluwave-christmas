@@ -1,6 +1,5 @@
 const models = require('../models');
 const basketController = require('./BasketController');
-const kidController = require('./KidController');
 const basketUtility = require('../utility/basket/basketUtility');
 const accountUtility = require('../utility/account/accountUtility');
 const kidUtility = require('../utility/kid/kidUtility');

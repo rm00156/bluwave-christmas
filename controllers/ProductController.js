@@ -105,7 +105,7 @@ async function getProductItemScreen(req, res) {
   }
 
   const { productItem, productVariant } = productItemNumber === undefined ? await productItemNumberNotDefined(productId, account, kidCode, product, productVariantId)
-    : await productItemNumberDefined(productItemNumber, productVariantId);
+    : await productItemNumberDefined(productItemNumber, Number(productVariantId));
 
   // at this point productItem is defined
   const { kidsList, kid } = await getKidsListAndKidFromProductIdAndAccountId(productId, account, productItem);

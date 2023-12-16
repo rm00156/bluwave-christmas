@@ -26,7 +26,7 @@ function onClick(e) {
                 else
                 {
                     valid = true;
-                    $('#form').submit();
+                    $('#form').trigger('submit');
                 }
                 
             }

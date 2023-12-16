@@ -7,7 +7,7 @@ const env = process.env.NODE_ENV || 'development';
 const sequelize = new Sequelize(env === 'test' ? process.env.test_database : process.env.database, process.env.username, process.env.password, {
   host: process.env.database_host,
   dialect: process.env.database_dialect,
-  logging: env !== 'test',
+  logging: env !== 'test' && env !== 'development',
 });
 const db = {};
 

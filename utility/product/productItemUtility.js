@@ -1,11 +1,10 @@
-const puppeteer = require('puppeteer');
-const aws = require('aws-sdk');
 const models = require('../../models');
 
 const generalUtility = require('../general/generalUtility');
 const accountUtility = require('../account/accountUtility');
 const kidUtility = require('../kid/kidUtility');
 const productUtility = require('./productUtility');
+const env = process.env.NODE_ENV;
 
 async function createProductItem(details) {
   return models.productItem.create(details);
@@ -30,17 +29,13 @@ async function getNewProductItemNumber() {
 }
 
 async function generateProductItemPdf(data, productVariantItem) {
-  const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
-  const page = await browser.newPage();
-  const content = await generalUtility.compile(
-    productVariantItem.templateName,
-    data,
-  );
-  await page.setContent(content);
+  const { page, browser } = await generalUtility.setUpPageAndBrowser(productVariantItem, data);
 
-  const fileLocation = `${data.school}/${data.year}/${data.class}/`;
+  let testDevelopment = '';
+  if(env === 'test' || env === 'development') {
+    testDevelopment = `${env}/`;
+  }
+  const fileLocation = `${testDevelopment}${data.school}/${data.year}/${data.class}/`;
   const filename = `${data.name}_${data.code}.pdf`;
 
   await page.setViewport({ width: 1400, height: 800, deviceScaleFactor: 2 });
@@ -54,27 +49,8 @@ async function generateProductItemPdf(data, productVariantItem) {
   await page.close();
   await browser.close();
 
-  const s3 = new aws.S3();
   const s3FileLocation = `${fileLocation + Date.now()}_${filename}`;
-  const params = {
-    Bucket: process.env.bucketName,
-    Body: buffer,
-    Key: s3FileLocation,
-    ACL: 'public-read',
-  };
-
-  const s3UploadPromise = new Promise((resolve, reject) => {
-    s3.upload(params, (err, uploadData) => {
-      if (err) {
-        console.log(err);
-        reject(err);
-      } else {
-        resolve(uploadData);
-      }
-    });
-  });
-
-  await s3UploadPromise;
+  await generalUtility.uploadBodyToS3Bucket(buffer, s3FileLocation);
   const s3Path = process.env.s3BucketPath + s3FileLocation;
   return s3Path;
 }
@@ -420,7 +396,7 @@ async function createProductItems(product, kidCode, account) {
     } else {
       // if no kids
 
-      kid = await kidUtility.createKid('John Doe', 5, 0, null, account);
+      kid = await kidUtility.createKid('John Doe', 5, 0, null, account.id);
       productItemGroup = await createProductItemGroup();
       productItems = await generateProductItemForKid(
         kid,
@@ -459,7 +435,7 @@ async function createProductItems(product, kidCode, account) {
 }
 
 async function getProductItemDetailsByNumber(number) {
-  const result = models.sequelize.query(
+  const result = await models.sequelize.query(
     'select pi.*, pi.productItemGroupFk, pv.orderNo, pv.price, pv.productFk as productId, pvt.type as productVariantType from productItems pi '
       + ' inner join productVariants pv on pi.productVariantFk = pv.id '
       + ' inner join productVariantTypes pvt on pv.productVariantTypeFk = pvt.id '
@@ -500,8 +476,6 @@ async function generateUpdateProductItem(kid, productId, accountId) {
     );
     productItems = await getProductItemsWithProductForKid(productId, kid.id);
   }
-
-  console.log(productItems);
   for (let i = 0; i < productItems.length; i += 1) {
     const productItem = productItems[i];
 
@@ -509,10 +483,10 @@ async function generateUpdateProductItem(kid, productId, accountId) {
     let displayMonths;
     let displayBoth;
 
-    if (productItem.text2 !== 0 && productItem.text3 !== 0) {
+    if (productItem.text2 !== '0' && productItem.text3 !== '0') {
       // display both
       displayBoth = 'true';
-    } else if (productItem.text2 !== 0) {
+    } else if (productItem.text2 !== '0') {
       // display year
       displayYears = 'true';
     } else {
@@ -676,6 +650,15 @@ async function doesProductItemStillHaveDefaultPictures(productItem) {
   return false;
 }
 
+async function handleLinkKid(name, years, months, classId, account, job) {
+  const kid = await kidUtility.createKid(name, years, months, classId, account);
+  const product = await productUtility.getProductByName('Create Your Own Card');
+  const productItems = await createProductItems(product, kid.code, account);
+  job.progress(1);
+
+  return { productItem: productItems[0], product };
+}
+
 module.exports = {
   createProductItem,
   getProductItemByNumber,
@@ -697,4 +680,7 @@ module.exports = {
   createProductItemByVariantAccountAndKid,
   doesProductItemStillHaveDefaultPictures,
   getTemplateFromProductItemId,
+  generateProductItemForKid,
+  handleLinkKid,
+  generateProductItemPdf
 };

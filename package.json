@@ -61,7 +61,8 @@
     "save": "^2.5.0",
     "sequelize": "^6.21.3",
     "stripe": "^7.63.1",
-    "throng": "^4.0.0"
+    "throng": "^4.0.0",
+    "validator": "^13.11.0"
   },
   "devDependencies": {
     "dotenv": "^8.0.0",

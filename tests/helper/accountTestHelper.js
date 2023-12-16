@@ -16,19 +16,19 @@ async function createNewAccount(accountTypeId) {
     defaultPassword: true,
   };
 
-  return await accountUtility.createAccount(accountDetail);
+  return accountUtility.createAccount(accountDetail);
 }
 
 async function createNewOrganiserAccount() {
-  return await createNewAccount(ACCOUNT_TYPE_ID.ORGANISER);
+  return createNewAccount(ACCOUNT_TYPE_ID.ORGANISER);
 }
 
 async function createNewCustomerAccount() {
-  return await createNewAccount(ACCOUNT_TYPE_ID.CUSTOMER);
+  return createNewAccount(ACCOUNT_TYPE_ID.CUSTOMER);
 }
 
 async function createNewAdminAccount() {
-  return await createNewAccount(ACCOUNT_TYPE_ID.ADMIN);
+  return createNewAccount(ACCOUNT_TYPE_ID.ADMIN);
 }
 
 async function newAccountEmail() {

@@ -1,5 +1,4 @@
 const models = require('../models');
-const kidController = require('./KidController');
 const queueController = require('./QueueController');
 const confirmAmountValidator = require('../validators/confirmAmount');
 const schoolUtility = require('../utility/school/schoolUtility');
@@ -156,14 +155,16 @@ async function changeSchoolStep(req, res) {
 
   let statusDetail;
   if (nextTypeFk === '') {
-    statusDetail = await schoolUtility.getCurrentSchoolsStatusDetailsBySchoolId(
+    const schoolsStatusDetails = await schoolUtility.getCurrentSchoolsStatusDetailsBySchoolId(
       schoolId,
     );
+    if (schoolsStatusDetails.length === 0) throw new Error('');
+    statusDetail = schoolsStatusDetails[0];
   } else {
     statusDetail = { nextTypeFk, type: '' };
   }
 
-  if (statusDetail.nextTypeFk != null) {
+  if (statusDetail.nextTypeFk !== null) {
     nextTypeFk = statusDetail.nextTypeFk;
     await schoolUtility.createNewStatusForSchoolId(schoolId, nextTypeFk);
   }

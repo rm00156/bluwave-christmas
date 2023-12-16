@@ -192,7 +192,7 @@ const start = function () {
         job,
       );
     } else if (job.data.process == 'generateProductItemForKid') {
-      return await productController.generateProductItemForKid(job.data.kid, job.data.productId, job.data.dummy, job.data.isAccountLinkedToASchoolInScheme);
+      return await productItemUtility.generateProductItemForKid(job.data.kid, job.data.productId, job.data.dummy, job.data.isAccountLinkedToASchoolInScheme);
     } else if (job.data.process == 'classOrderInstruction') {
       const progress = 1;
       job.progress(progress);
@@ -207,7 +207,7 @@ const start = function () {
     } else if (job.data.process == 'generateOrderDetails') {
       return await orderController.getOrderDetailsGroupByTypeForId(job.data.purchaseBasketId, job);
     } else if (job.data.process == 'linkKid') {
-      return await kidUtility.handleLinkKid(job.data.name, job.data.years, job.data.months, job.data.classId, job.data.account, job);
+      return await productItemUtility.handleLinkKid(job.data.name, job.data.years, job.data.months, job.data.classId, job.data.account, job);
     } else if (job.data.process == 'ordersNotShippedReminder') {
       await sendOrdersNotShippedReminder();
     } else if (job.data.process == 'schoolArtworkPacksNotSentReminder') {

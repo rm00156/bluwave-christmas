@@ -836,6 +836,17 @@ async function updateSchoolDetailsForSchoolId(
   );
 }
 
+async function getSchoolWithNameAndPostCode(name, postCode) {
+  return models.school
+    .findOne({
+      where: {
+        name,
+        postCode,
+        deleteFl: false,
+      },
+    });
+}
+
 module.exports = {
   createClass,
   createSchool,
@@ -893,4 +904,5 @@ module.exports = {
   generateSchoolNumber,
   getAllSchools,
   updateSchoolDetailsForSchoolId,
+  getSchoolWithNameAndPostCode,
 };

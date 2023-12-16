@@ -123,4 +123,13 @@ describe('account utility tests', () => {
 
     expect(account).toBeNull();
   });
+
+  it('get account by email', async () => {
+
+    const account = await accountTestHelper.createNewCustomerAccount();
+
+    const getAccount = await accountUtility.getAccountByEmail(account.email);
+    
+    expect(getAccount.id).toBe(account.id)
+  })
 });

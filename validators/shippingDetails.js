@@ -1,36 +1,42 @@
 const validator = require('validator');
 const fetch = require('node-fetch');
 
-exports.validateShippingDetailFields = async function (errors, req) {
-  await validateShippingDetailFields(errors, req);
-};
+const UK_ID = 235;
 
-const validateShippingDetailFields = async function (errors, req) {
-  if (req.body.postCode == undefined || req.body.postCode.length == 0) {
+async function validateShippingDetailFields(req) {
+  const errors = {};
+  const {
+    postCode, country, fullName, addressLine1, addressLine2, city,
+  } = req;
+  if (postCode === undefined || postCode.length === 0) {
     errors.postCode = 'Please enter a valid Post Code';
   }
 
-  if (req.body.postCode.length > 0) {
-    if (req.body.country !== undefined && req.body.country == 235) {
-      let response = await fetch(`https://api.postcodes.io/postcodes/${req.body.postCode}`);
+  if (postCode.length > 0) {
+    if (country !== undefined && req.body.country === UK_ID) {
+      let response = await fetch(`https://api.postcodes.io/postcodes/${postCode}`);
       response = await response.json();
       if (response.status != 200) errors.postCode = response.error;
     }
   }
 
-  if (req.body.fullName !== undefined && !validator.isLength(req.body.fullName, { min: 3 })) {
+  if (fullName !== undefined && !validator.isLength(fullName, { min: 3 })) {
     errors.fullName = 'Full Name must be more than 3 characters long';
   }
 
-  if (req.body.addressLine1 !== undefined && !validator.isLength(req.body.addressLine1, { min: 3 })) {
+  if (addressLine1 !== undefined && !validator.isLength(addressLine1, { min: 3 })) {
     errors.addressLine1 = 'Address Line 1 must be more than 3 characters long';
   }
 
-  if (req.body.addressLine2 !== undefined && !validator.isLength(req.body.addressLine2, { min: 3 })) {
+  if (addressLine2 !== undefined && !validator.isLength(addressLine2, { min: 3 })) {
     errors.addressLine2 = 'Address Line 2 must be more than 3 characters long';
   }
 
-  if (req.body.city !== undefined && !validator.isLength(req.body.city, { min: 3 })) {
+  if (city !== undefined && !validator.isLength(city, { min: 3 })) {
     errors.city = 'City must be more than 3 characters long';
   }
+}
+
+module.exports = {
+  validateShippingDetailFields,
 };

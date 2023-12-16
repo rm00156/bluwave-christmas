@@ -52,52 +52,51 @@ async function rerenderSignup(errors, req, res, type) {
 }
 
 async function signup(req, res, next) {
-  return validateUser(req).then(async (validateUserErrors) => {
-    const { type, name, telephoneNo } = req.body;
-    if (!isEmpty(validateUserErrors)) {
-      // reRender the sign up page with the errors
-      rerenderSignup(validateUserErrors, req, res, type);
-    } else {
-      const accountTypeFk = 2;
+  const validateUserErrors = await validateUser(req);
+  const { type, name, telephoneNo } = req.body;
+  if (!isEmpty(validateUserErrors)) {
+    // reRender the sign up page with the errors
+    rerenderSignup(validateUserErrors, req, res, type);
+  } else {
+    const accountTypeFk = 2;
 
-      const transaction = await models.sequelize.transaction();
-      const accountNumber = await accountUtility.getNewAccountCode();
+    const transaction = await models.sequelize.transaction();
+    const accountNumber = await accountUtility.getNewAccountCode();
 
-      const accountDetail = {
-        accountNumber,
-        email: req.body.email,
-        hashPassword: generalUtility.generateHash(req.body.password),
-        name,
-        accountTypeId: accountTypeFk,
-        telephoneNumber: telephoneNo,
-        defaultPassword: false,
-      };
-      try {
-        await accountUtility.createAccount(accountDetail);
-      } catch (err) {
-        // throw exception
-        await transaction.rollback();
-        throw new Error('error with account sign up');
-      }
-
-      await transaction.commit();
-
-      await queueController.addParentRegistrationEmailJob(req.body.email);
-      await queueController.addParentRegistrationBluwaveEmailJob(
-        req.body.email,
-        telephoneNo,
-        name,
-      );
-
-      // authenticate with passport
-      passport.authenticate('local', {
-        successRedirect: '/parentDashboard',
-        failureRedirect: '/signup',
-        failureFlash: true,
-      })(req, res, next);
-      // needs to be translated to the create your own card button
+    const accountDetail = {
+      accountNumber,
+      email: req.body.email,
+      hashPassword: generalUtility.generateHash(req.body.password),
+      name,
+      accountTypeId: accountTypeFk,
+      telephoneNumber: telephoneNo,
+      defaultPassword: false,
+    };
+    try {
+      await accountUtility.createAccount(accountDetail);
+    } catch (err) {
+      // throw exception
+      await transaction.rollback();
+      throw new Error('error with account sign up');
     }
-  });
+
+    await transaction.commit();
+
+    await queueController.addParentRegistrationEmailJob(req.body.email);
+    await queueController.addParentRegistrationBluwaveEmailJob(
+      req.body.email,
+      telephoneNo,
+      name,
+    );
+
+    // authenticate with passport
+    passport.authenticate('local', {
+      successRedirect: '/parentDashboard',
+      failureRedirect: '/signup',
+      failureFlash: true,
+    })(req, res, next);
+    // needs to be translated to the create your own card button
+  }
 }
 
 function signupOrganiser(req, res, next) {
@@ -226,28 +225,28 @@ function login(req, res, next) {
       return res.redirect(dashboardPath);
     });
   })(req, res, next);
-};
+}
 
 function logout(req, res) {
   req.logout();
   req.session.destroy();
   res.redirect('/');
-};
+}
 
 async function signupPage(req, res) {
   // res.redirect('/');
   const { type } = req.query;
   res.render('signup3', { type, errors: {} });
-};
+}
 
 function signupOrganiserPage(req, res) {
   // res.render('signupOrganiser3',{errors:{}});
   res.redirect('/login');
-};
+}
 
 function signUpAdmin(req, res) {
   res.render('signUpAdmin', { errors: {}, user: req.user });
-};
+}
 
 async function signUpAdminPage(req, res) {
   const errors = await validateUser(req);
@@ -278,5 +277,5 @@ module.exports = {
   signupOrganiserPage,
   login,
   logout,
-  signUpAdmin
+  signUpAdmin,
 };

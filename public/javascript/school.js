@@ -145,7 +145,7 @@ function changeStep(e)
         {
             var statusDetail = data.statusDetail;
             
-            if(statusDetail.type == 'Waiting for Customer Response')
+            if(statusDetail.currentStep == 'Waiting for Customer Response')
             {
                 $('#overlay3').attr('style','display:block;z-index:55')
             }

@@ -1779,8 +1779,7 @@ exports.resetPassword = function (req, res) {
   const { password } = req.body;
   const { email } = req.body;
 
-  const errors = {};
-  validator.validateCreateUserFields(errors, req);
+  const errors = validator.validateCreateUserFields(req);
 
   if (errors.password) {
     res.json({ errors });
@@ -1799,11 +1798,10 @@ exports.resetPassword = function (req, res) {
 };
 
 exports.changeOrganiser = function (req, res) {
-  const errors = {};
   const { schoolId } = req.body;
   const { email } = req.body;
   const { originalEmail } = req.body;
-  validator.validateCreateUserFields(errors, req);
+  const errors = validator.validateCreateUserFields(req);
 
   if (errors.email) {
     res.json({ errors });
@@ -1879,12 +1877,12 @@ exports.getEditContactDetails = function (req, res) {
 exports.updatePassword = function (req, res) {
   const { password } = req.body;
   const { repeat } = req.body;
-  const errors = {};
+
   if (repeat == password) {
     if (repeat == 'welcome') {
       res.json({ errors: 'Please update to a new password' });
     } else {
-      validator.validateCreateUserFields(errors, req);
+      const errors = validator.validateCreateUserFields(errors, req);
 
       if (errors.password) {
         res.json({ errors: errors.password });
@@ -1940,12 +1938,11 @@ exports.editClassName = function (req, res) {
   });
 };
 exports.editContactDetails = function (req, res) {
-  const errors = {};
   const { schoolId } = req.body;
 
   console.log('edit');
   // validate values
-  validator.validateCreateUserFields(errors, req);
+  const errors = validator.validateCreateUserFields(errors, req);
 
   if (errors.telephoneNo || errors.postCode || errors.address || errors.name || errors.numberOfPupils || errors.numberOfClasses) {
     // error

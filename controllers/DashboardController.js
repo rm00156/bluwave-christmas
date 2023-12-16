@@ -1,10 +1,7 @@
 const puppeteer = require('puppeteer');
-const hbs = require('handlebars');
 const aws = require('aws-sdk');
-const path = require('path');
 const fs = require('fs-extra');
 const PDFMerge = require('pdf-merge');
-const Queue = require('bull');
 const models = require('../models');
 const dadController = require('./DadController');
 const queueController = require('./QueueController');
@@ -12,9 +9,7 @@ const queueController = require('./QueueController');
 const schoolUtility = require('../utility/school/schoolUtility');
 const STATUS_TYPES = require('../utility/school/statusTypes');
 
-// const process.env = require('../process.env/process.env.json');
 
-const env = process.env.NODE_ENV || 'development';
 const validator = require('../validators/shippingDetails');
 
 // Connect to a local redis intance locally, and the Heroku-provided URL in production
@@ -1418,8 +1413,7 @@ exports.getProductItem = function (req, res) {
 // }
 
 exports.validateShippingDetails = async function (req, res) {
-  const errors = {};
-  await validator.validateShippingDetailFields(errors, req);
+  const errors = await validator.validateShippingDetailFields(req);
 
   res.json({ errors });
 };

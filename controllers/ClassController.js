@@ -1,6 +1,5 @@
 const PDFMerge = require('pdf-merge');
 const aws = require('aws-sdk');
-// const process.env = require('../process.env/process.env.json');
 const archiver = require('archiver');
 
 const puppeteer = require('puppeteer');

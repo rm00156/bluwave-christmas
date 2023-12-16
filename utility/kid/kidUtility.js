@@ -1,7 +1,23 @@
 const models = require('../../models');
 const generalUtility = require('../general/generalUtility');
-const productItemUtility = require('../product/productItemUtility');
-const productUtility = require('../product/productUtility');
+
+async function getKidByCode(code) {
+  return models.kid.findOne({
+    where: {
+      code,
+    },
+  });
+}
+
+async function generateNewKidCode() {
+  const code = generalUtility.makeCode();
+
+  const kid = await getKidByCode(code);
+
+  if (kid == null) return code;
+
+  return generateNewKidCode();
+}
 
 async function createKid(name, years, months, classId, parentAccountId) {
   const code = await generateNewKidCode();
@@ -36,24 +52,6 @@ async function addKidToClass(kidId, classId) {
   });
 }
 
-async function getKidByCode(code) {
-  return models.kid.findOne({
-    where: {
-      code,
-    },
-  });
-}
-
-async function generateNewKidCode() {
-  const code = generalUtility.makeCode();
-
-  const kid = await getKidByCode(code);
-
-  if (kid == null) return code;
-
-  return generateNewKidCode();
-}
-
 async function getKidClassAndSchoolFromKidId(kidId) {
   const result = await models.sequelize.query('select s.name as school, c.name as class from kids k '
                     + ' inner join classes c on k.classFk = c.id '
@@ -62,18 +60,6 @@ async function getKidClassAndSchoolFromKidId(kidId) {
 
   return result.length === 0 ? null : result[0];
 }
-
-// async function getKidsForProductAndAccountWhereProductVariantOrderNumber1(productId, accountId) {
-//   return models.sequelize.query(
-//     'select distinct k.*, pi.productItemNumber, pv.id as productVariantId from productItems pi '
-//                         + ' inner join productVariants pv on pi.productVariantFk = pv.id '
-//                         + ' inner join kids k on pi.kidFk = k.id '
-//                         + ' where pv.productFk = :productId '
-//                         + ' and pi.accountFk = :accountId '
-//                         + ' and pv.orderNo = 1',
-//     { replacements: { productId, accountId }, type: models.sequelize.QueryTypes.SELECT },
-//   );
-// }
 
 async function getKidsFromAccountIdAndProductId(accountId, productId) {
   return models.sequelize.query('select distinct k.*, pi.id as productItemId, p.productNumber, pi.productItemNumber, pi.productVariantFk as productVariantId from kids k '
@@ -134,14 +120,14 @@ async function getKidById(id) {
   });
 }
 
-async function handleLinkKid(name, years, months, classId, account, job) {
-  const kid = await createKid(name, years, months, classId, account);
-  const product = await productUtility.getProductByName('Create Your Own Card');
-  const productItems = await productItemUtility.createProductItems(product, kid.code, account);
-  job.progress(1);
+// async function handleLinkKid(name, years, months, classId, account, job) {
+//   const kid = await createKid(name, years, months, classId, account);
+//   const product = await productUtility.getProductByName('Create Your Own Card');
+//   const productItems = await productItemUtility.createProductItems(product, kid.code, account);
+//   job.progress(1);
 
-  return { productItem: productItems[0], product };
-}
+//   return { productItem: productItems[0], product };
+// }
 
 async function getNumberOfLinkedKids() {
   const result = await models.sequelize.query(
@@ -165,6 +151,6 @@ module.exports = {
   getKidsFromClassId,
   isKidLinkedToAccountId,
   getKidById,
-  handleLinkKid,
+  // handleLinkKid,
   getNumberOfLinkedKids,
 };

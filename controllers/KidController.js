@@ -14,7 +14,7 @@ async function linkKid(req, res) {
     month, age, name, code,
   } = req.query;
 
-  const isKidLinkedToAccount = await isKidLinkedToAccountId(account.id);
+  const isKidLinkedToAccount = await kidUtility.isKidLinkedToAccountId(account.id);
   const basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
 
   res.render('linkKid3', {
@@ -44,7 +44,7 @@ async function processLinkKids(req, res) {
   const { classCode } = req.body;
   const { basket } = req.body;
 
-  months = (months == '') ? 0 : months;
+  months = (months === '') ? 0 : months;
   const classAndSchool = await classUtility.getClassAndSchoolByClassNumber(classCode);
 
   if (classAndSchool == null) {

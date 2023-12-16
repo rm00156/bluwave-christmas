@@ -1,5 +1,4 @@
 const models = require('../models');
-const kidController = require('./KidController');
 const classController = require('./ClassController');
 const schoolUtility = require('../utility/school/schoolUtility');
 const basketUtility = require('../utility/basket/basketUtility');
@@ -282,11 +281,10 @@ async function getSchoolDetailsPage(req, res) {
 }
 
 async function editSchoolDetails(req, res) {
-  const errors = {};
   const { schoolId } = req.body;
 
   // validate values
-  validator.validateOrganiserUserFields(errors, req);
+  const errors = validator.validateOrganiserUserFields(req);
 
   if (errors.telephoneNo || errors.postCode || errors.address || errors.name || errors.numberOfKidsPerClass) {
     // error

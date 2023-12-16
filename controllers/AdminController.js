@@ -108,8 +108,9 @@ exports.searchAccounts = async function (req, res) {
 
 exports.getProductItemScreen = async function (req, res) {
   const { productItemNumber } = req.query;
-  let productItem = await productItemUtility.getProductItemDetailsByNumber(productItemNumber);
-  productItem = productItem[0];
+  console.log(productItemNumber);
+  const productItem = await productItemUtility.getProductItemDetailsByNumber(productItemNumber);
+  console.log(productItem);
   const product = await productUtility.getProductById(productItem.productId);
   const productVariants = await productUtility.getProductVariantsForProductItemGroupId(productItem.productItemGroupFk);
   const productVariant = await productUtility.getProductVariantDetailsById(productItem.productVariantFk);
