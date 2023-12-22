@@ -11,6 +11,18 @@ async function getBackgroundSetting(accountId) {
   });
 }
 
+async function setBackgroundSetting(value, accountId) {
+  await models.setting.update({
+    value,
+    versionNo: models.sequelize.literal('versionNo + 1'),
+  }, {
+    where: {
+      name: BACKGROUND_COLOR,
+      accountFk: accountId,
+    },
+  });
+}
+
 async function createBackgroundSetting(accountId, value) {
   return models.setting.create({
     name: BACKGROUND_COLOR,
@@ -48,4 +60,5 @@ module.exports = {
   createBackgroundSetting,
   getYearByYear,
   createNewYear,
+  setBackgroundSetting,
 };

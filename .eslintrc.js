@@ -26,5 +26,15 @@ module.exports = {
     'no-await-in-loop': 0,
     'prefer-destructuring': 0,
     'no-underscore-dangle': 0,
+    'global-require': 0,
+    'import/no-dynamic-require': 0,
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: true, // Consider devDependencies as well
+        optionalDependencies: false,
+        peerDependencies: false,
+      },
+    ],
   },
 };

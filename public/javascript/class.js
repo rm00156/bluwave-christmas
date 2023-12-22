@@ -1,7 +1,5 @@
 var jobs = {};
 var proofJobs = {};
-var printFormJobs = {};
-var purchaseJobs = {};
 var orderInstructionJobs = {};
 var table;
 
@@ -13,10 +11,9 @@ $(document).ready(function(){
     $('#createProof').on('click', createProofs2);
     $('#kidOrderButton').on('click', switchKidOrders);
     $('#viewProof').on('click', viewProofs);
-    $('#viewPurchaseCards').on('click', viewPurchaseCards);
     $('#editCards').on('click', editCards);
     $('#schoolButton').on('click', gotToSchool);
-    $('#generatePrintForm').on('click', generatePrintForm);
+    
     $('#orderTable').DataTable({
             dom: 'Bfrtip',
             buttons: [
@@ -36,7 +33,7 @@ $(document).ready(function(){
     }); 
 
     // $('#kidsTable_length select').on('click', reece);
-     $('#createCards').on('click', createCards);
+    //  $('#createCards').on('click', createCards);
      $('#editClassName').on('click', editClassName);
      $('#cancel').on('click',removeOverlay);
      $('#updateName').on('click',updateClassName);
@@ -49,12 +46,10 @@ $(document).ready(function(){
 
      })
     //  $('#addKid').on('click',addKid);
-     setInterval(updateJobs, 1000);
      setInterval(updateProofJobs,1000);
-     setInterval(updatePrintFormJobs,1000);
-     setInterval(updatePurchaseJobs,1000);
-     setInterval(updateOrderInstructionJobs,1000);
-     setInterval(updatePurchaseOrdersJobs,1000);
+    //  setInterval(updatePrintFormJobs,1000);
+    //  setInterval(updateOrderInstructionJobs,1000);
+     setInterval(updateJobs, 1000);
 })
 
 function generateOrderForms(e)
@@ -72,7 +67,7 @@ function generateOrderForms(e)
                 $('#error').text('');
                 $('#overlay2').attr('style','display:block; z-index:55');
                 $('#progressText').text('Generating Print Form for class ' + ' ....');
-                printFormJobs[job.id]= {id: job.id, state: "queued"};
+                jobs[job.id]= {id: job.id, state: "queued"};
                 // window.location = data.form;
             }
             else
@@ -135,65 +130,6 @@ function editClassName(e)
     
 }
 
-function createCards(e)
-{
-    var classId =(e.currentTarget.getAttribute('data-classId'));
-    var data = {classId:classId};
-
-    $.ajax({
-        type:'post',
-        url:'/createCardsForClass',
-        data:data,
-        success:function(job)
-        {
-            if(job.errors)
-            {
-                $('#error').text(job.errors);
-            }
-            else
-            {
-                $('#overlay').attr('style','display:block')
-                $('#progressText').text('Generating Cards for class ' + $('#className').val() + ' ....');
-                jobs[job.id] = {id: job.id, state: "queued", totalSteps:job.totalSteps, classId:job.classId};
-
-            }
-        }
-    })
-}
-
-function updateJobs() {
-    
-    for (var id of Object.keys(jobs)) {
-        var data = {id:id};
-        $.ajax({
-            type:"get",
-            url:'/createCardsForClass',
-            data:data,
-            success:function(result){
-                if(result.process== 'createCards')
-                {
-                    var progress = result.progress;
-                    var totalSteps = jobs[result.id].totalSteps
-            
-                    var progressAsPercentage = ((progress/totalSteps) * 100).toFixed(2);
-            
-                    $('#progress').attr('style','height:25px;width:' + progressAsPercentage + '%');
-                    $('#progress').text(progressAsPercentage + '%');
-            
-                    if(progress == totalSteps)
-                    {
-                    var jobId = result.id;
-                    $('#overlay').attr('style','display:block;z-index:55');
-                    window.location = '/viewCreatedCards?classId=' + jobs[result.id].classId +'&selectedIndex=0';
-                        delete jobs[jobId];
-                        
-                    }
-                }
-            }
-        })
-    }
-  }
-
 function updateProofJobs() {
     for (var id of Object.keys(proofJobs)) {
         var data = {id:id};
@@ -229,111 +165,45 @@ function updateProofJobs() {
     }
   }
 
-function updatePrintFormJobs() {
-    for (var id of Object.keys(printFormJobs)) {
-        var data = {id:id};
+// function updatePrintFormJobs() {
+//     for (var id of Object.keys(printFormJobs)) {
+//         var data = {id:id};
 
-        $.ajax({
-            type:'get',
-            url:'/createPrintForm',
-            data:data,
-            success:function(result)
-            {
-                if(result.process == 'ordersForm')
-                {
+//         $.ajax({
+//             type:'get',
+//             url:'/createPrintForm',
+//             data:data,
+//             success:function(result)
+//             {
+//                 if(result.process == 'ordersForm')
+//                 {
           
-                  var progress = result.progress;
-                  var totalSteps = 7;
+//                   var progress = result.progress;
+//                   var totalSteps = 7;
             
-                  var progressAsPercentage = ((progress/totalSteps) * 100).toFixed(2);
+//                   var progressAsPercentage = ((progress/totalSteps) * 100).toFixed(2);
             
-                  $('#progress').attr('style','height:25px;width:' + progressAsPercentage + '%');
-                  $('#progress').text(progressAsPercentage + '%');
+//                   $('#progress').attr('style','height:25px;width:' + progressAsPercentage + '%');
+//                   $('#progress').text(progressAsPercentage + '%');
             
-                  if(progress == totalSteps && result.form != undefined)
-                  {
-                    var jobId = result.id;
-                    $('#overlay2').attr('style','display:none');
-                    $('#progress').attr('style','height:25px;width:' + 0 + '%');
-                    $('#progress').text(0 + '%');
-                    delete printFormJobs[jobId];
-                    window.location = result.form;
+//                   if(progress == totalSteps && result.form != undefined)
+//                   {
+//                     var jobId = result.id;
+//                     $('#overlay2').attr('style','display:none');
+//                     $('#progress').attr('style','height:25px;width:' + 0 + '%');
+//                     $('#progress').text(0 + '%');
+//                     delete printFormJobs[jobId];
+//                     window.location = result.form;
                            
-                  }
-                }
-            }
-        })
-    }
-  }
+//                   }
+//                 }
+//             }
+//         })
+//     }
+//   }
+
 
   
-function updatePurchaseJobs() {
-    for (var id of Object.keys(purchaseJobs)) {
-        var data = {id:id};
-
-        $.ajax({
-            type:'get',
-            url:'/updatePurchaseJobs',
-            data:data,
-            success:function(result)
-            {
-                if(result.process == 'purchasedCards')
-                {
-          
-                  var progress = result.progress;
-                  var totalSteps = 5;
-            
-                  var progressAsPercentage = ((progress/totalSteps) * 100).toFixed(2);
-            
-                  $('#progress').attr('style','height:25px;width:' + progressAsPercentage + '%');
-                  $('#progress').text(progressAsPercentage + '%');
-            
-                  if(progress == totalSteps && result.path != undefined)
-                  {
-                    var jobId = result.id;
-                    $('#overlay').attr('style','display:none');
-                    $('#progress').attr('style','height:25px;width:' + 0 + '%');
-                    $('#progress').text(0 + '%');
-                    delete purchaseJobs[jobId];
-                    window.location = result.path;
-                           
-                  }
-                }
-            }
-        })
-    }
-  }
-  
-
-function generatePrintForm(e)
-{
-    var classId = e.currentTarget.getAttribute('data-classId');
-
-    var data = {classId:classId};
-    $.ajax({
-
-        type:"post",
-        url:'/generatePrintForm',
-        data:data,
-        success:function(job)
-        {
-            if(job.errors == null)
-            {
-                $('#error').text('');
-                $('#overlay').attr('style','display:block');
-                $('#progressText').text('Generating Print Form for class ' + $('#className').val() + ' ....');
-                printFormJobs[job.id]= {id: job.id, state: "queued"};
-                // window.location = data.form;
-            }
-            else
-            {
-              
-              $('#error').text(job.errors);
-            }
-        }
-    })
-}
-
 function gotToSchool(e)
 {
     const schoolId = e.currentTarget.getAttribute('data-schoolId');
@@ -495,36 +365,6 @@ function viewProofs(e)
     })
 }
 
-function viewPurchaseCards(e)
-{
-    var classId = e.currentTarget.getAttribute("data-classId");
-    console.log(classId);
-    var data = {classId:classId};
-    $.ajax({
-        type: "get",
-        url:"/generatePurchasedCards",
-        data:data,
-        dataType: "json",
-        success: function(job)
-        {
-            
-            var errors = job.errors;
-           if(errors)
-           {
-                $('#error').text(errors);
-           }
-           else
-           {
-            $('#overlay').attr('style','display:block')
-            $('#progressText').text('Generating Purchased Cards for class ' + $('#className').val() + ' ....');
-           
-                purchaseJobs[job.id] = {id: job.id, state: "queued"};
-           }
-        }
-    })
-}
-
-
 function editCards(e)
 {
     var classId = e.currentTarget.getAttribute("data-classId");
@@ -564,7 +404,7 @@ function generatePurchasedOrders(e)
             {
                 $('#overlay2').attr('style','display:block;z-index:55'); 
                 $('#progressText').text('Generating Proofs for class ' + $('#className').val() + ' ....');
-                purchaseJobs[job.id] = {id: job.id, state: "queued"};
+                jobs[job.id] = {id: job.id, state: "queued"};
                 $('#error').text('');
             }
             else
@@ -588,8 +428,8 @@ function createOrderInstructions(e)
             if(!job.error)
             {
                 $('#overlay2').attr('style','display:block;z-index:55'); 
-                $('#progressText').text('Generating Proofs for class ' + $('#className').val() + ' ....');
-                orderInstructionJobs[job.id] = {id: job.id, state: "queued"};
+                $('#progressText').text('Generating Order Instructions for class ' + $('#className').val() + ' ....');
+                jobs[job.id] = {id: job.id, state: "queued"};
                 $('#error').text('');
             }
             else
@@ -598,75 +438,38 @@ function createOrderInstructions(e)
             }
         }
     })
-
 }
 
-function updatePurchaseOrdersJobs() {
-    for (var id of Object.keys(purchaseJobs)) {
-        var data = {id:id};
-        $.ajax({
-            type:'get',
-            url:'/createOrderInstructionJob',
-            data:data,
-            success:function(result){
-                if(result.process == 'purchasedOrders')
-                {
-                  var progress = result.progress;
-                  var totalSteps = 8;
-            
-                  var progressAsPercentage = ((progress/totalSteps) * 100).toFixed(2);
-            
-                  $('#progress').attr('style','height:25px;width:' + progressAsPercentage + '%');
-                  $('#progress').text(progressAsPercentage + '%');
-            
-                  console.log(totalSteps);
-                  if(progress == totalSteps && result.instructionPath != undefined)
-                  {
-                    var jobId = result.id;
-                    $('#overlay2').attr('style','display:none');
-                    $('#progress').attr('style','height:25px;width:' + 0 + '%');
-                    $('#progress').text(0 + '%');
-                    delete purchaseJobs[jobId];
-                    window.location = result.instructionPath;
-                           
-                  }
-                }
+function updateJobs() {
+    for (var id of Object.keys(jobs)) {
+      var data = { id: id };
+  
+      $.ajax({
+        type: "get",
+        url: "/update_jobs",
+        data: data,
+        success: function (result) {
+          if (result.process === "classOrderInstruction" || result.process === 'ordersForm' || result.process === 'purchasedOrders') {
+            const {percentage, completed} = result.progress;
+  
+            $("#progress").attr(
+              "style",
+              "height:25px;width:" + percentage + "%"
+            );
+            $("#progress").text(percentage + "%");
+  
+            console.log(result.pdfPath);
+            if (completed === true && result.pdfPath !== undefined) {
+              var jobId = result.id;
+              $("#overlay2").attr("style", "display:none");
+              $("#progress").attr("style", "height:25px;width:" + 0 + "%");
+              $("#progress").text(0 + "%");
+              delete jobs[jobId];
+              console.log(result.pdfPath)
+              window.location = result.pdfPath;
             }
-        })   
-    }
-  }
-
-function updateOrderInstructionJobs() {
-    for (var id of Object.keys(orderInstructionJobs)) {
-        var data = {id:id};
-        $.ajax({
-            type:'get',
-            url:'/createOrderInstructionJob',
-            data:data,
-            success:function(result){
-                if(result.process == 'classOrderInstruction')
-                {
-                  var progress = result.progress;
-                  var totalSteps = 6;
-            
-                  var progressAsPercentage = ((progress/totalSteps) * 100).toFixed(2);
-            
-                  $('#progress').attr('style','height:25px;width:' + progressAsPercentage + '%');
-                  $('#progress').text(progressAsPercentage + '%');
-            
-                  console.log(totalSteps);
-                  if(progress == totalSteps && result.instructionPath != undefined)
-                  {
-                    var jobId = result.id;
-                    $('#overlay2').attr('style','display:none');
-                    $('#progress').attr('style','height:25px;width:' + 0 + '%');
-                    $('#progress').text(0 + '%');
-                    delete orderInstructionJobs[jobId];
-                    window.location = result.instructionPath;
-                           
-                  }
-                }
-            }
-        })   
+          }
+        },
+      });
     }
   }

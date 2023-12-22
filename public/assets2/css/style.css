@@ -999,9 +999,9 @@ canvas {
 	animation: glowing2 1300ms infinite;
   }
 
-.tick {
+/* .tick {
 	list-style-image: url('img/tick.png');
-}
+} */
 
 .cross {
 	list-style-image: url('img/cross.png');

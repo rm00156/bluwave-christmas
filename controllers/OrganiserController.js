@@ -1,8 +1,8 @@
 const models = require('../models');
-const classController = require('./ClassController');
 const schoolUtility = require('../utility/school/schoolUtility');
 const basketUtility = require('../utility/basket/basketUtility');
 const kidUtility = require('../utility/kid/kidUtility');
+const { getOrderDetailsForAllKidsFromClassId } = require('../utility/class/classUtility');
 
 const validator = require('../validators/signup');
 
@@ -69,38 +69,8 @@ function classOrders(req, res) {
               schoolFk: schoolClass.schoolFk,
             },
           }).then((deadLine) => {
-            let deadLineDttm = '';
-            let daysLeft;
-            let daysLeftSign;
-            const now = Date.now();
-            if (deadLine != null) {
-              const unparsedDeadLine = deadLine.deadLineDttm;
+            const { deadLineDttm, daysLeft, daysLeftSign } = schoolUtility.getDeadlineDetails(deadLine);
 
-              let month = unparsedDeadLine.getMonth() + 1;
-              month = month < 10 ? `0${month}` : month;
-              let days = unparsedDeadLine.getDate();
-              days = days < 10 ? `0${days}` : days;
-              const years = unparsedDeadLine.getFullYear();
-
-              deadLineDttm = `${years}-${month}-${days}`;
-
-              const unparsedDeadlineTime = unparsedDeadLine.getTime();
-              daysLeft = unparsedDeadlineTime - now;
-
-              daysLeft /= (1000 * 60 * 60 * 24);
-
-              if (daysLeft < 0) {
-                daysLeft = Math.ceil(daysLeft);
-                if (daysLeft === 0) daysLeftSign = 'zero';
-                else daysLeftSign = 'negative';
-              } else if (daysLeft === 0) {
-                daysLeftSign = 'zero';
-              } else {
-                daysLeft = Math.ceil(daysLeft);
-                if (daysLeft === 0) daysLeftSign = 'zero';
-                else daysLeftSign = 'postive';
-              }
-            }
             const displayParentSection = kid != null;
             res.render('classOrders2', {
               user: req.user,
@@ -164,38 +134,8 @@ function classParticipants(req, res) {
               schoolFk: schoolClass.schoolFk,
             },
           }).then(async (deadLine) => {
-            let deadLineDttm = '';
-            let daysLeft;
-            let daysLeftSign;
-            const now = Date.now();
-            if (deadLine != null) {
-              const unparsedDeadLine = deadLine.deadLineDttm;
+            const { deadLineDttm, daysLeft, daysLeftSign } = schoolUtility.getDeadlineDetails(deadLine);
 
-              let month = unparsedDeadLine.getMonth() + 1;
-              month = month < 10 ? `0${month}` : month;
-              let days = unparsedDeadLine.getDate();
-              days = days < 10 ? `0${days}` : days;
-              const years = unparsedDeadLine.getFullYear();
-
-              deadLineDttm = `${years}-${month}-${days}`;
-
-              const unparsedDeadlineTime = unparsedDeadLine.getTime();
-              daysLeft = unparsedDeadlineTime - now;
-
-              daysLeft /= (1000 * 60 * 60 * 24);
-
-              if (daysLeft < 0) {
-                daysLeft = Math.ceil(daysLeft);
-                if (daysLeft === 0) daysLeftSign = 'zero';
-                else daysLeftSign = 'negative';
-              } else if (daysLeft === 0) {
-                daysLeftSign = 'zero';
-              } else {
-                daysLeft = Math.ceil(daysLeft);
-                if (daysLeft === 0) daysLeftSign = 'zero';
-                else daysLeftSign = 'postive';
-              }
-            }
             const displayParentSection = kid != null;
             const currentStatus = await models.sequelize.query('select sts.type from classes c '
                                         + ' inner join schools s on c.schoolFk = s.id '
@@ -309,7 +249,7 @@ async function getClassScreen(req, res) {
   const isKidLinkedToAccount = await kidUtility.isKidLinkedToAccountId(account.id);
 
   const kids = await kidUtility.getKidsFromClassId(classId);
-  const orderDetails = await classController.getOrderDetailsForAllKidsFromClassId(classId, kids.length);
+  const orderDetails = await getOrderDetailsForAllKidsFromClassId(classId, kids.length);
   const deadlineDetails = await schoolUtility.getDeadlineDetailsForSchoolId(school.id);
   const { deadLineDttm } = deadlineDetails;
 

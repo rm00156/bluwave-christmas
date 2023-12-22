@@ -16,7 +16,7 @@ async function validateShippingDetailFields(req) {
     if (country !== undefined && req.body.country === UK_ID) {
       let response = await fetch(`https://api.postcodes.io/postcodes/${postCode}`);
       response = await response.json();
-      if (response.status != 200) errors.postCode = response.error;
+      if (response.status !== 200) errors.postCode = response.error;
     }
   }
 

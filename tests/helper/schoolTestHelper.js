@@ -50,6 +50,16 @@ async function createNewSchoolWithKid() {
   return { ...schoolClassDetails, ...{ kid } };
 }
 
+async function createNewSchoolWithKidWithAge(years, month) {
+  const schoolClassDetails = await createNewSchoolWithClass();
+  const account = schoolClassDetails.organiserAccount;
+  const schoolClass = schoolClassDetails.class;
+
+  const kid = await kidUtility.createKid(KID_NAME, years, month, schoolClass.id, account.id);
+
+  return { ...schoolClassDetails, ...{ kid } };
+}
+
 async function createNewSchoolDetails() {
   const numberOfSchools = await schoolUtility.getNumberOfSchools();
   const name = `School${numberOfSchools + 1}`;
@@ -64,4 +74,5 @@ module.exports = {
   createNewSchoolWithAccount,
   createNewSchoolWithClass,
   createNewSchoolWithKid,
+  createNewSchoolWithKidWithAge
 };

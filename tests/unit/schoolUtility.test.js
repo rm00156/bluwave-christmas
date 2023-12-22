@@ -218,16 +218,16 @@ describe('school utility tests', () => {
     expect(notExists).toBe(true);
   });
 
-  it('return school when provided the class id', async () => {
-    const schoolAccount = await schoolTestHelper.createNewSchoolWithAccount();
-    const { school } = schoolAccount;
+  // it('return school when provided the class id', async () => {
+  //   const schoolAccount = await schoolTestHelper.createNewSchoolWithAccount();
+  //   const { school } = schoolAccount;
 
-    const schoolClass = await schoolUtility.createClass(CLASS_NAME, school.id, yearId);
+  //   const schoolClass = await schoolUtility.createClass(CLASS_NAME, school.id, yearId);
 
-    const resultSchool = await schoolUtility.getSchoolFromClassId(schoolClass.id);
+  //   const resultSchool = await schoolUtility.getSchoolFromClassId(schoolClass.id);
 
-    expect(resultSchool.id).toEqual(school.id);
-  });
+  //   expect(resultSchool.id).toEqual(school.id);
+  // });
 
   it('create deadline for school', async () => {
     const schoolAccount = await schoolTestHelper.createNewSchoolWithAccount();

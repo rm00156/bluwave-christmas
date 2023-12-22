@@ -1,32 +1,33 @@
 const throng = require('throng');
 const Queue = require('bull');
-const path = require('path');
 
-const notProduction = process.env.NODE_ENV != 'production';
+const notProduction = process.env.NODE_ENV !== 'production';
 if (notProduction) {
   require('dotenv').config();
 }
+
+const redisUrlParse = require('redis-url-parse');
 const fs = require('fs-extra');
-const moment = require('moment');
+
 // const process.env = require('./process.env/process.env.json');
 const aws = require('aws-sdk');
 const puppeteer = require('puppeteer');
-const hbs = require('handlebars');
 const PDFMerge = require('pdf-merge');
 const nodeMailer = require('nodemailer');
 const models = require('./models');
 // Connect to a local redis intance locally, and the Heroku-provided URL in production
 const REDIS_URL = /* process.env.REDIS_URL */ process.env.STACKHERO_REDIS_URL_TLS || 'redis://127.0.0.1:6379';
 const env = process.env.NODE_ENV || 'development';
-const urlPrefix = env == 'development' ? 'http://localhost:4000' : process.env.website;
-const productController = require('./controllers/ProductController');
-const kidController = require('./controllers/KidController');
-const classController = require('./controllers/ClassController');
-const orderController = require('./controllers/OrderController');
+const urlPrefix = env === 'development' ? 'http://localhost:4000' : process.env.website;
 
 const schoolUtility = require('./utility/school/schoolUtility');
 const productItemUtility = require('./utility/product/productItemUtility');
 const kidUtility = require('./utility/kid/kidUtility');
+const generalUtility = require('./utility/general/generalUtility');
+const {
+  generateOrdersPdf, processClassOrderInstruction, getPdfsOfOrderItemsForPurchaseBasketId,
+  processSchoolOrderInstruction, generatePrintForm,
+} = require('./utility/order/orderUtility');
 
 const testEmail = 'rmillermcpherson4@gmail.com';
 const STATUS_TYPES = require('./utility/school/statusTypes');
@@ -39,8 +40,6 @@ const workers = process.env.WEB_CONCURRENCY || 2;
 // responses it can be much higher. If each job is CPU-intensive, it might need
 // to be much lower.
 const maxJobsPerWorker = 15;
-
-const redisUrlParse = require('redis-url-parse');
 
 const redisUrlParsed = redisUrlParse(REDIS_URL);
 const { host, port, password } = redisUrlParsed;
@@ -63,164 +62,213 @@ aws.config.update({
   region: process.env.region,
 });
 
-const compile = async function (templateName, data) {
-  const filePath = path.join(process.cwd(), 'templates', `${templateName}.hbs`);
-  const html = await fs.readFile(filePath, 'utf-8');
+async function forEachNoResponseDeadline(schools, callback) {
+  for (let i = 0; i < schools.length; i += 1) {
+    await callback(schools[i]);
+  }
+}
 
-  return hbs.compile(html)(data);
-};
-
-hbs.registerHelper('dateFormat', (value, format) => {
-  console.log('formatting', value, format);
-  return moment(value).format(format);
-});
-
-const start = function () {
-  // Connect to the named work queue
-
-  const workerQueue = new Queue('worker', client);
-
-  workerQueue.process(maxJobsPerWorker, async (job) => {
-    if (job.data.process == 'proof') {
-      var path = await createProofs(
-        job.data.kids,
-        job.data.classId,
-        job.data.year,
-        job.data.className,
-        job.data.schoolName,
-        job,
-      );
-
-      return { path };
-    }
-    if (job.data.process == 'artworkPic') {
-      await updateCardArtworkAndPicture(
-        job.data.files,
-        job.data.kidId,
-        job.data.name,
-        job.data.age,
-        job.data.displaySchool,
-        job.data.displayClass,
-        job.data.displayAge,
-        job.data.month,
-        job,
-      );
-    } else if (job.data.process == 'createCards') {
-      await createCards(job);
-    } else if (job.data.process == 'form') {
-      const form = await generatePrintForm(job.data.classId, job.data.purchasedCardDetails, job.data.numberOfPurchasedItems, job.data.purchasedExtras, job);
-
-      return { form };
-    } else if (job.data.process == 'createCardAdmin') {
-      await createCardAdmin(job.data.kidId, job);
-    } else if (job.data.process == 'updateCard') {
-      await updateCard(
-        job.data.classFk,
-        job.data.kidId,
-        job.data.age,
-        job.data.name,
-        job.data.displaySchool,
-        job.data.displayClass,
-        job.data.displayAge,
-        job.data.files,
-        job,
-      );
-    } else if (job.data.process == 'purchasedCards') {
-      var path = await generatePurchasedCards(job.data.purchasedBasketItems, job.data.classId, job);
-      return { path };
-    } else if (job.data.process == 'parentRegistrationEmail') {
-      await sendParentRegistrationEmail(job.data.email, job);
-    } else if (job.data.process == 'organiserRegistrationEmail') {
-      await sendOrganiserRegistrationEmail(job.data.email, job.data.school, job.data.name, job);
-    } else if (job.data.process == 'parentRegistrationEmailToBluwave') {
-      await sendParentRegistrationEmailToBluwave(job.data.email, job.data.name, job.data.telephoneNo, job);
-    } else if (job.data.process == 'organiserRegistrationEmailToBluwave') {
-      console.log('reece');
-      await sendOrganiserRegistrationEmailToBluwave(job.data.school, job.data.name, job.data.account, job.data.numberOfClasses, job);
-    } else if (job.data.process == 'purchaseEmail' || job.data.process == 'purchaseEmailToBluwave') {
-      if (job.data.process == 'purchaseEmail') await sendPurchaseEmail(false, job.data.basketItems, job.data.orderNumber, job.data.date, job.data.total, job.data.time, job);
-      else await sendPurchaseEmail(true, job.data.basketItems, job.data.orderNumber, job.data.date, job.data.total, job.data.time, job);
-    } else if (job.data.process == 'updateCalendar') {
-      await updateCalendar(job.data.calendarId, job);
-    } else if (job.data.process == 'deadline') {
-      await deadlineRecurringTask();
-    } else if (job.data.process == 'delay') {
-      await delayRecurringTask();
-    } else if (job.data.process == 'charity') {
-      await charity();
-    } else if (job.data.process == 'noDeadlineResponse') {
-      await noDeadlineResponse();
-    } else if (job.data.process == 'sendConfirmDetailsEmail') {
-      await sendConfirmDetailsEmail(job.data.school, job.data.name, job.data.bankAcc, job.data.sortCode, job.data.type);
-    } else if (job.data.process == 'resetEmail') {
-      await sendResetEmail(job.data.email, job);
-    } else if (job.data.process == 'parent3DaysToDeadline') {
-      await parent3DaysToDeadline();
-    } else if (job.data.process == 'parent1DayToDeadline') {
-      await parent1DayToDeadline();
-    } else if (job.data.process == 'noPurchaseMadeSinceSignUp') {
-      await noPurchaseMadeSinceSignUp();
-    } else if (job.data.process == 'test') {
-      await test();
-    } else if (job.data.process == 'testTrial') {
-      await testTrial(
-        job.data.x,
-        job.data.y,
-        job.data.width,
-        job.data.height,
-        job.data.name,
-        job.data.nameX,
-        job.data.nameY,
-        job.data.nameHeight,
-        job.data.nameWidth,
-      );
-    } else if (job.data.process == 'updateProductItem') {
-    // console.log('hello we made ite');
-      await updateProductItem(job.data.productItemId, job);
-    } else if (job.data.process == 'uploadAndGenerate') {
-      await uploadAndGenerate(job.data.productItemId, job.data.pictureNumber, job.data.productId, job.data.files, job);
-    } else if (job.data.process == 'updateAndGenerate') {
-      await updateAndGenerate(
-        job.data.productItemId,
-        job.data.productId,
-        job.data.name,
-        job.data.age,
-        job.data.month,
-        job.data.displaySchool,
-        job.data.displayClass,
-        job.data.displayAge,
-        job,
-      );
-    } else if (job.data.process == 'generateProductItemForKid') {
-      return await productItemUtility.generateProductItemForKid(job.data.kid, job.data.productId, job.data.dummy, job.data.isAccountLinkedToASchoolInScheme);
-    } else if (job.data.process == 'classOrderInstruction') {
-      const progress = 1;
-      job.progress(progress);
-      return await classController.processClassOrderInstruction(job.data.classId, job.data.deadlineId, progress, 1, job);
-    } else if (job.data.process == 'schoolOrderInstruction') {
-      return await classController.processSchoolOrderInstruction(job.data.schoolId, job);
-    } else if (job.data.process == 'ordersForm') {
-      console.log('core');
-      return await classController.generatePrintForm(job.data.classId, job);
-    } else if (job.data.process == 'purchasedOrders') {
-      return await classController.generateOrdersPdf(job.data.classId, job);
-    } else if (job.data.process == 'generateOrderDetails') {
-      return await orderController.getOrderDetailsGroupByTypeForId(job.data.purchaseBasketId, job);
-    } else if (job.data.process == 'linkKid') {
-      return await productItemUtility.handleLinkKid(job.data.name, job.data.years, job.data.months, job.data.classId, job.data.account, job);
-    } else if (job.data.process == 'ordersNotShippedReminder') {
-      await sendOrdersNotShippedReminder();
-    } else if (job.data.process == 'schoolArtworkPacksNotSentReminder') {
-      await sendSchoolArtworkPacksNotSentReminder();
-    } else if (job.data.process == 'schoolReadyForPrintingReminder') {
-      await sendSchoolReadyForPrintingReminder();
-    } else if (job.data.process == 'charityAmountConfirmed') {
-      await sendCharityAmountConfirmedSendToSchoolReminder();
-    }
+async function createEmail(type, errors, accountId) {
+  const status = (errors) ? 'Failed' : 'Success';
+  models.emailType.findOne({
+    where: {
+      type,
+    },
+  }).then(async (emailType) => {
+    await models.email.create({
+      emailTypeFk: emailType.id,
+      sentDttm: Date.now(),
+      status,
+      accountFk: accountId,
+      deleteFl: false,
+      versionNo: 1,
+    });
   }).catch((err) => {
     console.log(err);
   });
-};
+}
+
+async function sendDelayEmail(schoolId) {
+  const smtpTransport = nodeMailer.createTransport({
+    host: process.env.mailServer_host,
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.mailServer_email,
+      pass: process.env.mailServer_password,
+    },
+  });
+
+  const school = await models.school.findOne({
+    where: {
+      id: schoolId,
+    },
+  });
+
+  const account = await models.account.findOne({
+    where: {
+      email: school.email,
+    },
+  });
+
+  const data = { name: account.name };
+
+  const content = await generalUtility.compile('delayEmail', data);
+  const mailOptions = {
+    from: process.env.mailServer_email,
+    to: env === 'development' ? testEmail : school.email,
+    subject: 'Delay Period has now passed',
+    html: content,
+  };
+
+  smtpTransport.sendMail(mailOptions, async (errors, res) => {
+    console.log(errors);
+    console.log(res);
+
+    await createEmail('Delay', errors, account.id);
+    if (!errors) {
+      await models.deadLine.update(
+        {
+          emailSentFl: true,
+          emailSentDttm: Date.now(),
+        },
+        {
+          where:
+        {
+          schoolFk: schoolId,
+        },
+        },
+      );
+    }
+  });
+}
+
+async function schoolNoResponseDeadline(school) {
+  const { emailSentDttm } = school;
+  console.log(emailSentDttm);
+  const date = new Date(emailSentDttm);
+  const window = new Date();
+  window.setDate(date.getDate() + 3);
+
+  if (window.getTime() < Date.now()) {
+    // move school to next step
+    await schoolUtility.createNewStatusForSchoolId(school.id, STATUS_TYPES.STATUS_TYPES_ID.PRINTING);
+    // TO-DO send email maybe to customer
+    // TO-DO send email to bluwave
+  }
+}
+
+async function threeDayReminder(account) {
+  const smtpTransport = nodeMailer.createTransport({
+    host: process.env.mailServer_host,
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.mailServer_email,
+      pass: process.env.mailServer_password,
+    },
+  });
+
+  const days = '3 days';
+  const data = { name: (account.name === null ? '' : account.name), days };
+  const content = await generalUtility.compile('dayReminder', data);
+
+  const mailOptions = {
+    from: process.env.mailServer_email,
+    to: env === 'development' ? testEmail : account.email,
+    subject: '3 Days till purchase deadline',
+    html: content,
+  };
+
+  smtpTransport.sendMail(mailOptions, (errors) => {
+    createEmail('Parent 3 days to Deadline Reminder', errors, account.id);
+    console.log(errors);
+    // console.log(res);
+  });
+}
+
+async function sendCharityEmail(school) {
+  const smtpTransport = nodeMailer.createTransport({
+    host: process.env.mailServer_host,
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.mailServer_email,
+      pass: process.env.mailServer_password,
+    },
+  });
+
+  const account = await models.account.findOne({
+    where: {
+      email: school.email,
+    },
+  });
+
+  const { name } = account;
+  const confirmLink = `${urlPrefix}/login?confirmAmount=true`;
+  const content = await generalUtility.compile('charityEmail', { name, confirmLink });
+  const mailOptions = {
+    from: process.env.mailServer_email,
+    to: (env === 'development') ? testEmail : school.email,
+    subject: 'Charity contribution amount',
+    html: content,
+  };
+
+  smtpTransport.sendMail(mailOptions, async (errors) => {
+    await createEmail('Charity', errors, account.id);
+    if (!errors) {
+      // TO-DO  save model detailing that email has been sent
+      // create new status moving the
+
+      await schoolUtility.createNewStatusForSchoolId(school.id, STATUS_TYPES.STATUS_TYPES_ID.WAITING_FOR_CHARITABLE_CONTRIBUTION_RESPONSE);
+
+      mailOptions.to = (env === 'development') ? testEmail : process.env.mailServer_email;
+
+      smtpTransport.sendMail(mailOptions, async (bluwaveErrors) => {
+        await createEmail('Charity Bluwave', bluwaveErrors, account.id);
+      });
+    }
+  });
+
+  // create new template
+}
+
+async function sendGiveBackAmountEmailToSchool(school) {
+  const giveBackAmountBreakDownPerClass = await schoolUtility.getGiveBackAmountBreakDownPerClass(school.id);
+  const { totalGiveBackAmount } = giveBackAmountBreakDownPerClass;
+
+  await schoolUtility.createCharityAmount(school.id, totalGiveBackAmount);
+  await sendCharityEmail(school);
+}
+
+async function oneDayReminder(account) {
+  const smtpTransport = nodeMailer.createTransport({
+    host: process.env.mailServer_host,
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.mailServer_email,
+      pass: process.env.mailServer_password,
+    },
+  });
+
+  const days = '1 day';
+  const data = { name: (account.name === null ? '' : account.name), days };
+  const content = await generalUtility.compile('dayReminder', data);
+
+  const mailOptions = {
+    from: process.env.mailServer_email,
+    to: env === 'development' ? testEmail : account.email,
+    subject: '1 Day till purchase deadline',
+    html: content,
+  };
+
+  smtpTransport.sendMail(mailOptions, (errors) => {
+    createEmail('Parent 1 day to Deadline Reminder', errors, account.id);
+    console.log(errors);
+    // console.log(res);
+  });
+}
 
 async function updateAndGenerate(productItemId, productId, name, age, month, displaySchool, displayClass, displayAge, job) {
   let progress = 1;
@@ -230,7 +278,7 @@ async function updateAndGenerate(productItemId, productId, name, age, month, dis
   let productItems;
   const kidId = productItem.kidFk;
   let kid = null;
-  if (kidId != null) {
+  if (kidId !== null) {
     await models.kid.update({
       name,
       age,
@@ -247,10 +295,10 @@ async function updateAndGenerate(productItemId, productId, name, age, month, dis
   } else {
     productItems = await productItemUtility.getProductItemsWithProductForAccountAndNotWithKid(productId, productItem.accountFk);
   }
-  progress++;
+  progress += 1;
   job.progress(progress);
   console.log('REEECE');
-  for (let i = 0; i < productItems.length; i++) {
+  for (let i = 0; i < productItems.length; i += 1) {
     const item = productItems[i];
     await models.productItem.update({
       text1: name,
@@ -267,14 +315,14 @@ async function updateAndGenerate(productItemId, productId, name, age, month, dis
     });
   }
 
-  progress++;
+  progress += 1;
   job.progress(progress);
 
   console.log('ZITA');
   await productItemUtility.generateUpdateProductItem(kid, productId, productItem.accountFk);
   console.log('ALYSSA');
 
-  progress++;
+  progress += 1;
   job.progress(progress);
 }
 
@@ -287,7 +335,7 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
   let fileName = await models.uploadFileName.create();
   fileName = fileName.id;
 
-  progress++;
+  progress += 1;
   job.progress(progress);
 
   const date = Date.now();
@@ -315,7 +363,7 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
 
   await s3UploadPromise;
 
-  progress++;
+  progress += 1;
   job.progress(progress);
 
   // uploaded cropped image
@@ -324,7 +372,7 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
   const accountId = productItem.accountFk;
   const existingProductItems = await productItemUtility.getProductItemsWithProductForAccount(productId, productItem.accountFk, kidId);
 
-  progress++;
+  progress += 1;
   job.progress(progress);
 
   const data = {};
@@ -332,7 +380,7 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
 
   // edit the picture for the productitem to the new value
   // existingProductItems.forEach(async existingProductItem => {
-  for (let i = 0; i < existingProductItems.length; i++) {
+  for (let i = 0; i < existingProductItems.length; i += 1) {
     const existingProductItem = existingProductItems[i];
     await models.productItem.update(
       data,
@@ -345,106 +393,49 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
   }
   // })
 
-  progress++;
+  progress += 1;
   job.progress(progress);
 
   // regenerate the productitems pdf and update the value
   const kid = await kidUtility.getKidById(kidId);
   await productItemUtility.generateUpdateProductItem(kid, productId, accountId);
 
-  progress++;
+  progress += 1;
   job.progress(progress);
 }
 
-async function updateProductItem(productItemId, job) {
-  const progress = 1;
-  job.progress(progress);
-  return models.sequelize.query('select pi.id, p.id as productId, pi.accountFk, pt.type, p.template, pi.picture, p.width,p.height from productItems pi  '
-      + ' inner join products p on pi.productFk = p.id '
-      + ' inner join productTypes pt on p.productTypeFk = pt.id '
-      + ' where pi.id = :productItemId ', { replacements: { productItemId }, type: models.sequelize.QueryTypes.SELECT })
-    .then((result) => {
-      const productItemInfo = result[0];
-      models.product.findOne({
-        where: {
-          id: productItemInfo.productId,
-        },
-      }).then(async (product) => {
-        productItemInfo.artwork = product.imagePath;
-        // console.log(productItemInfo);
-        return await createProductItemPdf(productItemInfo, job, progress);
-      });
-    });
-}
-
-async function createProductItemPdf(productItemInfo, job, progress) {
-  const data = { picture: productItemInfo.picture, artwork: productItemInfo.artwork };
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-
-  const { template } = productItemInfo;
-  const { height } = productItemInfo;
-  const { width } = productItemInfo;
-
-  const page = await browser.newPage();
-  progress++;
-  job.progress(progress);
-
-  const content = await compile(template, data);
-  progress++;
-  job.progress(progress);
-
-  await page.setContent(content);
-  progress++;
-  job.progress(progress);
-
-  const buffer = await page.pdf({
-    printBackground: true,
-    width: `${width}cm`,
-    height: `${height}cm`,
-  });
-
-  progress++;
-  job.progress(progress);
-  await browser.close();
-
-  progress++;
-  job.progress(progress);
-  // console.log(buffer);
-  const now = Date.now();
-  const fileLocation = `ProductItem/${productItemInfo.type}/${productItemInfo.accountFk}/`;
-  const filename = `${productItemInfo.accountFk}_${now}.pdf`;
-  const s3FileLocation = fileLocation + filename;
-  await uploadToS3(buffer, s3FileLocation);
-
-  progress++;
-  job.progress(progress);
-
-  return models.productItem.update({
-    pdfPath: process.env.s3BucketPath + s3FileLocation,
-  }, {
-    where: {
-      id: productItemInfo.id,
+async function sendNoPurchaseMadeSinceSignUp(account) {
+  const smtpTransport = nodeMailer.createTransport({
+    host: process.env.mailServer_host,
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.mailServer_email,
+      pass: process.env.mailServer_password,
     },
-  }).then(() => {
-    progress++;
-    job.progress(progress);
-    return [job, progress];
+  });
+
+  const data = { name: (account.name === null ? '' : account.name) };
+  const content = await generalUtility.compile('noPurchaseSinceSignUp', data);
+  const mailOptions = {
+    from: process.env.mailServer_email,
+    to: env === 'development' ? testEmail : account.email,
+    subject: 'School Project - Buy your kids cards here',
+    html: content,
+  };
+
+  smtpTransport.sendMail(mailOptions, (errors) => {
+    createEmail('Noticed No Purchase After Sign Up', errors, account.id);
+    console.log(errors);
   });
 }
 
 function delay(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
+  Promise((resolve) => setTimeout(resolve, time));
 }
 
 async function forEachNoPurchaseMadeAccount(array, callback) {
-  for (let i = 0; i < array.length; i++) {
+  for (let i = 0; i < array.length; i += 1) {
     await callback(array[i]);
     await delay(5000);
   }
@@ -464,31 +455,10 @@ async function noPurchaseMadeSinceSignUp() {
       await forEachNoPurchaseMadeAccount(result, sendNoPurchaseMadeSinceSignUp);
     });
 }
-
-async function sendNoPurchaseMadeSinceSignUp(account) {
-  const smtpTransport = nodeMailer.createTransport({
-    host: process.env.mailServer_host,
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.mailServer_email,
-      pass: process.env.mailServer_password,
-    },
-  });
-
-  const data = { name: (account.name == null ? '' : account.name) };
-  const content = await compile('noPurchaseSinceSignUp', data);
-  const mailOptions = {
-    from: process.env.mailServer_email,
-    to: env == 'development' ? testEmail : account.email,
-    subject: 'School Project - Buy your kids cards here',
-    html: content,
-  };
-
-  smtpTransport.sendMail(mailOptions, (errors, res) => {
-    createEmail('Noticed No Purchase After Sign Up', errors, account.id);
-    console.log(errors);
-  });
+async function forEachDayReminder(array, callback) {
+  for (let i = 0; i < array.length; i += 1) {
+    await callback(array[i]);
+  }
 }
 
 async function parent1DayToDeadline() {
@@ -519,71 +489,7 @@ async function parent3DaysToDeadline() {
   await forEachDayReminder(results, threeDayReminder);
 }
 
-async function forEachDayReminder(array, callback) {
-  for (let i = 0; i < array.length; i++) {
-    await callback(array[i]);
-  }
-}
-
-async function threeDayReminder(account) {
-  const smtpTransport = nodeMailer.createTransport({
-    host: process.env.mailServer_host,
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.mailServer_email,
-      pass: process.env.mailServer_password,
-    },
-  });
-
-  const days = '3 days';
-  const data = { name: (account.name == null ? '' : account.name), days };
-  const content = await compile('dayReminder', data);
-
-  const mailOptions = {
-    from: process.env.mailServer_email,
-    to: env == 'development' ? testEmail : account.email,
-    subject: '3 Days till purchase deadline',
-    html: content,
-  };
-
-  smtpTransport.sendMail(mailOptions, (errors, res) => {
-    createEmail('Parent 3 days to Deadline Reminder', errors, account.id);
-    console.log(errors);
-    // console.log(res);
-  });
-}
-
-async function oneDayReminder(account) {
-  const smtpTransport = nodeMailer.createTransport({
-    host: process.env.mailServer_host,
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.mailServer_email,
-      pass: process.env.mailServer_password,
-    },
-  });
-
-  const days = '1 day';
-  const data = { name: (account.name == null ? '' : account.name), days };
-  const content = await compile('dayReminder', data);
-
-  const mailOptions = {
-    from: process.env.mailServer_email,
-    to: env == 'development' ? testEmail : account.email,
-    subject: '1 Day till purchase deadline',
-    html: content,
-  };
-
-  smtpTransport.sendMail(mailOptions, (errors, res) => {
-    createEmail('Parent 1 day to Deadline Reminder', errors, account.id);
-    console.log(errors);
-    // console.log(res);
-  });
-}
-
-async function sendResetEmail(email, job) {
+async function sendResetEmail(email) {
   const smtpTransport = nodeMailer.createTransport({
     host: process.env.mailServer_host,
     port: 587,
@@ -603,9 +509,9 @@ async function sendResetEmail(email, job) {
     const link = `${urlPrefix}/reset?from=${now}&to=${hourLater}&email=${email}`;
     const data = { now, hourLater, link };
 
-    const content = await compile('resetEmail', data);
+    const content = await generalUtility.compile('resetEmail', data);
 
-    if (resetEmail == null) {
+    if (resetEmail === null) {
       models.resetEmail.create({
         fromDttm: now,
         toDttm: hourLater,
@@ -621,7 +527,7 @@ async function sendResetEmail(email, job) {
           html: content,
         };
 
-        smtpTransport.sendMail(mailOptions, (errors, res) => {
+        smtpTransport.sendMail(mailOptions, (errors) => {
           models.account.findOne({
 
             where: {
@@ -692,11 +598,10 @@ async function testTrial(x, y, width, height, name, nameX, nameY, nameHeight, na
     ],
   });
 
-  const date = Date.now();
   const filename = 'tmp/reece.pdf';
   const page = await browser.newPage();
 
-  const content = await compile('testTrial', data);
+  const content = await generalUtility.compile('testTrial', data);
   await page.setContent(content);
 
   await page.setViewport({ width: 1400, height: 800, deviceScaleFactor: 2 });
@@ -721,9 +626,8 @@ async function test() {
     },
   });
 
-  console.log('temp');
   const data = {};
-  const content = await compile('delayEmail', data);
+  const content = await generalUtility.compile('delayEmail', data);
   const mailOptions = {
     from: process.env.mailServer_email,
     to: 'rmillermcpherson4@gmail.com',
@@ -765,10 +669,10 @@ async function sendConfirmDetailsEmail(schoolId, name, bankAcc, sortCode, type) 
     amount, school: school.name, name, sortCode, bankAcc, type,
   };
 
-  const content = await compile('charityConfirmEmail', data);
+  const content = await generalUtility.compile('charityConfirmEmail', data);
   const mailOptions = {
     from: process.env.mailServer_email,
-    to: env == 'development' ? testEmail : process.env.mailServer_email,
+    to: env === 'development' ? testEmail : process.env.mailServer_email,
     subject: `${school.name} have confirmed their charity give back amount`,
     html: content,
   };
@@ -806,27 +710,6 @@ async function noDeadlineResponse() {
   await forEachNoResponseDeadline(schools, schoolNoResponseDeadline);
 }
 
-async function schoolNoResponseDeadline(school) {
-  const { emailSentDttm } = school;
-  console.log(emailSentDttm);
-  const date = new Date(emailSentDttm);
-  const window = new Date();
-  window.setDate(date.getDate() + 3);
-
-  if (window.getTime() < Date.now()) {
-    // move school to next step
-    await schoolUtility.createNewStatusForSchoolId(school.id, STATUS_TYPES.STATUS_TYPES_ID.PRINTING);
-    // TO-DO send email maybe to customer
-    // TO-DO send email to bluwave
-  }
-}
-
-async function forEachNoResponseDeadline(schools, callback) {
-  for (let i = 0; i < schools.length; i++) {
-    await callback(schools[i]);
-  }
-}
-
 async function charity() {
   const schools = await models.sequelize.query('select distinct s.*, st.createdDttm from basketitems b '
   + ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id '
@@ -841,7 +724,7 @@ async function charity() {
   if (schools.length > 0) {
     console.log(schools);
 
-    for (let i = 0; i < schools.length; i++) {
+    for (let i = 0; i < schools.length; i += 1) {
       const school = schools[i];
 
       await sendGiveBackAmountEmailToSchool(school);
@@ -849,109 +732,11 @@ async function charity() {
   }
 }
 
-async function sendGiveBackAmountEmailToSchool(school) {
-  const giveBackAmountBreakDownPerClass = await schoolUtility.getGiveBackAmountBreakDownPerClass(school.id);
-  const { totalGiveBackAmount } = giveBackAmountBreakDownPerClass;
-
-  await schoolUtility.createCharityAmount(school.id, totalGiveBackAmount);
-  await sendCharityEmail(school);
-}
-
-async function sendCharityEmail(school) {
-  const smtpTransport = nodeMailer.createTransport({
-    host: process.env.mailServer_host,
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.mailServer_email,
-      pass: process.env.mailServer_password,
-    },
-  });
-
-  const account = await models.account.findOne({
-    where: {
-      email: school.email,
-    },
-  });
-
-  const { name } = account;
-  const confirmLink = `${urlPrefix}/login?confirmAmount=true`;
-  const content = await compile('charityEmail', { name, confirmLink });
-  const mailOptions = {
-    from: process.env.mailServer_email,
-    to: (env == 'development') ? testEmail : school.email,
-    subject: 'Charity contribution amount',
-    html: content,
-  };
-
-  smtpTransport.sendMail(mailOptions, async (errors, res) => {
-    console.log(errors);
-    console.log(res);
-
-    await createEmail('Charity', errors, account.id);
-    if (!errors) {
-      // TO-DO  save model detailing that email has been sent
-      // create new status moving the
-
-      await schoolUtility.createNewStatusForSchoolId(school.id, STATUS_TYPES.STATUS_TYPES_ID.WAITING_FOR_CHARITABLE_CONTRIBUTION_RESPONSE);
-
-      mailOptions.to = (env == 'development') ? testEmail : process.env.mailServer_email;
-
-      smtpTransport.sendMail(mailOptions, async (errors, res) => {
-        console.log(errors);
-        console.log(res);
-
-        await createEmail('Charity Bluwave', errors, account.id);
-      });
-    }
-  });
-
-  // create new template
-}
-
-async function generateCharityConfirmPdf(result, totalGiveback, schoolName, pageNumber, numberOfPages, finalPage) {
-  const data = {
-    items: result, totalGiveBack: totalGiveback, schoolName, numberOfPages, pageNumber, finalPage,
-  };
-  const browser = await puppeteer.launch({
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-
-  const date = Date.now();
-  const filename = `tmp/charity_${date}_${pageNumber}.pdf`;
-  const page = await browser.newPage();
-
-  const content = await compile('charityInvoice', data);
-  await page.setContent(content);
-
-  await page.setViewport({ width: 1400, height: 800, deviceScaleFactor: 2 });
-  await page.pdf({
-    path: filename,
-    printBackground: true,
-    landscape: false,
-    format: 'A4',
-  });
-  await browser.close();
-
-  return filename;
-}
-
-async function eachPurchaseSchool(array, callback) {
-  for (let i = 0; i < array.length; i++) {
-    const school = array[i];
-
-    await callback(school);
-  }
-}
-
 async function delayRecurringTask() {
   const schools = await models.sequelize.query('select s.* from schools s '
                   + ' inner join deadlines d on d.schoolFk = s.id ', { type: models.sequelize.QueryTypes.SELECT });
 
-  for (let i = 0; i < schools.length; i++) {
+  for (let i = 0; i < schools.length; i += 1) {
     const school = schools[i];
 
     let status = await models.sequelize.query('select s.*, concat(date(s.createdDttm), :beforeMidnight) as createdDttm from statuses s '
@@ -964,101 +749,18 @@ async function delayRecurringTask() {
 
     status = status[0];
 
-    if (status.statusTypeFk == 6) {
+    if (status.statusTypeFk === 6) {
       // current step is delay
       const delayDttm = new Date(status.createdDttm);
       const window = new Date();
       window.setDate(delayDttm.getDate() + 3);
 
       if (window.getTime() < Date.now()) {
-        await schoolUtility.createNewStatusForSchoolId(school.id, PRINTING_STATUS_TYPE_ID);
+        await schoolUtility.createNewStatusForSchoolId(school.id, STATUS_TYPES.STATUS_TYPES_ID.PRINTING);
         await sendDelayEmail(school.id);
       }
     }
   }
-}
-
-async function deadlineRecurringTask() {
-  const deadlines = await models.sequelize.query('select d.* from deadlines d '
-              + ' inner join schools s on d.schoolFk = s.id '
-              + ' where d.emailSentFl = false '
-              + ' and concat(date(d.deadLineDttm ), :beforeMidnight)< now() '
-              + ' and d.continueFl = false '
-              + ' and d.delayFl = false ', { replacements: { beforeMidnight: ' 23:59:59' }, type: models.sequelize.QueryTypes.SELECT }).catch((err) => {
-    console.log(err);
-  });
-
-  for (let i = 0; i < deadlines.length; i++) {
-    const deadline = deadlines[i];
-
-    const schoolId = deadline.schoolFk;
-
-    // if no purchase deadline step, create one else just create waiting step
-
-    const purchaseDeadlineStatus = await schoolUtility.getSchoolStatusByStatusTypeId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.PURCHASE_DEADLINE);
-
-    if (purchaseDeadlineStatus == null) {
-      await schoolUtility.createNewStatusForSchoolId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.PURCHASE_DEADLINE);
-    }
-
-    await schoolUtility.createNewStatusForSchoolId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.WAITING_FOR_CUSTOMER_RESPONSE);
-    await sendDeadlineEmail(schoolId);
-  }
-}
-
-async function sendDelayEmail(schoolId) {
-  const smtpTransport = nodeMailer.createTransport({
-    host: process.env.mailServer_host,
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.mailServer_email,
-      pass: process.env.mailServer_password,
-    },
-  });
-
-  const school = await models.school.findOne({
-    where: {
-      id: schoolId,
-    },
-  });
-
-  const account = await models.account.findOne({
-    where: {
-      email: school.email,
-    },
-  });
-
-  const data = { name: account.name };
-
-  const content = await compile('delayEmail', data);
-  const mailOptions = {
-    from: process.env.mailServer_email,
-    to: env == 'development' ? testEmail : school.email,
-    subject: 'Delay Period has now passed',
-    html: content,
-  };
-
-  smtpTransport.sendMail(mailOptions, async (errors, res) => {
-    console.log(errors);
-    console.log(res);
-
-    await createEmail('Delay', errors, account.id);
-    if (!errors) {
-      await models.deadLine.update(
-        {
-          emailSentFl: true,
-          emailSentDttm: Date.now(),
-        },
-        {
-          where:
-        {
-          schoolFk: schoolId,
-        },
-        },
-      );
-    }
-  });
 }
 
 async function sendDeadlineEmail(schoolId) {
@@ -1098,10 +800,10 @@ async function sendDeadlineEmail(schoolId) {
     name: account.name,
   };
 
-  const content = await compile('deadlineEmail', data);
+  const content = await generalUtility.compile('deadlineEmail', data);
   const mailOptions = {
     from: process.env.mailServer_email,
-    to: env == 'development' ? testEmail : school.email,
+    to: env === 'development' ? testEmail : school.email,
     subject: 'Purchase Deadline has now passed',
     html: content,
 
@@ -1130,176 +832,35 @@ async function sendDeadlineEmail(schoolId) {
   });
 }
 
-async function createCalendar(template, data, width, height) {
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-  const page = await browser.newPage();
-  const content = await compile(template, data);
-  await page.setContent(content);
-
-  await page.setViewport({ width: 1400, height: 800, deviceScaleFactor: 2 });
-  const buffer = await page.pdf({
-
-    printBackground: true,
-    landscape: false,
-    width,
-    height,
+async function deadlineRecurringTask() {
+  const deadlines = await models.sequelize.query('select d.* from deadlines d '
+              + ' inner join schools s on d.schoolFk = s.id '
+              + ' where d.emailSentFl = false '
+              + ' and concat(date(d.deadLineDttm ), :beforeMidnight)< now() '
+              + ' and d.continueFl = false '
+              + ' and d.delayFl = false ', { replacements: { beforeMidnight: ' 23:59:59' }, type: models.sequelize.QueryTypes.SELECT }).catch((err) => {
+    console.log(err);
   });
 
-  await browser.close();
+  for (let i = 0; i < deadlines.length; i += 1) {
+    const deadline = deadlines[i];
 
-  return buffer;
+    const schoolId = deadline.schoolFk;
+
+    // if no purchase deadline step, create one else just create waiting step
+
+    const purchaseDeadlineStatus = await schoolUtility.getSchoolStatusByStatusTypeId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.PURCHASE_DEADLINE);
+
+    if (purchaseDeadlineStatus === null) {
+      await schoolUtility.createNewStatusForSchoolId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.PURCHASE_DEADLINE);
+    }
+
+    await schoolUtility.createNewStatusForSchoolId(schoolId, STATUS_TYPES.STATUS_TYPES_ID.WAITING_FOR_CUSTOMER_RESPONSE);
+    await sendDeadlineEmail(schoolId);
+  }
 }
 
-async function uploadToS3(buffer, s3FileLocation) {
-  const s3 = new aws.S3();
-  const params = {
-    Bucket: process.env.bucketName,
-    Body: buffer,
-    Key: s3FileLocation,
-    ACL: 'public-read',
-  };
-
-  const s3UploadPromise = new Promise((resolve, reject) => {
-    s3.upload(params, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-
-  await s3UploadPromise;
-}
-
-async function createCalendarAndUploadToS3Bucket(data, height, width, portrait, color, now, job, progress) {
-  data.background = `${process.env.s3BucketPath}Calendar/Pictures/Background/${portrait == true ? `portrait${color}.png` : `landscape${color}.png`}`;
-
-  const template = `calendar${portrait == true ? 'Portrait' : 'Landscape'}`;
-
-  progress++;
-  job.progress(progress);
-
-  const buffer = await createCalendar(template, data, width, height);
-
-  progress++;
-  job.progress(progress);
-
-  const buffer2 = await createCalendar(`${template}Preview`, data, width, height);
-  progress++;
-  job.progress(progress);
-
-  const fileLocation = `${data.schoolName}/${data.year}/${data.className}/Calendar/${portrait == true ? 'Portrait/' : 'Landscape/'}`;
-  const previewFileLocation = `${fileLocation}Previews/`;
-
-  const filename = `${data.kidName}_${color}_${now}.pdf`;
-  const s3FileLocation = fileLocation + filename;
-
-  const s3PreviewFileLocation = previewFileLocation + filename;
-
-  await uploadToS3(buffer, s3FileLocation);
-  progress++;
-  job.progress(progress);
-
-  await uploadToS3(buffer2, s3PreviewFileLocation);
-
-  progress++;
-  job.progress(progress);
-
-  return [job, progress];
-}
-
-function updateCalendar(calendarId, job) {
-  let progress = 1;
-  job.progress(progress);
-  return models.calendar.findOne({
-    where: {
-      id: calendarId,
-    },
-  }).then((calendar) => models.sequelize.query('select k.name, s.name as schoolName, c.name as className, y.year from kids k '
-                    + ' inner join classes c on k.classFk = c.id '
-                    + ' inner join years y on c.yearFk = y.id '
-                    + ' inner join schools s on c.schoolFk = s.id '
-                    + ' where k.id = :kidId ', { replacements: { kidId: calendar.kidFk }, type: models.sequelize.QueryTypes.SELECT })
-    .then(async (result) => {
-      result = result[0];
-      console.log(result);
-      const data = {
-        calendarPicture: calendar.calendarPicture,
-        kidName: result.name,
-        schoolName: result.schoolName,
-        className: result.className,
-        year: result.year,
-      };
-
-      var result;
-      const now = Date.now();
-      result = await createCalendarAndUploadToS3Bucket(data, '29.7cm', '42cm', false, 'Red', now, job, progress);
-      job = result[0];
-      progress = result[1];
-
-      result = await createCalendarAndUploadToS3Bucket(data, '29.7cm', '42cm', false, 'Green', now, job, progress);
-      job = result[0];
-      progress = result[1];
-
-      result = await createCalendarAndUploadToS3Bucket(data, '29.7cm', '42cm', false, 'Blue', now, job, progress);
-      job = result[0];
-      progress = result[1];
-
-      result = await createCalendarAndUploadToS3Bucket(data, '42cm', '25cm', true, 'Red', now, job, progress);
-      job = result[0];
-      progress = result[1];
-
-      result = await createCalendarAndUploadToS3Bucket(data, '42cm', '25cm', true, 'Green', now, job, progress);
-      job = result[0];
-      progress = result[1];
-
-      result = await createCalendarAndUploadToS3Bucket(data, '42cm', '25cm', true, 'Blue', now, job, progress);
-      job = result[0];
-      progress = result[1];
-
-      const filePortraitLocation = `${data.schoolName}/${data.year}/${data.className}/Calendar/Portrait/`;
-      const fileLandscapeLocation = `${data.schoolName}/${data.year}/${data.className}/Calendar/Landscape/`;
-      const previewPortraitFileLocation = `${filePortraitLocation}Previews/`;
-      const previewLandscapeFileLocation = `${fileLandscapeLocation}Previews/`;
-      const redFilename = `${data.kidName}_Red_${now}.pdf`;
-      const greenFilename = `${data.kidName}_Green_${now}.pdf`;
-      const blueFilename = `${data.kidName}_Blue_${now}.pdf`;
-
-      models.calendar.update({
-        landscapeRedPath: process.env.s3BucketPath + fileLandscapeLocation + redFilename,
-        landscapeGreenPath: process.env.s3BucketPath + fileLandscapeLocation + greenFilename,
-        landscapeBluePath: process.env.s3BucketPath + fileLandscapeLocation + blueFilename,
-        landscapeRedPathPreview: process.env.s3BucketPath + previewLandscapeFileLocation + redFilename,
-        landscapeGreenPathPreview: process.env.s3BucketPath + previewLandscapeFileLocation + greenFilename,
-        landscapeBluePathPreview: process.env.s3BucketPath + previewLandscapeFileLocation + blueFilename,
-        portraitRedPath: process.env.s3BucketPath + filePortraitLocation + redFilename,
-        portraitGreenPath: process.env.s3BucketPath + filePortraitLocation + greenFilename,
-        portraitBluePath: process.env.s3BucketPath + filePortraitLocation + blueFilename,
-        portraitRedPathPreview: process.env.s3BucketPath + previewPortraitFileLocation + redFilename,
-        portraitGreenPathPreview: process.env.s3BucketPath + previewPortraitFileLocation + greenFilename,
-        portraitBluePathPreview: process.env.s3BucketPath + previewPortraitFileLocation + blueFilename,
-      }, {
-        where: {
-          id: calendarId,
-        },
-      }).then(() => {
-        progress++;
-        job.progress(progress);
-      });
-    }));
-  // get calendar object
-
-  // for each type of calendar ie portrait land, colors create calendar
-}
-
-async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total, time, job) {
+async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total, time) {
   const smtpTransport = nodeMailer.createTransport({
     host: process.env.mailServer_host,
     port: 587,
@@ -1310,7 +871,7 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
     },
   });
 
-  var basketItem = basketItems[0];
+  const basketItem = basketItems[0];
   const parentAccount = await models.account.findOne({
     where: {
       id: basketItem.accountFk,
@@ -1327,36 +888,35 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
   const { deliveryName } = purchaseBasket;
   const { deliveryPrice } = purchaseBasket;
 
-  if (deliveryName == 'Collect From School') {
+  if (deliveryName === 'Collect From School') {
     template = 'purchaseEmail';
-    var basketItem = basketItems[0];
-    var school = await schoolUtility.getSchoolFromBasketItemId(basketItem.basketItemId);
+
+    const school = await schoolUtility.getSchoolFromBasketItemId(basketItem.basketItemId);
 
     const { postCode } = school;
 
-    school = school.name;
-    var data = {
+    const data = {
       total,
       basketItems,
       date,
       time,
       orderNumber,
-      school,
+      school: school.name,
       postCode,
       parentAccount,
       email: parentAccount.email,
       phone: parentAccount.telephoneNumber,
     };
 
-    const content = await compile(template, data);
-    var mailOptions = {
+    const content = await generalUtility.compile(template, data);
+    const mailOptions = {
       from: process.env.mailServer_email,
       to: bluwave ? process.env.mailServer_email : basketItems[0].email,
       subject: 'Thanks for making a purchase',
       html: content,
     };
 
-    smtpTransport.sendMail(mailOptions, (errors, res) => {
+    smtpTransport.sendMail(mailOptions, (errors) => {
       console.log('BIg guns');
       createEmail((bluwave) ? 'Parent Purchase Bluwave' : 'Parent Purchase', errors, parentAccount.id);
       console.log(errors);
@@ -1364,10 +924,9 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
       // job.progress(100);
     });
   } else {
-    var basketItem = basketItems[0];
-    var { school } = basketItem;
+    const { school } = basketItem;
     let missedDeadline = false;
-    if (school != 'Individuals') missedDeadline = true;
+    if (school !== 'Individuals') missedDeadline = true;
 
     const shippingAddress = await models.shippingAddress.findOne({
       where: {
@@ -1381,7 +940,7 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
       },
     });
 
-    var data = {
+    const data = {
       orderNumber,
       date,
       basketItems,
@@ -1401,17 +960,17 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
       school,
     };
 
-    const content = await compile(template, data);
+    const content = await generalUtility.compile(template, data);
 
     // var attachmentPath = await orderController.getOrderDetailsGroupByTypeForId(purchaseBasket.id, job);
     // console.log(attachmentPath.pdfPath)
-    var mailOptions = {
+    const mailOptions = {
       from: process.env.mailServer_email,
       to: bluwave ? process.env.mailServer_email : basketItems[0].email,
       subject: 'Thanks for making a purchase',
       html: content,
     };
-    // if(bluwave == true)
+    // if(bluwave === true)
     // {
     //   mailOptions['attachments'] = [{
     //     path:attachmentPath.pdfPath,
@@ -1419,7 +978,7 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
     //   }];
     // }
 
-    smtpTransport.sendMail(mailOptions, (errors, res) => {
+    smtpTransport.sendMail(mailOptions, (errors) => {
       createEmail((bluwave) ? 'Individual Purchase' : 'Individual Purchase Bluwave', errors, parentAccount.id);
       console.log(errors);
       // console.log(res);
@@ -1428,7 +987,7 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
   }
 }
 
-const sendOrganiserRegistrationEmailToBluwave = function (school, name, account, numberOfClasses, job) {
+function sendOrganiserRegistrationEmailToBluwave(school, name, account, numberOfClasses, job) {
   const smtpTransport = nodeMailer.createTransport({
     host: process.env.mailServer_host,
     port: 587,
@@ -1441,7 +1000,7 @@ const sendOrganiserRegistrationEmailToBluwave = function (school, name, account,
 
   const mailOptions = {
     from: process.env.mailServer_email,
-    to: env == 'development' ? testEmail : process.env.mailServer_email,
+    to: env === 'development' ? testEmail : process.env.mailServer_email,
     subject: `Organiser ${name} has registered school ${school.name}`,
     html: '<p>'
   + `School/Nursery Name: ${school.name}<br>`
@@ -1450,7 +1009,7 @@ const sendOrganiserRegistrationEmailToBluwave = function (school, name, account,
   + `Name: ${name}<br>`
   + `Email: <a href="${school.email}">${school.email}</a><br>`
   + `Telephone: ${school.number}<br>`
-  + `Additional Information: ${school.additionalInfo == null ? '' : school.additionalInfo}<br><br>`
+  + `Additional Information: ${school.additionalInfo === null ? '' : school.additionalInfo}<br><br>`
   + `Pupils Per Class: ${school.numberOfKidsPerClass}<br>`
   + `Number Of Classes: ${numberOfClasses}<br><br>`
   + `Date: ${account.createdAt}<br><br></p>`
@@ -1467,7 +1026,7 @@ const sendOrganiserRegistrationEmailToBluwave = function (school, name, account,
     console.log(res);
     job.progress(100);
   });
-};
+}
 
 const sendOrganiserRegistrationEmail = async function (email, school, name, job) {
   const smtpTransport = nodeMailer.createTransport({
@@ -1481,10 +1040,10 @@ const sendOrganiserRegistrationEmail = async function (email, school, name, job)
   });
 
   const data = { schoolName: school.name, name };
-  const content = await compile('registerOrganiser', data);
+  const content = await generalUtility.compile('registerOrganiser', data);
   const mailOptions = {
     from: process.env.mailServer_email,
-    to: env == 'development' ? testEmail : email,
+    to: env === 'development' ? testEmail : email,
     subject: 'Welcome to Kidscards4christmas fundraising project',
     html: content,
   };
@@ -1504,7 +1063,7 @@ const sendOrganiserRegistrationEmail = async function (email, school, name, job)
   });
 };
 
-const sendParentRegistrationEmailToBluwave = function (email, name, telephoneNo, job) {
+function sendParentRegistrationEmailToBluwave(email, name, telephoneNo, job) {
   const smtpTransport = nodeMailer.createTransport({
     host: process.env.mailServer_host,
     port: 587,
@@ -1544,9 +1103,9 @@ const sendParentRegistrationEmailToBluwave = function (email, name, telephoneNo,
       job.progress(100);
     });
   });
-};
+}
 
-const sendParentRegistrationEmail = async function (email, job) {
+async function sendParentRegistrationEmail(email, job) {
   const smtpTransport = nodeMailer.createTransport({
     host: process.env.mailServer_host,
     port: 587,
@@ -1565,7 +1124,7 @@ const sendParentRegistrationEmail = async function (email, job) {
     const accountType = account.accountTypeFk;
     let template;
     let emailType;
-    if (accountType == 2) {
+    if (accountType === 2) {
       template = 'registerParent';
       emailType = 'Parent Registration';
     } else {
@@ -1573,7 +1132,7 @@ const sendParentRegistrationEmail = async function (email, job) {
       emailType = 'Individual Registration';
     }
 
-    const content = await compile(template, {});
+    const content = await generalUtility.compile(template, {});
     const mailOptions = {
       from: process.env.mailServer_email,
       to: email,
@@ -1581,7 +1140,7 @@ const sendParentRegistrationEmail = async function (email, job) {
       html: content,
     };
 
-    smtpTransport.sendMail(mailOptions, async (errors, res) => {
+    smtpTransport.sendMail(mailOptions, async (errors) => {
     // console.log(res);
 
       createEmail(emailType, errors, account.id);
@@ -1589,57 +1148,36 @@ const sendParentRegistrationEmail = async function (email, job) {
       job.progress(100);
     });
   });
-};
+}
 
-const createEmail = async function (emailType, errors, accountId) {
-  const status = (errors) ? 'Failed' : 'Success';
-  models.emailType.findOne({
-    where: {
-      emailType,
-    },
-  }).then(async (emailType) => {
-    await models.email.create({
-      emailTypeFk: emailType.id,
-      sentDttm: Date.now(),
-      status,
-      accountFk: accountId,
-      deleteFl: false,
-      versionNo: 1,
-    });
-  }).catch((err) => {
-    console.log(err);
-  });
-};
-
-const generatePurchasedCards = async function (purchasedBasketItems, classId, job) {
+async function generatePurchasedCards(purchasedBasketItems, classId, job) {
   let processed = 1;
   job.progress(processed);
-  processed++;
+  processed += 1;
   const s3 = new aws.S3();
   const params = {
     Bucket: process.env.bucketName,
   };
 
   if (purchasedBasketItems.length > 1) {
-    let files = new Array();
     const now = Date.now();
-    files = await asyncForEachDownload(purchasedBasketItems, downloadPurchasedFiles, params, files, s3);
+    const files = await generalUtility.asyncForEachDownload(purchasedBasketItems, generalUtility.downloadFiles);
     job.progress(processed);
-    processed++;
+    processed += 1;
 
     const purchaseBuffer = await PDFMerge(files, { output: `${process.cwd()}/tmp/${now}_purchased.pdf` });
     files.forEach((file) => {
       fs.unlink(file);
     });
     job.progress(processed);
-    processed++;
+    processed += 1;
 
     return models.class.findOne({
       where: {
         id: classId,
       },
     }).then(async (schoolClass) => {
-      params.Key = 'Purchased' + `/${schoolClass == null ? 'undefined' : schoolClass.name}${now}_purchased.pdf`;
+      params.Key = `Purchased/${schoolClass === null ? 'undefined' : schoolClass.name}${now}_purchased.pdf`;
       params.ACL = 'public-read';
       params.Body = purchaseBuffer;
 
@@ -1655,7 +1193,7 @@ const generatePurchasedCards = async function (purchasedBasketItems, classId, jo
 
       await s3UploadPromise;
       job.progress(processed);
-      processed++;
+      processed += 1;
       fs.unlink(`${process.cwd()}/tmp/${now}_purchased.pdf`);
 
       const path = process.env.s3BucketPath + params.Key;
@@ -1689,986 +1227,7 @@ const generatePurchasedCards = async function (purchasedBasketItems, classId, jo
 
     return cardPath;
   });
-};
-
-const createCards = async function (job) {
-  const errors = {};
-  const { classId } = job.data;
-  // check whether any kids have been created for the class
-  models.kid.findOne({
-    where: {
-      classFk: classId,
-      deleteFl: false,
-    },
-  }).then((kid) => {
-    if (kid == null) {
-      errors.createCards = 'There are no kids in the class so no cards can be created.';
-      return { errors };
-      // getClassScreen(req,res,classId,errors);
-      // no kids in class so no cards can be generated
-    }
-    // generate cards for class
-    models.class.findOne({
-      where:
-        {
-          id: classId,
-        },
-    }).then(async (schoolClass) => {
-      let cards = new Array();
-      cards = await createCardsForWholeClass(classId, schoolClass.schoolFk, schoolClass.yearFk, cards, job);
-    });
-  });
-
-  // A job can return values that will be stored in Redis as JSON
-  // This return value is unused in this demo application.
-  return { value: 'This will be stored' };
-};
-
-const generatePrintForm = async function (classId, purchasedCardDetails, numberOfPurchasedItems, purchasedExtras, job) {
-  const array = new Array();
-  let innerList = new Array();
-  const purchasedExtrasArray = new Array();
-  let purchasedExtrasInnerList = new Array();
-  let purchasedExtrasCount = 0;
-  let count = 0;
-
-  let processed = 1;
-  job.progress(processed);
-  processed++;
-
-  while (numberOfPurchasedItems > 0) {
-    if (count % 10 == 0 && count != 0) {
-      array.push(innerList);
-      innerList = new Array();
-    }
-
-    innerList.push(purchasedCardDetails[count]);
-
-    numberOfPurchasedItems--;
-    if (numberOfPurchasedItems == 0) array.push(innerList);
-    count++;
-  }
-
-  // length of array gives page number
-  // count gives number of items on the page
-  //
-  let numberOfPurchasedExtras = purchasedExtras.length;
-  while (numberOfPurchasedExtras > 0) {
-    if (purchasedExtrasCount % 10 == 0 && purchasedExtrasCount != 0) {
-      purchasedExtrasArray.push(purchasedExtrasInnerList);
-      purchasedExtrasInnerList = new Array();
-    }
-
-    purchasedExtrasInnerList.push(purchasedExtras[purchasedExtrasCount]);
-
-    numberOfPurchasedExtras--;
-    if (numberOfPurchasedExtras == 0) purchasedExtrasArray.push(purchasedExtrasInnerList);
-    purchasedExtrasCount++;
-  }
-
-  job.progress(processed);
-  processed++;
-
-  const classSchool = await models.sequelize.query('select c.name as className, s.name as schoolName from classes c '
-    + ' inner join schools s on c.schoolFk = s.id '
-    + ' where c.id = :classId ', { replacements: { classId }, type: models.sequelize.QueryTypes.SELECT })
-    .then((result) => {
-      const data = { className: result[0].className, schoolName: result[0].schoolName };
-      return data;
-    });
-
-  job.progress(processed);
-  processed++;
-
-  let pageNumber = 1;
-  const numberOfPages = array.length + purchasedExtrasArray.length;
-  const files = new Array();
-  for (let i = 0; i < array.length; i++) {
-    var x = await generatePrintFormPage(array[i], classSchool, pageNumber, numberOfPages);
-    files.push(x);
-    pageNumber++;
-  }
-
-  for (let i = 0; i < purchasedExtrasArray.length; i++) {
-    var x = await generatePrintExtrasFormPage(purchasedExtrasArray[i], classSchool, pageNumber, numberOfPages);
-    files.push(x);
-    pageNumber++;
-  }
-
-  job.progress(processed);
-  processed++;
-
-  const now = Date.now();
-  // prod upload the file use file path
-  const buffer = await PDFMerge(files, { output: `${process.cwd()}/tmp/${now}_printForm.pdf` });
-  files.forEach((file) => {
-    fs.unlink(file);
-  });
-
-  job.progress(processed);
-  processed++;
-
-  const s3 = new aws.S3();
-  const s3FileLocation = `${classSchool.schoolName}/${classSchool.className}/${Date.now()}_printForm.pdf`;
-
-  const params = {
-    Bucket: process.env.bucketName,
-    Body: buffer,
-    Key: s3FileLocation,
-    ACL: 'public-read',
-  };
-
-  const s3UploadPromise = new Promise((resolve, reject) => {
-    s3.upload(params, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-
-  await s3UploadPromise;
-
-  job.progress(processed);
-  processed++;
-
-  const s3Path = process.env.s3BucketPath + s3FileLocation;
-
-  return models.class.update({
-    printFormPath: s3Path,
-  }, {
-    where: {
-      id: classId,
-    },
-  }).then(() => {
-    job.progress(processed);
-
-    return s3Path;
-  });
-};
-
-const createCardAdmin = async function (kidId, job) {
-  const cards = new Array();
-  let processed = 1;
-  models.kid.findOne({
-    where: {
-      id: kidId,
-      deleteFl: false,
-    },
-  }).then((kid) => {
-    models.class.findOne({
-      where: {
-        id: kid.classFk,
-      },
-    }).then(async (schoolClass) => {
-      job.progress(processed);
-      processed++;
-      await createCardForSingleKid(kidId, kid.classFk, schoolClass.schoolFk, schoolClass.yearFk, cards, job, processed);
-    });
-  });
-};
-
-const updateCardArtworkAndPicture = async function (files, kidId, name, age, displaySchool, displayClass, displayAge, month, job) {
-  let processed = 1;
-  job.progress(processed);
-  processed++;
-  await tempMethod(files, kidId, name, age, month, displaySchool, displayClass, displayAge);
-
-  job.progress(processed);
-  processed++;
-
-  models.kid.findOne({
-    where: {
-      id: kidId,
-    },
-  }).then((kid) => {
-    models.class.findOne({
-      where: {
-        id: kid.classFk,
-      },
-    }).then(async (schoolClass) => {
-      const cards = new Array();
-      await createCardForSingleKid(kidId, kid.classFk, schoolClass.schoolFk, schoolClass.yearFk, cards, job, processed);
-    });
-  });
-};
-
-const tempMethod = async function (files, kidId, name, age, month, displaySchool, displayClass, displayAge) {
-  const date = Date.now();
-  const s3 = new aws.S3();
-  if (files == null) {
-    await models.kid.update(
-      {
-        name,
-        age,
-        month,
-        displayClass,
-        displaySchool,
-        displayAge,
-      },
-      {
-        where: {
-          id: kidId,
-        },
-      },
-    );
-  } else {
-    const fileName = await models.uploadFileName.build().save().then((uploadFileName) => uploadFileName.id);
-
-    const suffix = (files.file2.mimeType == 'image/png') ? 'png' : 'jpg';
-    const s3ArtworkPath = `${process.env.s3BucketPath}Artwork/${date}_${fileName}.${suffix}`;
-    const buffer = Buffer.from(files.file2.data.data);
-    const params = {
-      Bucket: process.env.bucketName,
-      Body: buffer,
-      Key: `Artwork/${date}_${fileName}.${suffix}`,
-      ACL: 'public-read',
-    };
-
-    const s3UploadPromise = new Promise((resolve, reject) => {
-      s3.upload(params, (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
-
-    await s3UploadPromise;
-
-    await models.kid.update(
-      {
-        name,
-        age,
-        month,
-        displayClass,
-        displaySchool,
-        displayAge,
-        artwork: s3ArtworkPath,
-      },
-      {
-        where: {
-          id: kidId,
-        },
-      },
-    );
-  }
-};
-
-const updateCard = async function (classFk, kidId, age, name, displaySchool, displayClass, displayAge, files, job) {
-  let cards = new Array();
-  let processed = 1;
-  // check whether kids details have been changed
-  // console.log(files);
-  return models.kid.findOne({
-    where: {
-      id: kidId,
-    },
-  }).then(async (kid) => {
-    if (kid.name == name && kid.age == age && kid.classFk == classFk
-            && kid.displaySchool == displaySchool && kid.displayAge == displayAge && kid.displayClass == displayClass
-           && files == null) {
-      // nothing to change
-      console.log('reece');
-      job.progress(8);
-    } else {
-      console.log('zita');
-      job.progress(processed);
-      processed++;
-      if (files == null) {
-        await models.kid.update(
-          {
-            name,
-            age,
-            classFk,
-            displayClass,
-            displaySchool,
-            displayAge,
-          },
-          {
-            where: {
-              id: kidId,
-            },
-          },
-        );
-
-        processed++;
-
-        processed++;
-        processed++;
-
-        job.progress(processed);
-      } else {
-        const date = Date.now();
-        const fileName = await models.uploadFileName.build().save().then((uploadFileName) => uploadFileName.id);
-
-        const suffix = (files.file2.mimeType == 'image/png') ? 'png' : 'jpg';
-        const s3ArtworkPath = `${process.env.s3BucketPath}Artwork/${date}_${fileName}.${suffix}`;
-
-        const buffer = Buffer.from(files.file2.data.data);
-        const s3 = new aws.S3();
-        const params = {
-          Bucket: process.env.bucketName,
-          Body: buffer,
-          Key: `Artwork/${date}_${fileName}.${suffix}`,
-          ACL: 'public-read',
-        };
-
-        const s3UploadPromise = new Promise((resolve, reject) => {
-          s3.upload(params, (err, data) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(data);
-            }
-          });
-        });
-
-        await s3UploadPromise;
-
-        job.progress(processed);
-        processed++;
-
-        await models.kid.update(
-          {
-            name,
-            age,
-            classFk,
-            displayClass,
-            displaySchool,
-            displayAge,
-            picture: s3ArtworkPath,
-            artwork: s3ArtworkPath,
-          },
-          {
-            where: {
-              id: kidId,
-            },
-          },
-        );
-
-        job.progress(processed);
-        processed++;
-        job.progress(processed);
-        processed++;
-      }
-
-      // create new card
-      models.class.findOne({
-        where: {
-          id: classFk,
-        },
-      }).then(async (schoolClass) => {
-        cards = await createCardForSingleKid(kidId, classFk, schoolClass.schoolFk, schoolClass.yearFk, cards, job, processed);
-        //     job.progress(processed);
-        // processed++;
-        // let card = cards[0];
-
-        // models.sequelize.query('select c.* from cards c ' +
-        //                      ' inner join kids k on c.kidFk = k.id ' +
-        //                      ' inner join classes cl on k.classFk = cl.id ' +
-        //                      ' where cl.id = :classId ' +
-        //                      ' and k.deleteFl = false ',
-        //                      {replacements:{classId:classFk},type:models.sequelize.QueryTypes.SELECT}).
-        //                      then( async cards=>{
-        //                       //  await createClassBatch(cards, classFk);
-
-        //                          res.json({cardIndex:selectedCardIndex, user:req.user, path:card.path, previewPath: card.previewPath, samplePath:card.samplePath });
-
-        //                      })
-      });
-    }
-  });
-};
-const createCardsForWholeClass = function (classId, schoolId, yearId, cards, job) {
-  return models.kid.findAll({
-    where: {
-      classFk: classId,
-      deleteFl: false,
-    },
-  }).then(async (kidsResults) => {
-    // socketServer.emit('kidTotal',{total:kidsResults.length});
-    let processed = 1;
-    for (let i = 0; i < kidsResults.length; i++) {
-      const result = kidsResults[i];
-      const kidId = result.dataValues.id;
-      cards = await createCardForSingleKid(kidId, classId, schoolId, yearId, cards, job, processed);
-      processed = cards[i].processed;
-    }
-
-    return cards;
-  });
-};
-
-const createCardForSingleKid = function (kidId, classId, schoolId, yearId, cards, job, processed) {
-  return models.kid.findOne({
-    where: {
-      id: kidId,
-      deleteFl: false,
-    },
-  }).then((kid) => models.class.findOne({
-    where: {
-      id: classId,
-    },
-  }).then((kidClass) => models.school.findOne({
-    where: {
-      id: schoolId,
-    },
-  }).then((school) => models.year.findOne({
-    where: {
-      id: yearId,
-    },
-  }).then((year) => createCard(school, year, kidClass, kid, cards, job, processed)))));
-};
-
-const createCard = async function (school, year, kidClass, kid, cards, job, processed) {
-  const displaySchool = kid.displaySchool == true ? 'true' : undefined;
-  const displayClass = kid.displayClass == true ? 'true' : undefined;
-  const displayAge = kid.displayAge == true ? 'true' : undefined;
-
-  let displayYears;
-  let displayMonths;
-  let displayBoth;
-
-  if (kid.age != 0 && kid.month != 0) {
-    // display both
-    displayBoth = 'true';
-  } else if (kid.age != 0) {
-    // display year
-    displayYears = 'true';
-  } else {
-    // display month
-    displayMonths = 'true';
-  }
-  const array = new Array();
-  const json = {
-    school: school.name,
-    code: kid.code,
-    name: kid.name,
-    age: kid.age,
-    month: kid.month,
-    class: kidClass.name,
-    artwork: kid.artwork,
-    picture: kid.picture,
-    year: year.year,
-    kidId: kid.id,
-    displaySchool,
-    displayClass,
-    displayAge,
-    displayYears,
-    displayMonths,
-    displayBoth,
-  };
-
-  array.push(json);
-
-  await asyncForEach(array, createPdf, cards, job, processed);
-
-  return cards;
-};
-const asyncForEach = async function (dataTemp, callback, array, job, processed) {
-  for (let i = 0; i < dataTemp.length; i++) {
-    const card = await callback(dataTemp[i], job, processed);
-    array.push(card);
-  }
-};
-const createPdf = async function (data, job, processed) {
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-  const page = await browser.newPage();
-
-  const dataPicture = data.picture;
-  const originalData = data;
-  originalData.picture = data.artwork;
-  originalData.displayPicture = true;
-  const content = await compile('card', originalData);
-  await page.setContent(content);
-  // await page.emulateMedia('screen');
-
-  let tempDir = 'dataDir/temp/OutBound/';
-  // var previewTempDir = "dataDir/temp/OutBound/";
-  const fileLocation = `${data.school}/${data.year}/${data.class}/`;
-  // let previewFileLocation = data.school + "/" + data.year + "/" + data.class + "/Previews/";
-  const package2FileLocation = `${data.school}/${data.year}/${data.class}/Pacakge 2/`;
-  // let package2PreviewFileLocation = data.school + "/" + data.year + "/" + data.class + "/Pacakge 2/Previews/";
-  const filename = `${data.name}_${data.code}.pdf`;
-
-  tempDir = tempDir + fileLocation + filename;
-  // previewTempDir = previewTempDir + previewFileLocation + filename;
-
-  await page.setViewport({ width: 1400, height: 800, deviceScaleFactor: 2 });
-  const buffer = await page.pdf({
-    // path: tempDir,
-    printBackground: true,
-    landscape: false,
-    width: '29cm',
-    height: '14.5cm',
-  });
-
-  // save file in temp directory, which shouldnt need to be on the server
-  // then upload the file with a dir name to s3 bucket
-  // then save the card to db with path location on s3 bucket
-  await browser.close();
-
-  const s3 = new aws.S3();
-  const s3FileLocation = `${fileLocation + Date.now()}_${filename}`;
-  // let s3PreviewFileLocation = previewFileLocation + Date.now() + "_" + filename;
-  const s3Package2FileLocation = `${package2FileLocation + Date.now()}_${filename}`;
-  // let s3Package2PreviewFileLocation = package2PreviewFileLocation + Date.now() + "_" + filename;
-  const params = {
-    Bucket: process.env.bucketName,
-    Body: buffer,
-    Key: s3FileLocation,
-    ACL: 'public-read',
-  };
-
-  const s3UploadPromise = new Promise((resolve, reject) => {
-    s3.upload(params, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-
-  await s3UploadPromise;
-  // await fs.unlink(tempDir);
-  // delete from temp dir
-  const s3Path = process.env.s3BucketPath + s3FileLocation;
-  // let s3PreviewPath = process.env.s3BucketPath + s3PreviewFileLocation;
-  const s3Package2Path = process.env.s3BucketPath + s3Package2FileLocation;
-  // let s3Package2PreviewPath = process.env.s3BucketPath + s3Package2PreviewFileLocation;
-  // const browser2 = await puppeteer.launch({
-  //   'args' : [
-  //     '--no-sandbox',
-  //     '--disable-setuid-sandbox'
-  //   ]
-  // });
-
-  job.progress(processed);
-  processed++;
-  // const page2= await browser2.newPage();
-
-  // const content2 = await compile('cardWatermark', originalData);
-  // await page2.setContent(content2);
-
-  // let dir2 = "public/dataDir/temp/OutBound/";
-  // dir2 = dir2 + data.school + "/" + data.year + "/" + data.class + "/" + data.name + "_" + data.code + "_Preview.pdf";
-  //  const buffer2=   await page2.pdf({
-  //     // path: previewTempDir,
-  //     printBackground:true ,
-  //     landscape:false,
-  //     width:"29cm",
-  //     height:"14.5cm"
-  //   });
-
-  //   await browser2.close();
-  //   var previewParams = {
-  //     Bucket:process.env.bucketName,
-  //     Body: buffer2,
-  //     Key: s3PreviewFileLocation,
-  //     ACL:'public-read'
-  //   };
-
-  //   var s3PreviewUploadPromise = new Promise(function(resolve, reject) {
-  //     s3.upload(previewParams, function(err, data) {
-  //         if (err) {
-  //             reject(err);
-  //         } else {
-  //             resolve(data);
-  //         }
-  //     });
-  // });
-
-  // await s3PreviewUploadPromise;
-
-  originalData.picture = '';
-  job.progress(processed);
-  processed++;
-  const browser3 = await puppeteer.launch({
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-  originalData.displayPicture = dataPicture != null;
-  originalData.picture = (dataPicture != null) ? dataPicture : 'https://kidscards4christmas.s3.eu-west-2.amazonaws.com/icons/insertImage.jpg';
-  const page3 = await browser3.newPage();
-
-  const content3 = await compile('card', originalData);
-  await page3.setContent(content3);
-
-  const buffer3 = await page3.pdf({
-    // path: previewTempDir,
-    printBackground: true,
-    landscape: false,
-    width: '29cm',
-    height: '14.5cm',
-  });
-
-  await browser3.close();
-  const package2Params = {
-    Bucket: process.env.bucketName,
-    Body: buffer3,
-    Key: s3Package2FileLocation,
-    ACL: 'public-read',
-  };
-
-  const s3Package2UploadPromise = new Promise((resolve, reject) => {
-    s3.upload(package2Params, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-
-  await s3Package2UploadPromise;
-  job.progress(processed);
-  processed++;
-  // const browser4 = await puppeteer.launch({
-  //   'args' : [
-  //     '--no-sandbox',
-  //     '--disable-setuid-sandbox'
-  //   ]
-  // });
-
-  // const page4= await browser4.newPage();
-
-  //   const content4 = await compile('cardWatermark', originalData);
-  //   await page4.setContent(content4);
-
-  //   const buffer4 = await page4.pdf({
-  //     // path: previewTempDir,
-  //     printBackground:true ,
-  //     landscape:false,
-  //     width:"29cm",
-  //     height:"14.5cm"
-  //   });
-
-  //   await browser4.close();
-  //   var package2PreviewParams = {
-  //     Bucket:process.env.bucketName,
-  //     Body: buffer4,
-  //     Key: s3Package2PreviewFileLocation,
-  //     ACL:'public-read'
-  //   };
-
-  //   var s3Package2PreviewUploadPromise = new Promise(function(resolve, reject) {
-  //     s3.upload(package2PreviewParams, function(err, data) {
-  //         if (err) {
-  //             reject(err);
-  //         } else {
-  //             resolve(data);
-  //         }
-  //     });
-  // });
-
-  // await s3Package2PreviewUploadPromise;
-
-  job.progress(processed);
-  processed++;
-  return models.card.findOne({
-    where: {
-      kidFk: data.kidId,
-    },
-  }).then((card) => {
-    if (card === null) {
-      const newCard = models.card.build({
-        path: s3Path,
-        // previewPath:s3PreviewPath,
-        package2Path: s3Package2Path,
-        // package2PreviewPath:s3Package2PreviewPath,
-        fileName: s3FileLocation,
-        // previewFileName: s3PreviewFileLocation,
-        package2FileName: s3Package2FileLocation,
-        // package2PreviewFileName:s3Package2PreviewFileLocation,
-        kidFk: data.kidId,
-      });
-
-      return newCard.save().then(() => ({ card: newCard, processed }));
-    }
-    return models.card.update(
-      {
-        path: s3Path,
-        // previewPath:s3PreviewPath,
-        package2Path: s3Package2Path,
-        // package2PreviewPath:s3Package2PreviewPath,
-        fileName: s3FileLocation,
-        // previewFileName: s3PreviewFileLocation,
-        package2FileName: s3Package2FileLocation,
-        // package2PreviewFileName:s3Package2PreviewFileLocation
-      },
-      {
-        where: {
-          kidFk: data.kidId,
-        },
-      },
-    ).then(() => models.card.findOne({
-      where: {
-        kidFk: data.kidId,
-      },
-    }).then((card) => ({ card, processed })));
-  });
-};
-
-const createProofs = async function (kids, classId, year, className, schoolName, job) {
-  let processed = 1;
-  job.progress(processed);
-  processed++;
-  const files = new Array();
-  await asyncForEachProofs(kids, createProofForClass, files);
-
-  job.progress(processed);
-  processed++;
-
-  // var sampleArray = await models.sequelize.query('select cd.samplePath, cd.sampleFileName from cards cd  ' +
-  // ' inner join kids k on cd.kidFk = k.id ' +
-  // ' inner join classes c on k.classFk = c.id ' +
-  // ' where c.id = :classId ' +
-  // ' and k.deleteFl = false '
-  // , {replacements:{
-  //     classId: classId
-  //       }, type: models.sequelize.QueryTypes.SELECT
-  //   });
-
-  job.progress(processed);
-  processed++;
-  // put check that sampleArray has length greater than zero
-  const s3 = new aws.S3();
-  const params = {
-    Bucket: process.env.bucketName,
-  };
-
-  // var files = new Array();
-  const now = Date.now();
-  // files = await asyncForEachDownload(sampleArray,downloadProofFiles,params,files,s3);
-
-  job.progress(processed);
-  processed++;
-  // if(files.length > 0 )
-  // {
-  const proofBuffer = await PDFMerge(files, { output: `${process.cwd()}/tmp/${now}_proof.pdf` });
-
-  files.forEach((file) => {
-    fs.unlink(file);
-  });
-
-  job.progress(processed);
-  processed++;
-  // save proof to s3
-  const fileLocation = `${schoolName}/${year}/${className}/`;
-  console.log(fileLocation);
-  params.Key = `${fileLocation}Proofs/${now}_proof.pdf`;
-  params.ACL = 'public-read';
-  params.Body = proofBuffer;
-
-  const s3UploadPromise = new Promise((resolve, reject) => {
-    s3.upload(params, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-
-  await s3UploadPromise;
-  job.progress(processed);
-  processed++;
-
-  fs.unlink(`${process.cwd()}/tmp/${now}_proof.pdf`);
-
-  const path = process.env.s3BucketPath + params.Key;
-  return models.class.update(
-    { proofPath: path },
-    {
-      where: {
-        id: classId,
-      },
-    },
-  ).then(() => {
-    job.progress(processed);
-    return path;
-  });
-};
-
-const asyncForEachProofs = async function (array, callback, files) {
-  for (let i = 0; i < array.length; i++) {
-    const filename = await callback(array[i], i);
-    files.push(filename);
-  }
-};
-
-const asyncForEachDownload = async function (array, callback, params, files, s3) {
-  for (let i = 0; i < array.length; i++) {
-    const fileName = await callback(array[i], params, i, s3);
-    files.push(fileName);
-    //  console.log(fileName);
-  }
-
-  return files;
-};
-
-const downloadProofFiles = async function (sampleItem, params, i, s3) {
-  const sampleFileName = sampleItem.sampleFileName;
-
-  params.Key = sampleFileName;
-  let file;
-  const tempFile = 'tmp' + `/${i}.pdf`;
-  const s3DownloadPromise = new Promise((resolve, reject) => {
-    file = fs.createWriteStream(tempFile);
-    const stream = s3.getObject(params).createReadStream();
-    stream.pipe(file);
-
-    stream.on('finish', resolve);
-  });
-
-  await s3DownloadPromise;
-  console.log(`file ${file}`);
-  return `${process.cwd()}/${tempFile}`;
-};
-
-const downloadPurchasedFiles = async function (purchasedFile, params, i, s3) {
-  const now = Date.now();
-  const cardFileName = purchasedFile.fileName;
-  params.Key = cardFileName;
-  let file;
-  const tempFile = 'tmp' + `/Purchased_${i}_${now}.pdf`;
-  const s3DownloadPromise = new Promise((resolve, reject) => {
-    file = fs.createWriteStream(tempFile);
-    const stream = s3.getObject(params).createReadStream();
-    stream.pipe(file);
-
-    stream.on('finish', resolve);
-  });
-
-  await s3DownloadPromise;
-  console.log(`file ${file}`);
-  return `${process.cwd()}/${tempFile}`;
-};
-
-const createProofForClass = async function (kid, i) {
-  const now = Date.now();
-  const deadLine = kid.deadLineDttm; /* dateformat(kid.deadLineDttm, "dddd dS mmmm yyyy"); */
-  const month = kid.month;
-  let displayYears;
-  let displayMonths;
-  let displayBoth;
-
-  if (kid.age != 0 && month != 0) {
-    // display both
-    displayBoth = 'true';
-  } else if (kid.age != 0) {
-    // display year
-    displayYears = 'true';
-  } else {
-    // display month
-    displayMonths = 'true';
-  }
-  const data = {
-    school: kid.schoolName,
-    code: kid.code,
-    name: kid.name,
-    age: kid.age,
-    class: kid.className,
-    artwork: kid.artwork,
-    picture: kid.picture,
-    year: kid.year,
-    kidId: kid.id,
-    displaySchool: 'true',
-    displayClass: 'true',
-    displayAge: 'true',
-    deadline: deadLine,
-    displayYears,
-    displayMonths,
-    displayBoth,
-    month,
-  };
-
-  const filename = `tmp/Proof_${kid.className}_${i}_${now}.pdf`;
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-  const page = await browser.newPage();
-
-  const content = await compile('sample', data);
-  await page.setContent(content);
-
-  await page.pdf({
-    path: filename,
-    printBackground: true,
-    format: 'A4',
-  });
-
-  await browser.close();
-
-  return filename;
-};
-
-const generatePrintFormPage = async function (array, classSchool, pageNumber, numberOfPages) {
-  const data = {
-    className: classSchool.className,
-    schoolName: classSchool.schoolName,
-    basketItems: array,
-    pageNumber,
-    numberOfPages,
-  };
-
-  return await printForm(data, pageNumber, 'printForm');
-};
-
-const generatePrintExtrasFormPage = async function (array, classSchool, pageNumber, numberOfPages) {
-  const data = {
-    className: classSchool.className,
-    schoolName: classSchool.schoolName,
-    basketItems: array,
-    pageNumber,
-    numberOfPages,
-  };
-
-  return await printForm(data, pageNumber, 'printExtrasForm');
-};
-
-const printForm = async function (data, i, template) {
-  const date = Date.now();
-  const filename = `tmp/reece_${date}_${i}.pdf`;
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    pipe: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-  const page = await browser.newPage();
-  const content = await compile(template, data);
-  await page.setContent(content);
-
-  await page.pdf({
-    path: filename,
-    printBackground: true,
-    format: 'A4',
-  });
-
-  browser.close();
-
-  return filename;
-};
+}
 
 async function sendOrdersNotShippedReminder() {
   const orderNumbers = await models.sequelize.query('select pb.orderNumber from purchasebaskets pb '
@@ -2687,15 +1246,15 @@ async function sendOrdersNotShippedReminder() {
       },
     });
 
-    const content = await compile('ordersToBeShippedReminder', { orderNumbers });
+    const content = await generalUtility.compile('ordersToBeShippedReminder', { orderNumbers });
     const mailOptions = {
       from: process.env.mailServer_email,
-      to: env == 'development' ? testEmail : process.env.mailServer_email,
+      to: env === 'development' ? testEmail : process.env.mailServer_email,
       subject: 'REMINDER OF ORDERS TO BE SHIPPED',
       html: content,
     };
 
-    smtpTransport.sendMail(mailOptions, async (errors, res) => {
+    smtpTransport.sendMail(mailOptions, async (errors) => {
       createEmail('Orders Not Shipped Reminder', errors, 1);
       console.log(errors);
     });
@@ -2723,15 +1282,15 @@ async function sendSchoolArtworkPacksNotSentReminder() {
       },
     });
 
-    const content = await compile('schoolArtworkPacksNotSentReminder', { schools });
+    const content = await generalUtility.compile('schoolArtworkPacksNotSentReminder', { schools });
     const mailOptions = {
       from: process.env.mailServer_email,
-      to: env == 'development' ? testEmail : process.env.mailServer_email,
+      to: env === 'development' ? testEmail : process.env.mailServer_email,
       subject: 'REMINDER OF SCHOOLS ARTWORK PACK NOT SENT OUT',
       html: content,
     };
 
-    smtpTransport.sendMail(mailOptions, async (errors, res) => {
+    smtpTransport.sendMail(mailOptions, async (errors) => {
       createEmail('Artwork Pack Not Sent Reminder', errors, 1);
       console.log(errors);
     });
@@ -2760,15 +1319,15 @@ async function sendSchoolReadyForPrintingReminder() {
       },
     });
 
-    const content = await compile('schoolPrintingSentReminder', { schools });
+    const content = await generalUtility.compile('schoolPrintingSentReminder', { schools });
     const mailOptions = {
       from: process.env.mailServer_email,
-      to: env == 'development' ? testEmail : process.env.mailServer_email,
+      to: env === 'development' ? testEmail : process.env.mailServer_email,
       subject: 'REMINDER OF SCHOOLS READY TO PRINT',
       html: content,
     };
 
-    smtpTransport.sendMail(mailOptions, async (errors, res) => {
+    smtpTransport.sendMail(mailOptions, async (errors) => {
       createEmail('Printing Reminder', errors, 1);
       console.log(errors);
     });
@@ -2788,46 +1347,118 @@ async function sendCharityAmountConfirmedSendToSchoolReminder() {
       },
     });
 
-    const content = await compile('charityAmountConfirmedSendToSchoolReminder', { schools });
+    const content = await generalUtility.compile('charityAmountConfirmedSendToSchoolReminder', { schools });
     const mailOptions = {
       from: process.env.mailServer_email,
-      to: env == 'development' ? testEmail : process.env.mailServer_email,
+      to: env === 'development' ? testEmail : process.env.mailServer_email,
       subject: 'REMINDER OF SCHOOLS TO SEND FUNDRAISING AMOUNT TO',
       html: content,
     };
 
-    smtpTransport.sendMail(mailOptions, async (errors, res) => {
+    smtpTransport.sendMail(mailOptions, async (errors) => {
       createEmail('Charity Amount Confirmed Reminder', errors, 1);
       console.log(errors);
     });
   }
 }
 
-// function resendFailedEmails()
-// {
-//   models.email.findAll({
-//     where:{
-//       status:'Failed'
-//     }
-//   }).then(async failedEmails=>{
+function start() {
+  // Connect to the named work queue
 
-//     await forEachFailedEmail(failedEmails, resendFailedEmail);
+  const workerQueue = new Queue('worker', client);
 
-//   })
-// }
+  workerQueue.process(maxJobsPerWorker, async (job) => {
+    if (job.data.process === 'form') {
+      const form = await generatePrintForm(job.data.classId, job.data.purchasedCardDetails, job.data.numberOfPurchasedItems, job.data.purchasedExtras, job);
+      return { form };
+    } if (job.data.process === 'purchasedCards') {
+      const path = await generatePurchasedCards(job.data.purchasedBasketItems, job.data.classId, job);
+      return { path };
+    } if (job.data.process === 'parentRegistrationEmail') {
+      return sendParentRegistrationEmail(job.data.email, job);
+    } if (job.data.process === 'organiserRegistrationEmail') {
+      return sendOrganiserRegistrationEmail(job.data.email, job.data.school, job.data.name, job);
+    } if (job.data.process === 'parentRegistrationEmailToBluwave') {
+      return sendParentRegistrationEmailToBluwave(job.data.email, job.data.name, job.data.telephoneNo, job);
+    } if (job.data.process === 'organiserRegistrationEmailToBluwave') {
+      console.log('reece');
+      return sendOrganiserRegistrationEmailToBluwave(job.data.school, job.data.name, job.data.account, job.data.numberOfClasses, job);
+    } if (job.data.process === 'purchaseEmail' || job.data.process === 'purchaseEmailToBluwave') {
+      if (job.data.process === 'purchaseEmail') return sendPurchaseEmail(false, job.data.basketItems, job.data.orderNumber, job.data.date, job.data.total, job.data.time, job);
+      return sendPurchaseEmail(true, job.data.basketItems, job.data.orderNumber, job.data.date, job.data.total, job.data.time, job);
+    } if (job.data.process === 'deadline') {
+      return deadlineRecurringTask();
+    } if (job.data.process === 'delay') {
+      return delayRecurringTask();
+    } if (job.data.process === 'charity') {
+      return charity();
+    } if (job.data.process === 'noDeadlineResponse') {
+      return noDeadlineResponse();
+    } if (job.data.process === 'sendConfirmDetailsEmail') {
+      return sendConfirmDetailsEmail(job.data.school, job.data.name, job.data.bankAcc, job.data.sortCode, job.data.type);
+    } if (job.data.process === 'resetEmail') {
+      return sendResetEmail(job.data.email, job);
+    } if (job.data.process === 'parent3DaysToDeadline') {
+      return parent3DaysToDeadline();
+    } if (job.data.process === 'parent1DayToDeadline') {
+      return parent1DayToDeadline();
+    } if (job.data.process === 'noPurchaseMadeSinceSignUp') {
+      return noPurchaseMadeSinceSignUp();
+    } if (job.data.process === 'test') {
+      return test();
+    } if (job.data.process === 'testTrial') {
+      return testTrial(
+        job.data.x,
+        job.data.y,
+        job.data.width,
+        job.data.height,
+        job.data.name,
+        job.data.nameX,
+        job.data.nameY,
+        job.data.nameHeight,
+        job.data.nameWidth,
+      );
+    } if (job.data.process === 'uploadAndGenerate') {
+      return uploadAndGenerate(job.data.productItemId, job.data.pictureNumber, job.data.productId, job.data.files, job);
+    } if (job.data.process === 'updateAndGenerate') {
+      return updateAndGenerate(
+        job.data.productItemId,
+        job.data.productId,
+        job.data.name,
+        job.data.age,
+        job.data.month,
+        job.data.displaySchool,
+        job.data.displayClass,
+        job.data.displayAge,
+        job,
+      );
+    } if (job.data.process === 'generateProductItemForKid') {
+      return productItemUtility.generateProductItemForKid(job.data.kid, job.data.productId, job.data.dummy, job.data.isAccountLinkedToASchoolInScheme);
+    } if (job.data.process === 'classOrderInstruction') {
+      return processClassOrderInstruction(job.data.classId, job.data.deadlineId, job);
+    } if (job.data.process === 'schoolOrderInstruction') {
+      return processSchoolOrderInstruction(job.data.schoolId, job);
+    } if (job.data.process === 'ordersForm') {
+      return generatePrintForm(job.data.classId, job);
+    } if (job.data.process === 'purchasedOrders') {
+      return generateOrdersPdf(job.data.classId, job);
+    } if (job.data.process === 'generateOrderDetails') {
+      return getPdfsOfOrderItemsForPurchaseBasketId(job.data.purchaseBasketId, job);
+    } if (job.data.process === 'linkKid') {
+      return productItemUtility.handleLinkKid(job.data.name, job.data.years, job.data.months, job.data.classId, job.data.account, job);
+    } if (job.data.process === 'ordersNotShippedReminder') {
+      return sendOrdersNotShippedReminder();
+    } if (job.data.process === 'schoolArtworkPacksNotSentReminder') {
+      return sendSchoolArtworkPacksNotSentReminder();
+    } if (job.data.process === 'schoolReadyForPrintingReminder') {
+      return sendSchoolReadyForPrintingReminder();
+    } if (job.data.process === 'charityAmountConfirmed') {
+      return sendCharityAmountConfirmedSendToSchoolReminder();
+    }
+    return 'error';
+  });
+}
 
-// async function forEachFailedEmail( array, callback)
-// {
-//    for(var i = 0; i< array.length; i++)
-//    {
-//       await callback(array[i]);
-//    }
-// }
-
-// function resendFailedEmail(failedEmail)
-// {
-//    createEmail()
-// }
 // Initialize the clustered worker process
 // See: https://devcenter.heroku.com/articles/node-concurrency for more info
 throng({ workers, start });

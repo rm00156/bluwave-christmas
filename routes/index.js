@@ -15,10 +15,11 @@ const orderController = require('../controllers/OrderController');
 const homeController = require('../controllers/HomeController');
 const adminController = require('../controllers/AdminController');
 const classController = require('../controllers/ClassController');
+const queueController = require('../controllers/QueueController');
 
 const {
   hasOrganiserOrAdminAuth, redirectToDashboard, isLoggedIn, hasAdminAuth,
-  hasParentAuth, hasOrganiserAuth, hasDefaultPasswordAuth, organiserCreatedCard,
+  hasParentAuth, hasOrganiserAuth, hasDefaultPasswordAuth,
 } = require('../middleware/hasAuth');
 
 router.get('/about', homeController.about);
@@ -31,54 +32,29 @@ router.get('/addSchool', isLoggedIn, hasAdminAuth, (req, res) => {
   res.render('addSchool', { user: req.user });
 });
 
-router.get('/getDelivery', isLoggedIn, dadController.getDelivery);
-router.get('/addPackage', isLoggedIn, hasAdminAuth, (req, res) => {
-  res.render('addPackage', { user: req.user });
-});
-
-router.post('/createPackage', isLoggedIn, hasAdminAuth, dadController.createPackage);
-
-router.get('/addKid', isLoggedIn, hasAdminAuth, dadController.getSchools);
-
-router.get('/addClass', isLoggedIn, hasAdminAuth, dadController.getSchools);
-
 router.get('/getClasses', isLoggedIn, dadController.getClasses);
 router.get('/getKids', isLoggedIn, dadController.getKids);
 
-router.get('/searchClass', isLoggedIn, hasAdminAuth, dadController.searchClass);
-router.get('/searchAccounts', isLoggedIn, hasAdminAuth, dadController.searchAccounts);
 router.post('/searchAccounts', isLoggedIn, hasAdminAuth, adminController.searchAccounts);
-router.post('/createSchool', isLoggedIn, hasAdminAuth, dadController.createSchool);
 router.post('/createClass', isLoggedIn, hasAdminAuth, dadController.createClass);
-router.post('/addKid', isLoggedIn, dadController.createKid);
 
-router.get('/searchSchool', isLoggedIn, dadController.searchSchools);
 router.post('/searchSchool', isLoggedIn, dadController.searchSchoolsResults);
 
-router.get('/order', isLoggedIn, hasDefaultPasswordAuth, hasAdminAuth, dadController.getOrder);
-
-router.get('/searchKids', isLoggedIn, hasAdminAuth, dadController.searchCards);
 router.post('/searchKids', isLoggedIn, hasAdminAuth, dadController.searchKidsResults);
 
 router.post('/searchClass', isLoggedIn, hasAdminAuth, dadController.searchClassResults);
-router.get('/viewCreatedCards', isLoggedIn, dadController.viewCreatedCards);
 
-router.get('/selectPreviewCard', isLoggedIn, dadController.selectPreviewCard);
 router.post('/updateCard', isLoggedIn, hasAdminAuth, dadController.updateCard);
 
 router.get('/signup', signUpController.signupPage);
 router.get('/signupOrganiser', signUpController.signupOrganiserPage);
 
 router.get('/class', isLoggedIn, hasDefaultPasswordAuth, hasAdminAuth, classController.getClassScreen);
-router.get('/school', isLoggedIn, hasDefaultPasswordAuth, hasAdminAuth, dadController.getSchoolScreen);
-
-router.get('/printScreen', isLoggedIn, dashboardController.print);
 
 router.post('/changeSchoolStep', isLoggedIn, hasAdminAuth, schoolController.changeSchoolStep);
 router.post('/signup', signUpController.signup);
 router.post('/signupOrganiser', signUpController.signupOrganiser);
 
-router.get('/dashboardNew', isLoggedIn, hasDefaultPasswordAuth, hasAdminAuth, dashboardController.loadScreen);
 router.get('/organiserDashboard', isLoggedIn, hasDefaultPasswordAuth, hasOrganiserAuth, organiserController.loadOrganiserDashboard);
 
 router.post('/login', signUpController.login);
@@ -90,7 +66,6 @@ router.post('/createNewCard', isLoggedIn, hasDefaultPasswordAuth, kidController.
 
 router.post('/unlinkKids', isLoggedIn, hasDefaultPasswordAuth, hasAdminAuth, dashboardController.unlinkKids);
 
-router.get('/viewPackages', isLoggedIn, dadController.viewPackages);
 router.get('/viewEditCard', isLoggedIn, dashboardController.viewEditCard);
 
 router.post('/addToBasket', isLoggedIn, hasDefaultPasswordAuth, dashboardController.addToBasket);
@@ -98,11 +73,6 @@ router.post('/addToBasket', isLoggedIn, hasDefaultPasswordAuth, dashboardControl
 router.post('/addToBasket2', isLoggedIn, hasDefaultPasswordAuth, dashboardController.addToBasket2);
 
 router.get('/basket', isLoggedIn, hasDefaultPasswordAuth, hasParentAuth, /* hasBasketAuth, */ basketController.basket);
-router.get('/cards', isLoggedIn, dashboardController.cards);
-router.get('/card', isLoggedIn, dashboardController.card);
-router.get('/kid', isLoggedIn, organiserCreatedCard, hasDefaultPasswordAuth, dashboardController.kid);
-router.get('/kid2', isLoggedIn, hasDefaultPasswordAuth, dashboardController.kid);
-router.get('/getPackageWithId', isLoggedIn, dashboardController.getPackageWithId);
 
 router.post('/purchase', isLoggedIn, hasParentAuth, hasDefaultPasswordAuth, orderController.purchase);
 
@@ -111,65 +81,33 @@ router.get('/participants', isLoggedIn, hasOrganiserAuth, hasDefaultPasswordAuth
 router.get('/classOrders', isLoggedIn, hasDefaultPasswordAuth, organiserController.classOrders);
 
 router.post('/setDeadLine', isLoggedIn, hasAdminAuth, schoolController.setDeadLine);
-
-router.post('/createProof', isLoggedIn, hasAdminAuth, dashboardController.createProof);
-router.get('/createProofJob', isLoggedIn, hasAdminAuth, dashboardController.getCreateProofJob);
-
-router.post('/createProofs', isLoggedIn, hasAdminAuth, dashboardController.createProofsForClass);
 router.get('/purchaseSuccessful', isLoggedIn, hasParentAuth, orderController.purchaseSuccessful);
-router.post('/createCardsForClass', isLoggedIn, hasAdminAuth, dadController.createCardsForClass);
-router.get('/createCardsForClass', isLoggedIn, hasAdminAuth, dadController.getCreateCardsForClassJob);
 
-router.get('/updateCalendarJobs', isLoggedIn, hasAdminAuth, dadController.getUpdateCalendarJob);
-
-router.get('/updateCardJobs', isLoggedIn, hasAdminAuth, dadController.getUpdateCardJobs);
-router.get('/createAdminCardJobs', isLoggedIn, hasAdminAuth, dadController.getCreateAdminCardJobs);
-router.get('/createProofsForClass', isLoggedIn, hasAdminAuth, dashboardController.getCreateProofJobs);
 router.get('/updatePicArtworkJobs', isLoggedIn, dadController.getUpdatePicArtworkJobs);
 router.get('/updatePurchaseJobs', isLoggedIn, hasAdminAuth, dadController.getUpdatePurchaseJobs);
 router.get('/createPrintForm', isLoggedIn, hasAdminAuth, dadController.getCreatePrintFormJobs);
-router.get('/editCards', isLoggedIn, hasAdminAuth, dadController.editCards);
 
-router.get('/viewProofs', isLoggedIn, hasAdminAuth, dadController.viewProofs);
-router.get('/printCard', isLoggedIn, hasAdminAuth, dadController.printCard);
-router.get('/generatePurchasedCards', isLoggedIn, hasAdminAuth, dadController.generatePurchasedCards);
-
-router.post('/createCardAdmin', isLoggedIn, dadController.createCardAdmin);
 router.post('/updateCardAdmin', isLoggedIn, dadController.updateCardArtworkAndPicture);
-router.post('/updateCalendar', isLoggedIn, dadController.updateCalendar);
 
-router.post('/deleteKid', isLoggedIn, hasAdminAuth, dadController.deleteKid);
 router.get('/parentDashboard', isLoggedIn, hasParentAuth, hasDefaultPasswordAuth, parentController.getParentScreen);
-router.get('/getCard', isLoggedIn, dadController.getCard);
-router.get('/getKid', isLoggedIn, dadController.getKid);
 router.get('/getBasketItems', isLoggedIn, hasDefaultPasswordAuth, dashboardController.getBasketItems);
 router.post('/stripe_webhooks/checkout.session.completed', orderController.sessionCompleted);
-router.post('/printForm', isLoggedIn, hasAdminAuth, dashboardController.printForm);
-router.post('/generatePrintForm', isLoggedIn, hasDefaultPasswordAuth, hasAdminAuth, dadController.generatePrintForm);
+
 router.post('/addPicture', isLoggedIn, hasDefaultPasswordAuth, dadController.addPicture);
 router.post('/addArtwork', isLoggedIn, hasDefaultPasswordAuth, dadController.addArtwork);
 
-router.post('/addCalendarPicture', isLoggedIn, hasDefaultPasswordAuth, dadController.addCalendarPicture);
 router.post('/uploadPicture', isLoggedIn, hasDefaultPasswordAuth, dadController.uploadPicture);
 router.post('/uploadArtwork', isLoggedIn, hasDefaultPasswordAuth, dadController.uploadArtwork);
 
-router.post('/uploadCalendarPicture', isLoggedIn, hasDefaultPasswordAuth, dadController.uploadCalendarPicture);
 router.get('/classParticipants', isLoggedIn, hasOrganiserAuth, hasDefaultPasswordAuth, organiserController.classParticipants);
 router.get('/signUpAdmin', /* isLoggedIn,hasAdminAuth, */ signUpController.signUpAdmin);
 router.post('/signUpAdmin', /* isLoggedIn,hasAdminAuth, */ signUpController.signUpAdminPage);
-router.get('/changeOrganiser', isLoggedIn, hasAdminAuth, dadController.getChangeOrganiser);
-router.post('/changeOrganiser', isLoggedIn, hasAdminAuth, dadController.changeOrganiser);
 router.get('/editContactDetails', isLoggedIn, dadController.getEditContactDetails);
 router.post('/editContactDetails', isLoggedIn, dadController.editContactDetails);
 router.get('/updatePassword', isLoggedIn, hasOrganiserAuth, dadController.getUpdatePassword);
 router.post('/updatePassword', isLoggedIn, hasOrganiserAuth, dadController.updatePassword);
 
-router.post('/editClassName', isLoggedIn, hasAdminAuth, dadController.editClassName);
-router.get('/searchOrders', isLoggedIn, hasAdminAuth, dadController.orderSearch);
 router.post('/searchOrders', isLoggedIn, hasAdminAuth, orderController.getSearchOrders);
-router.get('/getKidCardPath', isLoggedIn, dadController.getKidCardPath);
-router.get('/getCalendar', isLoggedIn, hasDefaultPasswordAuth, dadController.getCalendar);
-router.get('/getCalendar2', isLoggedIn, hasDefaultPasswordAuth, dadController.getCalendar2);
 
 router.get('/continue', schoolController.continues);
 router.get('/delay', schoolController.delay);
@@ -179,7 +117,6 @@ router.get('/delay', schoolController.delay);
 router.get('/confirmAmount', isLoggedIn, hasOrganiserAuth, hasDefaultPasswordAuth, schoolController.confirmAmount);
 router.get('/submit_bank_details', isLoggedIn, hasOrganiserAuth, hasDefaultPasswordAuth, schoolController.getSubmitBankDetails);
 router.post('/confirmAmount', schoolController.submitConfirmAmount);
-router.get('/amountConfirmed', dadController.amountConfirmed);
 router.post('/generateOrderItems', isLoggedIn, hasAdminAuth, dadController.generateOrderItems);
 router.post('/setShipped', isLoggedIn, hasAdminAuth, adminController.setShipped);
 router.get('/forgottenPassword', dadController.forgotten);
@@ -188,15 +125,6 @@ router.get('/resetSent', dadController.resetSent);
 router.get('/reset', dadController.reset);
 router.post('/resetPassword', dadController.resetPassword);
 
-router.post('/generateCard', isLoggedIn, hasAdminAuth, dadController.generateCard);
-router.post('/generateCalendar', isLoggedIn, hasAdminAuth, dadController.generateCalendar);
-
-router.get('/account', isLoggedIn, hasAdminAuth, dadController.getAccount);
-
-router.get('/createYourOwnCard', isLoggedIn, hasParentAuth, dadController.createYourOwnCard);
-
-router.post('/updateFirstLogin', isLoggedIn, hasParentAuth, dashboardController.updateFirstLogin);
-
 router.get('/parentDashboard2', isLoggedIn, hasParentAuth, hasDefaultPasswordAuth, dashboardController.parentDashboard);
 router.get('/shop', isLoggedIn, hasParentAuth, hasDefaultPasswordAuth, shopController.shop);
 router.post('/validateShippingDetails', isLoggedIn, hasParentAuth, hasDefaultPasswordAuth, dashboardController.validateShippingDetails);
@@ -204,7 +132,6 @@ router.get('/productItem', isLoggedIn, hasParentAuth, hasDefaultPasswordAuth, pr
 
 router.get('/getProductItem', isLoggedIn, hasDefaultPasswordAuth, dashboardController.getProductItem);
 
-router.post('/updateProductItem', isLoggedIn, hasDefaultPasswordAuth, dadController.updateProductItem);
 router.get('/createProductItemJobs', isLoggedIn, dadController.getProductItemJob);
 
 router.get('/orderHistory', isLoggedIn, hasParentAuth, dashboardController.getOrderHistory);
@@ -249,7 +176,6 @@ router.get('/getAccountIdForKidNumber', isLoggedIn, hasParentAuth, hasDefaultPas
 router.get('/getSchoolOrderInstruction', isLoggedIn, hasDefaultPasswordAuth, hasOrganiserOrAdminAuth, classController.getSchoolOrderInstruction);
 
 router.get('/getClassOrderInstruction', isLoggedIn, hasDefaultPasswordAuth, hasOrganiserOrAdminAuth, classController.getClassOrderInstruction);
-router.get('/createSchoolOrderInstructionJob', isLoggedIn, hasDefaultPasswordAuth, hasOrganiserOrAdminAuth, classController.getCreateOrderInstructionJob);
 
 router.get('/createOrderInstructionJob', isLoggedIn, hasDefaultPasswordAuth, hasOrganiserOrAdminAuth, classController.getCreateOrderInstructionJob);
 router.get('/*.html', (req, res) => {
@@ -287,5 +213,7 @@ router.get('/accounts_linked_no_order', isLoggedIn, hasDefaultPasswordAuth, hasA
 router.get('/accounts_linked_uploaded_no_order', isLoggedIn, hasDefaultPasswordAuth, hasAdminAuth, adminController.getAccountsLinkedNoOrderButUploadedPicture);
 
 router.post('/update_order_basket_item', isLoggedIn, hasAdminAuth, adminController.updateOrderBasketItem);
+
+router.get('/update_jobs', isLoggedIn, queueController.getUpdateJobs);
 
 module.exports = router;

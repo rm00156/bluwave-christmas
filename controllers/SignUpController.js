@@ -1,7 +1,6 @@
 const passport = require('passport');
 const { isEmpty } = require('lodash');
 const fetch = require('node-fetch');
-const { stringify } = require('querystring');
 const models = require('../models');
 const {
   validateUser,
@@ -21,12 +20,14 @@ async function processCaptcha(req, res) {
     return res.json({ error: 'Token not defined' });
   }
 
-  const query = stringify({
+  const params = {
     secret: process.env.captcha_secret_key,
     response: req.body.captcha,
     remoteip: req.connection.remoteAddress,
-  });
-  const verifyURL = `https://google.com/recaptcha/api/siteverify?${query}`;
+  };
+
+  const searchParams = new URLSearchParams(params);
+  const verifyURL = `https://google.com/recaptcha/api/siteverify?${searchParams.toString()}`;
 
   const body = await fetch(verifyURL).then((response) => response.json());
 

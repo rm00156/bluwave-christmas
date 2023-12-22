@@ -120,15 +120,6 @@ async function getKidById(id) {
   });
 }
 
-// async function handleLinkKid(name, years, months, classId, account, job) {
-//   const kid = await createKid(name, years, months, classId, account);
-//   const product = await productUtility.getProductByName('Create Your Own Card');
-//   const productItems = await productItemUtility.createProductItems(product, kid.code, account);
-//   job.progress(1);
-
-//   return { productItem: productItems[0], product };
-// }
-
 async function getNumberOfLinkedKids() {
   const result = await models.sequelize.query(
     'select count(k.id) as count from kids k '
@@ -137,6 +128,47 @@ async function getNumberOfLinkedKids() {
   );
   return result[0].count;
 }
+
+async function searchForKidsWithNoClass(kidNumber, name) {
+  return models.sequelize.query(
+    'select * from kids '
+      + ' where code like :kidNumber '
+      + ' and name like :name '
+      + ' and classFk is null ',
+    {
+      replacements: {
+        kidNumber: `%${kidNumber}%`,
+        name: `%${name}%`,
+      },
+      type: models.sequelize.QueryTypes.SELECT,
+    },
+  );
+}
+
+async function searchForKidsWithClass(kidNumber, name, schoolClass, school) {
+  return models.sequelize.query(
+    'select k.name, k.code , s.name as school, c.name as class from kids k '
+        + ' inner join classes c on k.classFk = c.id '
+        + ' inner join schools s on c.schoolFk = s.id '
+        + ' where k.code like :kidNumber '
+        + ' and k.name like :name '
+        + ' and c.name like :schoolClass '
+        + ' and s.name like :school ',
+    {
+      replacements: {
+        kidNumber: `%${kidNumber}%`,
+        name: `%${name}%`,
+        schoolClass: `%${schoolClass}%`,
+        school: `%${school}%`,
+      },
+      type: models.sequelize.QueryTypes.SELECT,
+    },
+  );
+}
+
+// async function searchForKids(kidNumber, name, school, schoolClass) {
+
+// }
 
 module.exports = {
   createKid,
@@ -151,6 +183,7 @@ module.exports = {
   getKidsFromClassId,
   isKidLinkedToAccountId,
   getKidById,
-  // handleLinkKid,
   getNumberOfLinkedKids,
+  searchForKidsWithNoClass,
+  searchForKidsWithClass,
 };

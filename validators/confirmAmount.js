@@ -1,6 +1,6 @@
 const validator = require('validator');
 
-exports.validateConfirmAmountDetails = function (req) {
+function validateConfirmAmountDetails(req) {
   const errors = {};
   if (!validator.isNumeric(req.body.bankAcc)) {
     errors.bankAcc = 'Please enter a valid bank account number, must not contain characters';
@@ -23,4 +23,8 @@ exports.validateConfirmAmountDetails = function (req) {
   }
 
   return errors;
+}
+
+module.exports = {
+  validateConfirmAmountDetails,
 };

@@ -1,9 +1,9 @@
 const generalUtility = require('../general/generalUtility');
 const models = require('../../models');
 const { STATUS_TYPES, STATUS_TYPES_ID } = require('./statusTypes');
-const accountUtility = require('../account/accountUtility');
-const classUtility = require('../class/classUtility');
-const orderUtility = require('../order/orderUtility');
+const { updateAccountNameAndNumber } = require('../account/accountUtility');
+const { getGiveBackAmountDetailsForClassByClassId } = require('../class/classUtility');
+const { getGiveBackAmountDetailsFromOrderDetails } = require('../order/givebackUtility');
 const { PURCHASE_BASKET_STATUS } = require('../basket/purchaseBasketStatus');
 
 async function generateClassNumber() {
@@ -148,20 +148,28 @@ async function isValidClassForSchool(schoolId, className) {
   return schoolClass == null;
 }
 
-async function getSchoolFromClassId(classId) {
-  const result = await models.sequelize.query(
-    'select s.* from schools s '
-      + ' inner join classes c on c.schoolFk = s.id '
-      + ' where c.id = :classId ',
-    { replacements: { classId }, type: models.sequelize.QueryTypes.SELECT },
-  );
-  return result.length === 0 ? null : result[0];
-}
+// async function getSchoolFromClassId(classId) {
+//   const result = await models.sequelize.query(
+//     'select s.* from schools s '
+//       + ' inner join classes c on c.schoolFk = s.id '
+//       + ' where c.id = :classId ',
+//     { replacements: { classId }, type: models.sequelize.QueryTypes.SELECT },
+//   );
+//   return result.length === 0 ? null : result[0];
+// }
 
 async function getSchoolDeadlineBySchoolId(schoolId) {
   return models.deadLine.findOne({
     where: {
       schoolFk: schoolId,
+    },
+  });
+}
+
+async function getSchoolDeadlineById(id) {
+  return models.deadLine.findOne({
+    where: {
+      id,
     },
   });
 }
@@ -262,14 +270,9 @@ function getDeadlineDetails(deadLine) {
   const now = Date.now();
   if (deadLine != null) {
     const unparsedDeadLine = deadLine.deadLineDttm;
+    const { parsedDttm } = generalUtility.getParsedDttmAndTime(unparsedDeadLine);
 
-    let month = unparsedDeadLine.getMonth() + 1;
-    month = month < 10 ? `0${month}` : month;
-    let days = unparsedDeadLine.getDate();
-    days = days < 10 ? `0${days}` : days;
-    const years = unparsedDeadLine.getFullYear();
-
-    deadLineDttm = `${years}-${month}-${days}`;
+    deadLineDttm = parsedDttm;
 
     const unparsedDeadlineTime = unparsedDeadLine.getTime();
     daysLeft = unparsedDeadlineTime - now;
@@ -528,7 +531,7 @@ async function getGiveBackAmountBreakDownPerClass(schoolId) {
 
   for (let i = 0; i < classes.length; i += 1) {
     const schoolClass = classes[i];
-    const giveBackAmountDetailsForClass = await classUtility.getGiveBackAmountDetailsForClassByClassId(
+    const giveBackAmountDetailsForClass = await getGiveBackAmountDetailsForClassByClassId(
       schoolClass.id,
     );
     giveBackAmountDetailsForClass.name = schoolClass.name;
@@ -655,7 +658,7 @@ async function getGiveBackAmount(schoolId) {
     ...orderItemDetailsForSchool,
     ...orderItemsDetailsLinkedIndirectlyToSchool,
   ];
-  return orderUtility.getGiveBackAmountDetailsFromOrderDetails(
+  return getGiveBackAmountDetailsFromOrderDetails(
     orderItemDetails,
   );
 }
@@ -829,7 +832,7 @@ async function updateSchoolDetailsForSchoolId(
 
   const school = await getSchoolFromSchoolId(schoolId);
 
-  await accountUtility.updateAccountNameAndNumber(
+  await updateAccountNameAndNumber(
     school.organiserAccountFk,
     organiserName,
     number,
@@ -861,7 +864,7 @@ module.exports = {
   getSchoolFromAccountId,
   getClassesForSchoolId,
   isValidClassForSchool,
-  getSchoolFromClassId,
+  // getSchoolFromClassId,
   getSchoolDeadlineBySchoolId,
   getNumberOfKidsLinkedToEachSchool,
   createNewStatusForSchoolId,
@@ -905,4 +908,5 @@ module.exports = {
   getAllSchools,
   updateSchoolDetailsForSchoolId,
   getSchoolWithNameAndPostCode,
+  getSchoolDeadlineById,
 };

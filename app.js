@@ -1,6 +1,6 @@
 const express = require('express');
 
-const notProduction = process.env.NODE_ENV != 'production';
+const notProduction = process.env.NODE_ENV !== 'production';
 if (notProduction) {
   require('dotenv').config();
 }
@@ -128,7 +128,7 @@ app.use('/', indexRouter);
 //   });
 
 // error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -136,7 +136,7 @@ app.use((err, req, res, next) => {
   // render the error page
   res.status(err.status || 500);
   console.log(err);
-  req.app.get('env') === 'development' ? res.render('error') : res.render('404', { user: req.user });
+  return req.app.get('env') === 'development' ? res.render('error') : res.render('404', { user: req.user });
 });
 
 module.exports = app;

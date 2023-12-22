@@ -71,14 +71,6 @@ async function addUpdateCardJob(classFk, kidId, age, name, displaySchool, displa
   });
 }
 
-async function updateCalendarJob(kidId, calendarId) {
-  return workerQueue.add({ process: 'updateCalendar', kidId, calendarId });
-}
-
-async function updateProductItemJob(productItemId) {
-  return workerQueue.add({ process: 'updateProductItem', productItemId });
-}
-
 async function addArtworkPicJob(kidId, name, age, displaySchool, month, displayClass, displayAge, file) {
   return workerQueue.add({
     process: 'artworkPic',
@@ -201,6 +193,24 @@ async function linkKidJob(name, years, months, classId, account) {
   });
 }
 
+async function getUpdateJobs(req, res) {
+  const { id } = req.query;
+  const job = await getJobId(id);
+
+  if (job === null) {
+    res.status(404).end();
+  } else {
+    const state = await job.getState();
+    const progress = job._progress;
+    const reason = job.failedReason;
+    const pdfPath = (job.returnvalue === null) ? undefined : (job.returnvalue).pdfPath;
+    const { process } = job.data;
+    res.json({
+      id, state, progress, reason, pdfPath, process,
+    });
+  }
+}
+
 module.exports = {
   addClassOrderInstructionJob,
   addSchoolOrderInstructionJob,
@@ -210,8 +220,6 @@ module.exports = {
   addPurchaseEmailJob,
   addCreateClassJob,
   addUpdateCardJob,
-  updateCalendarJob,
-  updateProductItemJob,
   addArtworkPicJob,
   addCreateCardAminJob,
   addResetEmailJob,
@@ -228,4 +236,5 @@ module.exports = {
   addPurchaseOrdersJob,
   generateOrderDetailsJob,
   linkKidJob,
+  getUpdateJobs,
 };

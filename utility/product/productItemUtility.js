@@ -4,7 +4,26 @@ const generalUtility = require('../general/generalUtility');
 const accountUtility = require('../account/accountUtility');
 const kidUtility = require('../kid/kidUtility');
 const productUtility = require('./productUtility');
+
 const env = process.env.NODE_ENV;
+
+function getDefaultDisplayOptionsForKid(age, month) {
+  let displayYears;
+  let displayMonths;
+  let displayBoth;
+
+  if (age !== 0 && month !== 0) {
+    // display both
+    displayBoth = 'true';
+  } else if (age !== 0) {
+    // display year
+    displayYears = 'true';
+  } else {
+    // display month
+    displayMonths = 'true';
+  }
+  return { displayYears, displayMonths, displayBoth };
+}
 
 async function createProductItem(details) {
   return models.productItem.create(details);
@@ -29,25 +48,16 @@ async function getNewProductItemNumber() {
 }
 
 async function generateProductItemPdf(data, productVariantItem) {
-  const { page, browser } = await generalUtility.setUpPageAndBrowser(productVariantItem, data);
+  const { page, browser } = await generalUtility.setUpPageAndBrowser(productVariantItem.templateName, data);
 
   let testDevelopment = '';
-  if(env === 'test' || env === 'development') {
+  if (env === 'test' || env === 'development') {
     testDevelopment = `${env}/`;
   }
   const fileLocation = `${testDevelopment}${data.school}/${data.year}/${data.class}/`;
   const filename = `${data.name}_${data.code}.pdf`;
 
-  await page.setViewport({ width: 1400, height: 800, deviceScaleFactor: 2 });
-  const buffer = await page.pdf({
-    printBackground: true,
-    landscape: false,
-    width: productVariantItem.width,
-    height: productVariantItem.height,
-  });
-
-  await page.close();
-  await browser.close();
+  const buffer = await generalUtility.createPdfAsBuffer(page, productVariantItem.width, productVariantItem.height, browser);
 
   const s3FileLocation = `${fileLocation + Date.now()}_${filename}`;
   await generalUtility.uploadBodyToS3Bucket(buffer, s3FileLocation);
@@ -217,7 +227,7 @@ async function getProductItemsWithProductForAccount(
     + ' and pi.deleteFl = false '
     + ' and pv.deleteFl = false ';
 
-  if (kidId !== undefined) query = `${query} and pi.kidFk = :kidId `;
+  if (kidId !== undefined && kidId !== null) query = `${query} and pi.kidFk = :kidId `;
 
   return models.sequelize.query(query, {
     replacements: { kidId, productId, accountId },
@@ -234,20 +244,7 @@ async function generateProductItemForKid(
   // no productItem created at this point
   // we will be returning the created procuctItem
 
-  let displayYears;
-  let displayMonths;
-  let displayBoth;
-
-  if (kid.age !== 0 && kid.month !== 0) {
-    // display both
-    displayBoth = 'true';
-  } else if (kid.age !== 0) {
-    // display year
-    displayYears = 'true';
-  } else {
-    // display month
-    displayMonths = 'true';
-  }
+  const { displayYears, displayMonths, displayBoth } = getDefaultDisplayOptionsForKid(kid.age, kid.month);
   const kidSchoolClassDetails = await kidUtility.getKidClassAndSchoolFromKidId(
     kid.id,
   );
@@ -313,6 +310,14 @@ async function createProductItemGroup() {
   return models.productItemGroup.create({
     deleteFl: false,
     versionNo: 1,
+  });
+}
+
+async function getProductItemGroupById(id) {
+  return models.productItemGroup.findOne({
+    where: {
+      id,
+    },
   });
 }
 
@@ -462,7 +467,21 @@ async function getProductVariantForProductItemId(productItemId) {
   return result.length === 0 ? null : result[0];
 }
 
-async function generateUpdateProductItem(kid, productId, accountId) {
+async function setPdfPathForProductItemById(id, pdfPath) {
+  await models.productItem.update(
+    {
+      pdfPath,
+    },
+    {
+      where: {
+        id,
+        versionNo: models.sequelize.literal('versionNo + 1'),
+      },
+    },
+  );
+}
+
+async function getProductItemsAndKidSchoolClassDetails(kid, productId, accountId) {
   let kidSchoolClassDetails = null;
   let productItems;
   if (kid == null) {
@@ -476,33 +495,22 @@ async function generateUpdateProductItem(kid, productId, accountId) {
     );
     productItems = await getProductItemsWithProductForKid(productId, kid.id);
   }
+  return { productItems, kidSchoolClassDetails };
+}
+
+async function generateUpdateProductItem(kid, productId, accountId) {
+  const { productItems, kidSchoolClassDetails } = await getProductItemsAndKidSchoolClassDetails(kid, productId, accountId);
   for (let i = 0; i < productItems.length; i += 1) {
     const productItem = productItems[i];
 
-    let displayYears;
-    let displayMonths;
-    let displayBoth;
-
-    if (productItem.text2 !== '0' && productItem.text3 !== '0') {
-      // display both
-      displayBoth = 'true';
-    } else if (productItem.text2 !== '0') {
-      // display year
-      displayYears = 'true';
-    } else {
-      // display month
-      displayMonths = 'true';
-    }
+    const { displayYears, displayMonths, displayBoth } = getDefaultDisplayOptionsForKid(Number(productItem.text2), Number(productItem.text3));
 
     const data = {
-      // "school":kidSchoolClassDetails.school,
       code: productItem.productItemNumber,
       name: productItem.text1,
       age: productItem.text2,
       month: productItem.text3,
-      // "class":kidSchoolClassDetails.class,
       year: 2022,
-      // "kidId":kid.id,
       displaySchool: productItem.displayItem1,
       displayClass: productItem.displayItem2,
       displayAge: productItem.displayItem3,
@@ -526,27 +534,8 @@ async function generateUpdateProductItem(kid, productId, accountId) {
     }
 
     const s3Path = await generateProductItemPdf(data, productVariantItem);
-    await models.productItem.update(
-      {
-        pdfPath: s3Path,
-      },
-      {
-        where: {
-          id: productItem.id,
-          versionNo: models.sequelize.literal('versionNo + 1'),
-        },
-      },
-    );
+    await setPdfPathForProductItemById(productItem.id, s3Path);
   }
-}
-
-async function getPriceForProductItemId(id) {
-  return models.sequelize.query(
-    'select pv.price from productItems pi '
-      + ' inner join productVariants pv on pi.productVariantFk = pv.id '
-      + ' where pi.id = :id',
-    { replacements: { id }, type: models.sequelize.QueryTypes.SELECT },
-  );
 }
 
 async function getProductItemsForKidNumber(kidNumber) {
@@ -659,6 +648,16 @@ async function handleLinkKid(name, years, months, classId, account, job) {
   return { productItem: productItems[0], product };
 }
 
+async function setClassIdForProductItem(classId, productItemId) {
+  await models.productItem.update({
+    classFk: classId,
+  }, {
+    where: {
+      id: productItemId,
+    },
+  });
+}
+
 module.exports = {
   createProductItem,
   getProductItemByNumber,
@@ -674,7 +673,6 @@ module.exports = {
   getProductItemDetailsByNumber,
   generateUpdateProductItem,
   getProductVariantForProductItemId,
-  getPriceForProductItemId,
   getProductItemsForKidNumber,
   getProductItemsForAccountNumber,
   createProductItemByVariantAccountAndKid,
@@ -682,5 +680,11 @@ module.exports = {
   getTemplateFromProductItemId,
   generateProductItemForKid,
   handleLinkKid,
-  generateProductItemPdf
+  generateProductItemPdf,
+  createProductItemObjectNoKid,
+  createProductItemObject,
+  getDefaultDisplayOptionsForKid,
+  setPdfPathForProductItemById,
+  getProductItemGroupById,
+  setClassIdForProductItem,
 };

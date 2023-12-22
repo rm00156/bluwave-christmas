@@ -44,7 +44,7 @@ $(document).ready(function(){
 
     $('#classes').DataTable({ searching: false,lengthChange:false});
     $('#orderClasses').DataTable();
-    setInterval(updateOrderInstructionJobs,1000);
+    setInterval(updateJobs,1000);
 
 });
 
@@ -224,42 +224,38 @@ function orderInstruction(e)
     })
 }
 
-function updateOrderInstructionJobs() {
-    var classSize = $('#classSize').val();
-    classSize = parseFloat(classSize);
 
+  function updateJobs() {
     for (var id of Object.keys(orderInstructionJobs)) {
-        var data = {id:id};
-        $.ajax({
-            type:'get',
-            url:'/createSchoolOrderInstructionJob',
-            data:data,
-            success:function(result){
-                if(result.process == 'schoolOrderInstruction')
-                {
-                  var progress = result.progress;
-                  var totalSteps = ((5 * classSize) + 4).toFixed(0);
-            
-                  var progressAsPercentage = ((progress/totalSteps) * 100).toFixed(2);
-            
-                  $('#progress').attr('style','height:25px;width:' + progressAsPercentage + '%');
-                  $('#progress').text(progressAsPercentage + '%');
-            
-                  console.log(totalSteps);
-                  console.log(result.instructionPath);
-                  if(progress == totalSteps && result.instructionPath != undefined)
-                  {
-                    var jobId = result.id;
-                    $('#overlay4').attr('style','display:none');
-                    $('#progress').attr('style','height:25px;width:' + 0 + '%');
-                    $('#progress').text(0 + '%');
-                    delete orderInstructionJobs[jobId];
-                    window.location = result.instructionPath;
-                           
-                  }
-                }
+      var data = { id: id };
+  
+      $.ajax({
+        type: "get",
+        url: "/update_jobs",
+        data: data,
+        success: function (result) {
+          if (result.process == "schoolOrderInstruction") {
+            const {percentage, completed} = result.progress;
+  
+            $("#progress").attr(
+              "style",
+              "height:25px;width:" + percentage + "%"
+            );
+            $("#progress").text(percentage + "%");
+  
+            console.log(result.pdfPath);
+            if (completed === true && result.pdfPath !== undefined) {
+              var jobId = result.id;
+              $("#overlay4").attr("style", "display:none");
+              $("#progress").attr("style", "height:25px;width:" + 0 + "%");
+              $("#progress").text(0 + "%");
+              delete orderInstructionJobs[jobId];
+              console.log(result.pdfPath)
+              window.location = result.pdfPath;
             }
-        })   
+          }
+        },
+      });
     }
   }
 
