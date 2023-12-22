@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function CharityAmounts(sequelize, Sequelize) {
   const CharityAmount = sequelize.define(
     'charityAmount',
     {
@@ -53,4 +53,6 @@ module.exports = function (sequelize, Sequelize) {
   );
 
   return CharityAmount;
-};
+}
+
+module.exports = CharityAmounts;

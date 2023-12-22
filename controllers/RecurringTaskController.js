@@ -1,4 +1,5 @@
 const nodeSchedule = require('node-schedule');
+const logger = require('pino')();
 const queueController = require('./QueueController');
 
 async function charityAmountBackTask() {
@@ -8,7 +9,7 @@ async function charityAmountBackTask() {
   // rule.second = 20;
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('charity');
-    console.log('charity amount back recurring task starting');
+    logger.info('charity amount back recurring task starting');
   });
 }
 
@@ -19,7 +20,7 @@ async function sendCharityAmountConfirmedSendToSchoolReminder() {
   // rule.second = 20;
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('charityAmountConfirmed');
-    console.log('charity amount confirmed recurring task starting');
+    logger.info('charity amount confirmed recurring task starting');
   });
 }
 
@@ -30,7 +31,7 @@ async function noDeadlineResponseTask() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('noDeadlineResponse');
-    console.log('No deadline response recurring task starting');
+    logger.info('No deadline response recurring task starting');
   });
 }
 
@@ -41,7 +42,7 @@ async function parent3DaysToDeadline() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('parent3DaysToDeadline');
-    console.log('Parent 3 Days To Deadline recurring task starting');
+    logger.info('Parent 3 Days To Deadline recurring task starting');
   });
 }
 
@@ -52,7 +53,7 @@ async function parent1DaysToDeadline() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('parent1DayToDeadline');
-    console.log('Parent 1 Day To Deadline recurring task starting');
+    logger.info('Parent 1 Day To Deadline recurring task starting');
   });
 }
 
@@ -63,7 +64,7 @@ async function sendNoPurchaseMadeSinceSignUp() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('noPurchaseMadeSinceSignUp');
-    console.log('No Purchase Made Since Sign Up recurring task starting');
+    logger.info('No Purchase Made Since Sign Up recurring task starting');
   });
 }
 
@@ -74,7 +75,7 @@ async function sendOrdersNotShippedReminder() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('ordersNotShippedReminder');
-    console.log('Orders Not Shipped recurring task starting');
+    logger.info('Orders Not Shipped recurring task starting');
   });
 }
 
@@ -85,7 +86,7 @@ async function deadlineRecurringTask() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('deadline');
-    console.log('Deadline recurring task starting');
+    logger.info('Deadline recurring task starting');
   });
 }
 
@@ -97,7 +98,7 @@ async function delayRecurringTask() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('delay');
-    console.log('Delay recurring task starting');
+    logger.info('Delay recurring task starting');
   });
 }
 
@@ -108,7 +109,7 @@ async function sendSchoolArtworkPacksNotSentReminder() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('schoolArtworkPacksNotSentReminder');
-    console.log('School Artwork Packs Not Sent Reminder recurring task starting');
+    logger.info('School Artwork Packs Not Sent Reminder recurring task starting');
   });
 }
 
@@ -119,7 +120,7 @@ async function sendSchoolReadyForPrintingReminder() {
 
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('schoolReadyForPrintingReminder');
-    console.log('School Ready For Printing Reminder recurring task starting');
+    logger.info('School Ready For Printing Reminder recurring task starting');
   });
 }
 

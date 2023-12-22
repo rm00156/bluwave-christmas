@@ -5,6 +5,7 @@ const notProduction = process.env.NODE_ENV !== 'production';
 if (notProduction) {
   require('dotenv').config();
 }
+const logger = require('pino')();
 
 const redisUrlParse = require('redis-url-parse');
 const fs = require('fs-extra');
@@ -84,7 +85,7 @@ async function createEmail(type, errors, accountId) {
       versionNo: 1,
     });
   }).catch((err) => {
-    console.log(err);
+    logger.error(err);
   });
 }
 
@@ -121,10 +122,7 @@ async function sendDelayEmail(schoolId) {
     html: content,
   };
 
-  smtpTransport.sendMail(mailOptions, async (errors, res) => {
-    console.log(errors);
-    console.log(res);
-
+  smtpTransport.sendMail(mailOptions, async (errors) => {
     await createEmail('Delay', errors, account.id);
     if (!errors) {
       await models.deadLine.update(
@@ -145,7 +143,6 @@ async function sendDelayEmail(schoolId) {
 
 async function schoolNoResponseDeadline(school) {
   const { emailSentDttm } = school;
-  console.log(emailSentDttm);
   const date = new Date(emailSentDttm);
   const window = new Date();
   window.setDate(date.getDate() + 3);
@@ -182,8 +179,6 @@ async function threeDayReminder(account) {
 
   smtpTransport.sendMail(mailOptions, (errors) => {
     createEmail('Parent 3 days to Deadline Reminder', errors, account.id);
-    console.log(errors);
-    // console.log(res);
   });
 }
 
@@ -265,8 +260,6 @@ async function oneDayReminder(account) {
 
   smtpTransport.sendMail(mailOptions, (errors) => {
     createEmail('Parent 1 day to Deadline Reminder', errors, account.id);
-    console.log(errors);
-    // console.log(res);
   });
 }
 
@@ -297,7 +290,6 @@ async function updateAndGenerate(productItemId, productId, name, age, month, dis
   }
   progress += 1;
   job.progress(progress);
-  console.log('REEECE');
   for (let i = 0; i < productItems.length; i += 1) {
     const item = productItems[i];
     await models.productItem.update({
@@ -318,9 +310,7 @@ async function updateAndGenerate(productItemId, productId, name, age, month, dis
   progress += 1;
   job.progress(progress);
 
-  console.log('ZITA');
   await productItemUtility.generateUpdateProductItem(kid, productId, productItem.accountFk);
-  console.log('ALYSSA');
 
   progress += 1;
   job.progress(progress);
@@ -353,7 +343,7 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
   const s3UploadPromise = new Promise((resolve, reject) => {
     s3.upload(params, (err, data) => {
       if (err) {
-        console.log(err);
+        logger.error(err);
         reject(err);
       } else {
         resolve(data);
@@ -426,7 +416,6 @@ async function sendNoPurchaseMadeSinceSignUp(account) {
 
   smtpTransport.sendMail(mailOptions, (errors) => {
     createEmail('Noticed No Purchase After Sign Up', errors, account.id);
-    console.log(errors);
   });
 }
 
@@ -472,7 +461,6 @@ async function parent1DayToDeadline() {
   )
     .then(async (results) => {
       await forEachDayReminder(results, oneDayReminder);
-    // console.log('result ' + result);
     });
 }
 
@@ -535,12 +523,10 @@ async function sendResetEmail(email) {
             },
           }).then((account) => {
             createEmail('Reset Password', errors, account.id);
-            console.log(errors);
-            // console.log(res);
           });
         });
       }).catch((err) => {
-        console.log(err);
+        logger.error(err);
       });
     } else {
       models.resetEmail.update({
@@ -560,7 +546,7 @@ async function sendResetEmail(email) {
           html: content,
         };
 
-        smtpTransport.sendMail(mailOptions, (errors, res) => {
+        smtpTransport.sendMail(mailOptions, (errors) => {
           models.account.findOne({
 
             where: {
@@ -568,21 +554,18 @@ async function sendResetEmail(email) {
             },
           }).then((account) => {
             createEmail('Reset Password', errors, account.id);
-            console.log(errors);
-            console.log(res);
           });
         });
       }).catch((err) => {
-        console.log(err);
+        logger.error(err);
       });
     }
   }).catch((err) => {
-    console.log(err);
+    logger.error(err);
   });
 }
 
 async function testTrial(x, y, width, height, name, nameX, nameY, nameHeight, nameWidth) {
-  console.log(`name X  ${name}`);
   const newWidth = parseFloat(width);
   const newHeight = parseFloat(height);
 
@@ -635,10 +618,7 @@ async function test() {
     html: content,
   };
 
-  smtpTransport.sendMail(mailOptions, (errors, res) => {
-    console.log(errors);
-    console.log(res);
-  });
+  smtpTransport.sendMail(mailOptions);
 }
 
 async function sendConfirmDetailsEmail(schoolId, name, bankAcc, sortCode, type) {
@@ -677,7 +657,7 @@ async function sendConfirmDetailsEmail(schoolId, name, bankAcc, sortCode, type) 
     html: content,
   };
 
-  smtpTransport.sendMail(mailOptions, async (errors, res) => {
+  smtpTransport.sendMail(mailOptions, async (errors) => {
     const account = await models.account.findOne({
       where: {
         email: school.email,
@@ -685,8 +665,6 @@ async function sendConfirmDetailsEmail(schoolId, name, bankAcc, sortCode, type) 
     });
 
     await createEmail('Confirmed Charity Amount Bluwave', errors, account.id);
-    console.log(errors);
-    console.log(res);
   });
 }
 
@@ -704,7 +682,6 @@ async function noDeadlineResponse() {
     + ' and d.delayFl is false '
     + ' and d.emailSentFl = true ', { type: models.sequelize.QueryTypes.SELECT });
 
-  console.log(schools);
   // for each school
   // check whether we have gone passed the 3 day window
   await forEachNoResponseDeadline(schools, schoolNoResponseDeadline);
@@ -722,8 +699,6 @@ async function charity() {
   + ' and st.statusTypeFk = 9', { replacements: { completed: 'Completed' }, type: models.sequelize.QueryTypes.SELECT });
 
   if (schools.length > 0) {
-    console.log(schools);
-
     for (let i = 0; i < schools.length; i += 1) {
       const school = schools[i];
 
@@ -792,8 +767,6 @@ async function sendDeadlineEmail(schoolId) {
     },
   });
 
-  console.log(deadline);
-
   const data = {
     continueLink: `${urlPrefix}/continue?verificationCode=${deadline.verificationCode}`,
     delayLink: `${urlPrefix}/delay?verificationCode=${deadline.verificationCode}`,
@@ -809,7 +782,7 @@ async function sendDeadlineEmail(schoolId) {
 
   };
 
-  smtpTransport.sendMail(mailOptions, async (errors, res) => {
+  smtpTransport.sendMail(mailOptions, async (errors) => {
     await createEmail('Deadline', errors, account.id);
 
     if (!errors) {
@@ -826,9 +799,6 @@ async function sendDeadlineEmail(schoolId) {
         },
       );
     }
-
-    console.log(errors);
-    console.log(res);
   });
 }
 
@@ -838,9 +808,7 @@ async function deadlineRecurringTask() {
               + ' where d.emailSentFl = false '
               + ' and concat(date(d.deadLineDttm ), :beforeMidnight)< now() '
               + ' and d.continueFl = false '
-              + ' and d.delayFl = false ', { replacements: { beforeMidnight: ' 23:59:59' }, type: models.sequelize.QueryTypes.SELECT }).catch((err) => {
-    console.log(err);
-  });
+              + ' and d.delayFl = false ', { replacements: { beforeMidnight: ' 23:59:59' }, type: models.sequelize.QueryTypes.SELECT });
 
   for (let i = 0; i < deadlines.length; i += 1) {
     const deadline = deadlines[i];
@@ -917,11 +885,7 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
     };
 
     smtpTransport.sendMail(mailOptions, (errors) => {
-      console.log('BIg guns');
       createEmail((bluwave) ? 'Parent Purchase Bluwave' : 'Parent Purchase', errors, parentAccount.id);
-      console.log(errors);
-      // console.log(res);
-      // job.progress(100);
     });
   } else {
     const { school } = basketItem;
@@ -962,27 +926,15 @@ async function sendPurchaseEmail(bluwave, basketItems, orderNumber, date, total,
 
     const content = await generalUtility.compile(template, data);
 
-    // var attachmentPath = await orderController.getOrderDetailsGroupByTypeForId(purchaseBasket.id, job);
-    // console.log(attachmentPath.pdfPath)
     const mailOptions = {
       from: process.env.mailServer_email,
       to: bluwave ? process.env.mailServer_email : basketItems[0].email,
       subject: 'Thanks for making a purchase',
       html: content,
     };
-    // if(bluwave === true)
-    // {
-    //   mailOptions['attachments'] = [{
-    //     path:attachmentPath.pdfPath,
-    //     filename:purchaseBasket.orderNumber + '.zip'
-    //   }];
-    // }
 
     smtpTransport.sendMail(mailOptions, (errors) => {
       createEmail((bluwave) ? 'Individual Purchase' : 'Individual Purchase Bluwave', errors, parentAccount.id);
-      console.log(errors);
-      // console.log(res);
-      // job.progress(100);
     });
   }
 }
@@ -1020,15 +972,13 @@ function sendOrganiserRegistrationEmailToBluwave(school, name, account, numberOf
   + '<p>Bluwave Ltd, Registered in England and Wales (registered no. 048 400 51) Registered Office: Unit 1b 1a Philip Walk SE15 3NH, United Kingdom.</p><br>'
   + '<p>Website: <a href="www.thebluwavegroup.com">www.thebluwavegroup.com</a></p>',
   };
-  smtpTransport.sendMail(mailOptions, (errors, res) => {
+  smtpTransport.sendMail(mailOptions, (errors) => {
     createEmail('Organiser Registration Bluwave', errors, account.id);
-    console.log(errors);
-    console.log(res);
     job.progress(100);
   });
 }
 
-const sendOrganiserRegistrationEmail = async function (email, school, name, job) {
+async function sendOrganiserRegistrationEmail(email, school, name, job) {
   const smtpTransport = nodeMailer.createTransport({
     host: process.env.mailServer_host,
     port: 587,
@@ -1048,20 +998,17 @@ const sendOrganiserRegistrationEmail = async function (email, school, name, job)
     html: content,
   };
 
-  smtpTransport.sendMail(mailOptions, (errors, res) => {
+  smtpTransport.sendMail(mailOptions, (errors) => {
     models.account.findOne({
       where: {
         email,
       },
     }).then((account) => {
       createEmail('Organiser Registration', errors, account.id);
-
-      console.log(errors);
-      console.log(res);
       job.progress(100);
     });
   });
-};
+}
 
 function sendParentRegistrationEmailToBluwave(email, name, telephoneNo, job) {
   const smtpTransport = nodeMailer.createTransport({
@@ -1091,15 +1038,13 @@ function sendParentRegistrationEmailToBluwave(email, name, telephoneNo, job) {
     + '<p>Bluwave Ltd, Registered in England and Wales (registered no. 048 400 51) Registered Office: Unit 1b 1a Philip Walk SE15 3NH, United Kingdom.</p><br>'
     + '<p>Website: <a href="www.thebluwavegroup.com">www.thebluwavegroup.com</a></p>',
   };
-  smtpTransport.sendMail(mailOptions, (errors, res) => {
+  smtpTransport.sendMail(mailOptions, (errors) => {
     models.account.findOne({
       where: {
         email,
       },
     }).then((account) => {
       createEmail(emailType, errors, account.id);
-      console.log(errors);
-      console.log(res);
       job.progress(100);
     });
   });
@@ -1141,8 +1086,6 @@ async function sendParentRegistrationEmail(email, job) {
     };
 
     smtpTransport.sendMail(mailOptions, async (errors) => {
-    // console.log(res);
-
       createEmail(emailType, errors, account.id);
 
       job.progress(100);
@@ -1234,7 +1177,6 @@ async function sendOrdersNotShippedReminder() {
         + ' inner join shippingAddresses sa on pb.shippingAddressFk = sa.id where pb.status = :completed '
         + ' and pb.shippedFl is false ', { replacements: { completed: 'Completed' }, type: models.sequelize.QueryTypes.SELECT });
 
-  console.log(orderNumbers);
   if (orderNumbers.length > 0) {
     const smtpTransport = nodeMailer.createTransport({
       host: process.env.mailServer_host,
@@ -1256,7 +1198,6 @@ async function sendOrdersNotShippedReminder() {
 
     smtpTransport.sendMail(mailOptions, async (errors) => {
       createEmail('Orders Not Shipped Reminder', errors, 1);
-      console.log(errors);
     });
   }
 }
@@ -1270,7 +1211,6 @@ async function sendSchoolArtworkPacksNotSentReminder() {
     { type: models.sequelize.QueryTypes.SELECT },
   );
 
-  console.log(schools);
   if (schools.length > 0) {
     const smtpTransport = nodeMailer.createTransport({
       host: process.env.mailServer_host,
@@ -1292,7 +1232,6 @@ async function sendSchoolArtworkPacksNotSentReminder() {
 
     smtpTransport.sendMail(mailOptions, async (errors) => {
       createEmail('Artwork Pack Not Sent Reminder', errors, 1);
-      console.log(errors);
     });
   }
 }
@@ -1307,7 +1246,6 @@ async function sendSchoolReadyForPrintingReminder() {
     { replacements: { printing: 'Printing' }, type: models.sequelize.QueryTypes.SELECT },
   );
 
-  console.log(schools);
   if (schools.length > 0) {
     const smtpTransport = nodeMailer.createTransport({
       host: process.env.mailServer_host,
@@ -1329,7 +1267,6 @@ async function sendSchoolReadyForPrintingReminder() {
 
     smtpTransport.sendMail(mailOptions, async (errors) => {
       createEmail('Printing Reminder', errors, 1);
-      console.log(errors);
     });
   }
 }
@@ -1357,7 +1294,6 @@ async function sendCharityAmountConfirmedSendToSchoolReminder() {
 
     smtpTransport.sendMail(mailOptions, async (errors) => {
       createEmail('Charity Amount Confirmed Reminder', errors, 1);
-      console.log(errors);
     });
   }
 }
@@ -1381,7 +1317,6 @@ function start() {
     } if (job.data.process === 'parentRegistrationEmailToBluwave') {
       return sendParentRegistrationEmailToBluwave(job.data.email, job.data.name, job.data.telephoneNo, job);
     } if (job.data.process === 'organiserRegistrationEmailToBluwave') {
-      console.log('reece');
       return sendOrganiserRegistrationEmailToBluwave(job.data.school, job.data.name, job.data.account, job.data.numberOfClasses, job);
     } if (job.data.process === 'purchaseEmail' || job.data.process === 'purchaseEmailToBluwave') {
       if (job.data.process === 'purchaseEmail') return sendPurchaseEmail(false, job.data.basketItems, job.data.orderNumber, job.data.date, job.data.total, job.data.time, job);

@@ -35,7 +35,7 @@ router.get('/addSchool', isLoggedIn, hasAdminAuth, (req, res) => {
 router.get('/getClasses', isLoggedIn, dadController.getClasses);
 router.get('/getKids', isLoggedIn, dadController.getKids);
 
-router.post('/searchAccounts', isLoggedIn, hasAdminAuth, adminController.searchAccounts);
+router.post('/searchAccounts', isLoggedIn, hasAdminAuth, adminController.searchForAccounts);
 router.post('/createClass', isLoggedIn, hasAdminAuth, dadController.createClass);
 
 router.post('/searchSchool', isLoggedIn, dadController.searchSchoolsResults);

@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function UploadFileNames(sequelize, Sequelize) {
   const UploadFileName = sequelize.define('uploadFileName', {
 
     id: {
@@ -12,4 +12,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return UploadFileName;
-};
+}
+
+module.exports = UploadFileNames;

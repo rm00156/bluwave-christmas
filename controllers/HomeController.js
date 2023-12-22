@@ -1,19 +1,19 @@
 const basketUtility = require('../utility/basket/basketUtility');
 const kidUtility = require('../utility/kid/kidUtility');
 
-exports.login = function (req, res) {
+function login(req, res) {
   const { reset } = req.query;
   const confirm = req.query.confirmAmount;
 
   if (reset === 'success') res.render('home4', { user: req.user, reset: true, confirm });
   else res.render('home4', { user: req.user, confirm });
-};
+}
 
-exports.home = async function (req, res) {
+async function home(req, res) {
   res.render('home5');
-};
+}
 
-exports.terms = async function (req, res) {
+async function terms(req, res) {
   const account = req.user;
   let basketItemsDetails = null;
   let isKidsLinkedToAccount = null;
@@ -27,9 +27,9 @@ exports.terms = async function (req, res) {
     basketItemsDetails,
     isKidsLinkedToAccount,
   });
-};
+}
 
-exports.privacy = async function (req, res) {
+async function privacy(req, res) {
   const account = req.user;
   let basketItemsDetails = null;
   let isKidsLinkedToAccount = null;
@@ -43,9 +43,9 @@ exports.privacy = async function (req, res) {
     basketItemsDetails,
     isKidsLinkedToAccount,
   });
-};
+}
 
-exports.about = async function (req, res) {
+async function about(req, res) {
   const account = req.user;
   let basketItemsDetails = null;
   let isKidsLinkedToAccount = null;
@@ -59,9 +59,9 @@ exports.about = async function (req, res) {
     basketItemsDetails,
     isKidsLinkedToAccount,
   });
-};
+}
 
-exports.faqs = async function (req, res) {
+async function faqs(req, res) {
   const account = req.user;
   let basketItemsDetails = null;
   let isKidsLinkedToAccount = null;
@@ -75,4 +75,13 @@ exports.faqs = async function (req, res) {
     basketItemsDetails,
     isKidsLinkedToAccount,
   });
+}
+
+module.exports = {
+  about,
+  faqs,
+  home,
+  login,
+  privacy,
+  terms,
 };

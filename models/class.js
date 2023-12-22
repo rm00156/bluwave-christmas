@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function Classes(sequelize, Sequelize) {
   const Class = sequelize.define('class', {
 
     id: {
@@ -61,4 +61,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return Class;
-};
+}
+
+module.exports = Classes;

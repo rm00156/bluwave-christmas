@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function Templates(sequelize, Sequelize) {
   const Template = sequelize.define(
     'template',
     {
@@ -82,4 +82,6 @@ module.exports = function (sequelize, Sequelize) {
   );
 
   return Template;
-};
+}
+
+module.exports = Templates;

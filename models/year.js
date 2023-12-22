@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function Years(sequelize, Sequelize) {
   const Year = sequelize.define('year', {
 
     id: {
@@ -28,4 +28,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return Year;
-};
+}
+
+module.exports = Years;

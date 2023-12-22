@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function Countries(sequelize, Sequelize) {
   const Country = sequelize.define('country', {
 
     id: {
@@ -29,4 +29,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return Country;
-};
+}
+
+module.exports = Countries;

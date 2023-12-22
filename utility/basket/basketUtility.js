@@ -1,6 +1,7 @@
 const models = require('../../models');
 const { PURCHASE_BASKET_STATUS } = require('./purchaseBasketStatus');
 const productItemUtility = require('../product/productItemUtility');
+const { getKidsFromAccountId } = require('../kid/kidUtility');
 
 async function createBasketItem(
   accountId,
@@ -150,6 +151,17 @@ async function updateOrderBasketItem(path, fileName, picture, basketItemId) {
   });
 }
 
+async function updateBaskeItemQuantityAndCostById(id, quantity, cost) {
+  await models.basketItem.update(
+    { quantity, cost, versionNo: models.sequelize.literal('versionNo + 1') },
+    {
+      where: {
+        id,
+      },
+    },
+  );
+}
+
 async function getBasketItemDetailsForBasketItemIds(basketItemIds) {
   return models.sequelize.query('select b.*, pv.name as productVariantName, p.name as productName, pv.price from basketItems b '
     + ' inner join productItems pi on b.productItemFk = pi.id '
@@ -162,8 +174,8 @@ async function getBasketItemsDetailsForPurchaseBasketId(purchaseBasketId) {
   const basketItems = await models.sequelize.query(
     'select pv.price, a.email, pi.productItemNumber as code, concat( pv.name, " - ", p.name) '
       + ' as productVariantName, b.id as basketItemId, b.* , '
-      + ' pi.text1 as kidName, if(pi.displayItem3=true,:yes,:no) as displayAge,if(pi.displayItem2=true,:yes,:no) '
-      + ' as displayClass,if(pi.displayItem1=true,:yes,:no) as displaySchool, FORMAT(b.cost,2) as cost, pi.classFk, pi.id as productItemId from  basketitems b '
+      + ' pi.text1 as kidName, if(b.displayItem3,:yes,:no) as displayAge,if(b.displayItem2,:yes,:no) '
+      + ' as displayClass,if(b.displayItem1,:yes,:no) as displaySchool, FORMAT(b.cost,2) as cost, pi.classFk, pi.id as productItemId from  basketitems b '
       + ' inner join productItems pi on b.productItemFk = pi.id '
       + ' inner join productVariants pv on pi.productVariantFk = pv.id '
       + ' inner join products p on pv.productFk = p.id '
@@ -190,25 +202,29 @@ async function getBasketItemsDetailsForPurchaseBasketId(purchaseBasketId) {
   };
 }
 
-async function updateClassForPurchasedItems(basketItemsDetails) {
-  const productItemsWithClass = [];
-  const productItemsWithoutClass = [];
+async function updateClassForPurchasedItems(basketItems) {
+  if (basketItems.length === 0) return;
 
-  basketItemsDetails.forEach((item) => {
-    if (item.classFk === null) productItemsWithoutClass.push(item);
-    else productItemsWithClass.push(item);
-  });
+  const accountId = basketItems[0].accountFk;
+  const kids = await getKidsFromAccountId(accountId);
 
-  if (productItemsWithClass.length === 0) return;
+  const kid = kids.find((k) => k.classFk !== null);
+  if (kid === undefined) return;
 
-  if (productItemsWithoutClass.length === 0) return;
+  const classId = kid.classFk;
+  const productItemIds = basketItems.filter((b) => b.classFk === null).map((item) => item.productItemId);
 
-  const classId = productItemsWithClass[0].classFk;
+  if (productItemIds.length === 0) return;
+  await productItemUtility.setClassIdForProductItems(classId, productItemIds);
+  // }
+}
 
-  for (let i = 0; i < productItemsWithoutClass.length; i += 1) {
-    const item = productItemsWithoutClass[i];
-    await productItemUtility.setClassIdForProductItem(classId, item.productItemId);
-  }
+async function getPriceForBasketItemId(id) {
+  const price = await models.sequelize.query('select pv.price from productItems pi '
+                + ' inner join basketItems b on b.productItemFk = pi.id '
+                + ' inner join productVariants pv on pi.productVariantFk = pv.id '
+                + ' where b.id = :id', { replacements: { id }, type: models.sequelize.QueryTypes.SELECT });
+  return price[0].price;
 }
 
 module.exports = {
@@ -226,4 +242,6 @@ module.exports = {
   updateOrderBasketItem,
   getBasketItemDetailsForBasketItemIds,
   updateClassForPurchasedItems,
+  getPriceForBasketItemId,
+  updateBaskeItemQuantityAndCostById,
 };

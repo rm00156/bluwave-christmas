@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function ProductVariantTypes(sequelize, Sequelize) {
   const ProductVariantType = sequelize.define(
     'productVariantType',
     {
@@ -33,4 +33,6 @@ module.exports = function (sequelize, Sequelize) {
   );
 
   return ProductVariantType;
-};
+}
+
+module.exports = ProductVariantTypes;

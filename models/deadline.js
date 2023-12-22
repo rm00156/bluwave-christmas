@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function Deadlines(sequelize, Sequelize) {
   const DeadLine = sequelize.define('deadLine', {
 
     id: {
@@ -60,4 +60,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return DeadLine;
-};
+}
+
+module.exports = Deadlines;

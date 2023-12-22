@@ -93,7 +93,6 @@ function classOrders(req, res) {
 
 function classParticipants(req, res) {
   const { classId } = req.query;
-  console.log('romeo');
   models.class.findOne({
     where: {
       id: classId,

@@ -6,8 +6,8 @@ if (notProduction) {
 }
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-
+const morgan = require('morgan');
+const logger = require('pino')();
 const passport = require('passport');
 
 const session = require('express-session');
@@ -25,48 +25,48 @@ const dadController = require('./controllers/DadController');
 const recurringTaskController = require('./controllers/RecurringTaskController');
 
 models.sequelize.sync().then(() => {
-  console.log('Database reece has connected successfully for Dads Christmas Card app');
+  logger.info('Database reece has connected successfully for Dads Christmas Card app');
   // dadController.deadlineRecurringTask().then(()=>{
 
-  //   console.log('Initialising recurring task which will check whether a schools deadline has passed, and to send necessary emails ' +
+  //   logger.info('Initialising recurring task which will check whether a schools deadline has passed, and to send necessary emails ' +
   //   ' aswell as move the school to waiting step');
 
   recurringTaskController.charityAmountBackTask().then(() => {
-    console.log('Initialising charity amount back task');
+    logger.info('Initialising charity amount back task');
 
     recurringTaskController.noDeadlineResponseTask().then(() => {
-      console.log('Initialising no response to deadline email task');
+      logger.info('Initialising no response to deadline email task');
 
       recurringTaskController.parent3DaysToDeadline().then(() => {
-        console.log('Initialising parent 3 Days To Deadline email task');
+        logger.info('Initialising parent 3 Days To Deadline email task');
 
         recurringTaskController.parent1DaysToDeadline().then(() => {
-          console.log('Initialising parent 1 Days To Deadline email task');
+          logger.info('Initialising parent 1 Days To Deadline email task');
 
           recurringTaskController.sendNoPurchaseMadeSinceSignUp().then(() => {
-            console.log('Initialising send No Purchase Made Since Sign Up email task');
+            logger.info('Initialising send No Purchase Made Since Sign Up email task');
 
             dadController.sendFailedEmails().then(() => {
-              console.log('Initialising send Failed email task');
+              logger.info('Initialising send Failed email task');
 
               recurringTaskController.sendOrdersNotShippedReminder().then(() => {
-                console.log('Orders Not Shipped Reminder email task');
+                logger.info('Orders Not Shipped Reminder email task');
 
                 recurringTaskController.deadlineRecurringTask().then(() => {
-                  console.log('Initialising recurring task which will check whether a schools deadline has passed, and to send necessary emails '
+                  logger.info('Initialising recurring task which will check whether a schools deadline has passed, and to send necessary emails '
                         + ' aswell as move the school to waiting step');
 
                   recurringTaskController.delayRecurringTask().then(() => {
-                    console.log('Initialising recurring task which will move delayed schools to printing and send email');
+                    logger.info('Initialising recurring task which will move delayed schools to printing and send email');
 
                     recurringTaskController.sendSchoolArtworkPacksNotSentReminder().then(() => {
-                      console.log('Initialising recurring task which will send email to remind artwork pack sent out');
+                      logger.info('Initialising recurring task which will send email to remind artwork pack sent out');
 
                       recurringTaskController.sendSchoolReadyForPrintingReminder().then(() => {
-                        console.log('Initialising recurring task which will send email to remind printing for school sent out');
+                        logger.info('Initialising recurring task which will send email to remind printing for school sent out');
 
                         recurringTaskController.sendCharityAmountConfirmedSendToSchoolReminder().then(() => {
-                          console.log('Initialising recurring task which will send email to remind give back amount for school sent out');
+                          logger.info('Initialising recurring task which will send email to remind give back amount for school sent out');
                         });
                       });
                     });
@@ -86,13 +86,13 @@ models.sequelize.sync().then(() => {
   // });
 // });
 }).catch((err) => {
-  console.log(err, 'Database connection to reece has failed!');
+  logger.error(err, 'Database connection to reece has failed!');
 });
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-app.use(logger('dev'));
+app.use(morgan('dev'));
 app.use(upload());
 // app.use(express.json());
 app.use(bodyParser.json({
@@ -135,7 +135,7 @@ app.use((err, req, res) => {
 
   // render the error page
   res.status(err.status || 500);
-  console.log(err);
+  logger.error(err);
   return req.app.get('env') === 'development' ? res.render('error') : res.render('404', { user: req.user });
 });
 

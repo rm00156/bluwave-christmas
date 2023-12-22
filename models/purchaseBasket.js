@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function PurchaseBaskets(sequelize, Sequelize) {
   const PurchaseBasket = sequelize.define('purchaseBasket', {
 
     id: {
@@ -78,4 +78,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return PurchaseBasket;
-};
+}
+
+module.exports = PurchaseBaskets;

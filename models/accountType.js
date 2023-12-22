@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function AccountTypes(sequelize, Sequelize) {
   const AccountType = sequelize.define('accountType', {
 
     id: {
@@ -27,4 +27,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return AccountType;
-};
+}
+
+module.exports = AccountTypes;

@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function Settings(sequelize, Sequelize) {
   const Setting = sequelize.define(
     'setting',
     {
@@ -42,4 +42,6 @@ module.exports = function (sequelize, Sequelize) {
   );
 
   return Setting;
-};
+}
+
+module.exports = Settings;

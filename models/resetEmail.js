@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function ResetEmails(sequelize, Sequelize) {
   const ResetEmail = sequelize.define('resetEmail', {
 
     id: {
@@ -44,4 +44,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return ResetEmail;
-};
+}
+
+module.exports = ResetEmails;

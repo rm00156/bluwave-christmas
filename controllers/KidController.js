@@ -32,7 +32,6 @@ async function linkKid(req, res) {
 async function createNewCard(req, res) {
   const { basket } = req.body;
   const job = await queueController.linkKidJob('John Doe', 5, 0, null, req.user);
-  console.log(`jobid ${job.id}`);
   return res.json({ id: job.id, basket });
 }
 
@@ -56,7 +55,6 @@ async function processLinkKids(req, res) {
   }
 
   const job = await queueController.linkKidJob(name, years, months, classAndSchool.classId, account);
-  console.log(`jobid ${job.id}`);
   return res.json({ id: job.id, basket });
 }
 
@@ -109,7 +107,6 @@ async function linkKidJob(req, res) {
     const reason = job.failedReason;
     const result = (job.returnvalue == null) ? undefined : job.returnvalue;
     const { process } = job.data;
-    console.log(`result ${result}`);
     res.json({
       id, state, progress, reason, result, process,
     });

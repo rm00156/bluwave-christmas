@@ -1,3 +1,4 @@
+const logger = require('pino')();
 const passport = require('passport');
 const { isEmpty } = require('lodash');
 const fetch = require('node-fetch');
@@ -43,7 +44,6 @@ async function processCaptcha(req, res) {
 
 async function rerenderSignup(errors, req, res, type) {
   if (req.path === '/signupOrganiser') {
-    console.log(errors);
     res.render('signupOrganiser3', { formData: req.body, errors });
   } else if (req.path === '/signup') {
     res.render('signup3', { formData: req.body, errors, type });
@@ -104,7 +104,6 @@ function signupOrganiser(req, res, next) {
   return validateOrganiserSignup(req).then(async (validateOrganiserErrors) => {
     if (!isEmpty(validateOrganiserErrors)) {
       // reRender the sign up page with the errors
-      console.log(validateOrganiserErrors);
       rerenderSignup(validateOrganiserErrors, req, res);
     } else {
       const t = await models.sequelize.transaction();
@@ -164,7 +163,7 @@ function signupOrganiser(req, res, next) {
           classes.length,
         );
       } catch (error) {
-        console.log(error);
+        logger.error(error);
         await t.rollback();
         throw error;
       }
@@ -195,7 +194,6 @@ function login(req, res, next) {
 
     return req.logIn(user, async (loginErr) => {
       if (loginErr) {
-        console.log(loginErr);
         return next(loginErr);
       }
 
@@ -253,7 +251,6 @@ async function signUpAdminPage(req, res) {
   const errors = await validateUser(req);
   if (!isEmpty(errors)) {
     // reRender the sign up page with the errors
-    console.log(errors);
     rerenderSignup(errors, req, res);
   } else if (req.body.name === undefined) {
     await models.account.create({

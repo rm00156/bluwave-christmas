@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function ProductTypes(sequelize, Sequelize) {
   const ProductType = sequelize.define(
     'productType',
     {
@@ -33,4 +33,6 @@ module.exports = function (sequelize, Sequelize) {
   );
 
   return ProductType;
-};
+}
+
+module.exports = ProductTypes;

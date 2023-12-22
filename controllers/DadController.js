@@ -2,6 +2,7 @@ const aws = require('aws-sdk');
 
 const nodeSchedule = require('node-schedule');
 
+const logger = require('pino')();
 const models = require('../models');
 const validator = require('../validators/signup');
 const queueController = require('./QueueController');
@@ -20,7 +21,7 @@ async function charityAmountBackTask() {
   // rule.second =18;
   return nodeSchedule.scheduleJob(rule, async () => {
     await queueController.addJob('charity');
-    console.log('charity amount back recurring task starting');
+    logger.info('charity amount back recurring task starting');
   });
 }
 
@@ -30,9 +31,6 @@ async function sendFailedEmails() {
   rule.minute = 14;
   rule.second = 22;
   return nodeSchedule.scheduleJob(rule, async () => {
-    // await workerQueue.add({process:'parent3DaysToDeadline'});
-    // console.log('Parent 3 Days To Deadline recurring task starting');
-
     const purchasebaskets = await models.sequelize.query('SELECT distinct pb.* FROM emails e '
     + ' inner join accounts a on e.accountFk = a.id  '
     + ' inner join basketitems b on b.accountfk = a.id '
@@ -125,7 +123,6 @@ function createClass(req, res) {
 }
 
 function getClasses(req, res) {
-  // console.log(req.query);
   return models.class.findAll({
     where: {
       schoolFk: req.query.schoolId,
@@ -328,7 +325,6 @@ async function addArtwork(req, res) {
   }).then(() => {
     res.json({ success: 'success' });
   });
-  // console.log(req.files);
 }
 
 async function uploadPicture(req, res) {
@@ -356,7 +352,6 @@ async function uploadPicture(req, res) {
   });
 
   await s3UploadPromise;
-  // console.log(req.files);
   res.json({ filePath: s3PicturePath });
 }
 
@@ -385,7 +380,6 @@ async function uploadArtwork(req, res) {
   });
 
   await s3UploadPromise;
-  // console.log(req.files);
   res.json({ filePath: s3PicturePath });
 }
 
@@ -507,7 +501,6 @@ function getAccounts(req, res) {
   const { createdDt } = req.body;
   const { telephone } = req.body;
 
-  console.log(telephone);
   models.sequelize.query(
     'select a.id, a.name, a.email, a.telephoneNumber as telephone, at.accountType, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as createdDt from accounts a '
                 + ' inner join accountTypes at on a.accountTypeFk = at.id '
@@ -652,7 +645,7 @@ function reset(req, res) {
       res.render('reset2', { valid: false, expired: true });
     }
   }).catch((err) => {
-    console.log(err);
+    logger.error(err);
   });
 }
 
@@ -686,7 +679,6 @@ function forgotten(res) {
 
 function generateOrderItems(req, res) {
   const { id } = req.body;
-  console.log('got here');
   models.basketItem.findAll({
     where: {
       purchaseBasketFk: id,
@@ -784,7 +776,6 @@ function getUpdatePassword(req, res) {
 function editContactDetails(req, res) {
   const { schoolId } = req.body;
 
-  console.log('edit');
   // validate values
   const errors = validator.validateCreateUserFields(req);
 

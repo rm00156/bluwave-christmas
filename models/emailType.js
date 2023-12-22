@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function EmailTypes(sequelize, Sequelize) {
   const EmailType = sequelize.define('emailType', {
 
     id: {
@@ -29,4 +29,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return EmailType;
-};
+}
+
+module.exports = EmailTypes;

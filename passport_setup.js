@@ -2,7 +2,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const models = require('./models');
 
-module.exports = function (passport) {
+function Passports(passport) {
   passport.serializeUser((account, done) => {
     done(null, account.id);
   });
@@ -20,9 +20,9 @@ module.exports = function (passport) {
     });
   });
 
-  const validPassword = function (account, password) {
+  function validPassword(account, password) {
     return bcrypt.compareSync(password, account.password);
-  };
+  }
 
   passport.use(new LocalStrategy({
     usernameField: 'email',
@@ -50,4 +50,6 @@ module.exports = function (passport) {
     }).catch((err) => {
       done(err, false);
     })));
-};
+}
+
+module.exports = Passports;

@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function DeliveryOptions(sequelize, Sequelize) {
   const DeliveryOption = sequelize.define(
     'deliveryOption',
     {
@@ -67,4 +67,6 @@ module.exports = function (sequelize, Sequelize) {
   );
 
   return DeliveryOption;
-};
+}
+
+module.exports = DeliveryOptions;

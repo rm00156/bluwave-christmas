@@ -1,14 +1,17 @@
 const models = require('../models');
 const parentController = require('./ParentController');
-const basketUtility = require('../utility/basket/basketUtility');
+const {
+  getPriceForBasketItemId, createBasketItem,
+  updateBaskeItemQuantityAndCostById, getCurrentBasketItemsDetailsForAccountId,
+} = require('../utility/basket/basketUtility');
 const productItemUtility = require('../utility/product/productItemUtility');
 const productUtility = require('../utility/product/productUtility');
 
 const JOHN_DOE = 'John Doe';
+const UNITED_KINGDOM = 'United Kingdom';
 
-exports.addToBasket = async function (req, res) {
-  const { quantity } = req.body;
-  const { productItemId } = req.body;
+async function addToBasket(req, res) {
+  const { quantity, productItemId } = req.body;
   const accountId = req.user.id;
 
   const productItem = await productItemUtility.getProductItemById(productItemId);
@@ -24,7 +27,7 @@ exports.addToBasket = async function (req, res) {
     const path = productItem.pdfPath;
     const fileName = path.replace(process.env.s3BucketPath, '');
 
-    await basketUtility.createBasketItem(
+    await createBasketItem(
       accountId,
       path,
       productItemId,
@@ -38,27 +41,24 @@ exports.addToBasket = async function (req, res) {
       productItem.displayItem3,
     );
 
-    const basketItemDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(productItem.accountFk);
+    const basketItemDetails = await getCurrentBasketItemsDetailsForAccountId(productItem.accountFk);
     res.json({ numberOfBasketItems: basketItemDetails.basketItems.length, subTotal: basketItemDetails.subTotal.toFixed(2) });
   }
-};
+}
 
-exports.basket = async function (req, res) {
+async function basket(req, res) {
   const account = req.user;
-  const basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
+  const basketItemsDetails = await getCurrentBasketItemsDetailsForAccountId(account.id);
   const isDisplayShippingSectionDetail = await parentController.isDisplayShippingSectionDetail(account.id);
-  // var displayMessage = isDisplayShippingSectionDetail.displayMessage ? 'true' : 'false';
-  // isDisplayShippingSection
+
   const deliveryOption = await models.deliveryOption.findOne();
-  const countries = await models.country.findAll({}).catch((err) => {
-    console.log(err);
-  });
-  const countryList = countries.filter((o) => o.name === 'United Kingdom');
+  const countries = await models.country.findAll({});
+  const countryList = countries.filter((o) => o.name === UNITED_KINGDOM);
   countries.forEach((country) => {
-    if (country.name !== 'United Kingdom') countryList.push(country);
+    if (country.name !== UNITED_KINGDOM) countryList.push(country);
   });
 
-  countryList.push('United Kingdom');
+  countryList.push(UNITED_KINGDOM);
 
   const total = isDisplayShippingSectionDetail.isDisplayShippingSection ? (parseFloat(basketItemsDetails.subTotal) + parseFloat(deliveryOption.option2Price)).toFixed(2) : (parseFloat(basketItemsDetails.subTotal)).toFixed(2);
   res.render('basket3', {
@@ -69,39 +69,22 @@ exports.basket = async function (req, res) {
     deliveryOption,
     countries: countryList,
   });
-};
-
-async function getPriceForBasketItemId(id) {
-  const price = await models.sequelize.query('select pv.price from productItems pi '
-                + ' inner join basketItems b on b.productItemFk = pi.id '
-                + ' inner join productVariants pv on pi.productVariantFk = pv.id '
-                + ' where b.id = :id', { replacements: { id }, type: models.sequelize.QueryTypes.SELECT });
-  return price;
 }
 
-exports.updateBasketItem = async function (req, res) {
+async function updateBasketItem(req, res) {
   const { basketItemId } = req.body;
   const quantity = req.body.newQuantity;
 
-  let price = await getPriceForBasketItemId(basketItemId);
+  const price = await getPriceForBasketItemId(basketItemId);
 
-  price = parseFloat(price[0].price);
-  price = price.toFixed(2);
+  const price2dp = price.toFixed(2);
 
-  const cost = quantity * price;
-  await models.basketItem.update(
-    { quantity, cost, versionNo: models.sequelize.literal('versionNo + 1') },
-    {
-      where:
-                {
-                  id: basketItemId,
-                },
-    },
-  );
+  const cost = quantity * price2dp;
+  await updateBaskeItemQuantityAndCostById(basketItemId, quantity, cost);
   res.json({});
-};
+}
 
-exports.getIsDisplayCalendarsOptions = async function getIsDisplayCalendarsOptions(accountId) {
+async function getIsDisplayCalendarsOptions(accountId) {
   const count1 = await models.sequelize.query(
     'select count(b.id) as count from productTypes pt '
     + ' inner join products p on p.productTypeFk = pt.id '
@@ -130,12 +113,12 @@ exports.getIsDisplayCalendarsOptions = async function getIsDisplayCalendarsOptio
   const count = count1[0].count + count2[0].count;
 
   return count === 0;
-};
+}
 
-exports.mightLike = async function (req, res) {
+async function mightLike(req, res) {
   const accountId = req.user.id;
 
-  const basketItems = await basketUtility.getCurrentBasketItemsDetailsForAccountId(accountId);
+  const basketItems = await getCurrentBasketItemsDetailsForAccountId(accountId);
 
   const productIds = [];
 
@@ -154,4 +137,12 @@ exports.mightLike = async function (req, res) {
   );
 
   return res.render('mightLike', { user: req.user, products, basketItemsDetails: basketItems });
+}
+
+module.exports = {
+  addToBasket,
+  basket,
+  getIsDisplayCalendarsOptions,
+  mightLike,
+  updateBasketItem,
 };

@@ -1,3 +1,4 @@
+const logger = require('pino')();
 const models = require('../models');
 const queueController = require('./QueueController');
 const confirmAmountValidator = require('../validators/confirmAmount');
@@ -113,9 +114,8 @@ async function removeClass(req, res) {
   try {
     await schoolUtility.deleteClass(classId);
   } catch (err) {
-    console.log(err);
     await t.rollback();
-    return res.json({ errors: [] });
+    return res.json({ errors: err });
   }
 
   await t.commit();
@@ -139,7 +139,7 @@ async function addNewClass(req, res) {
       await schoolUtility.createClass(className, schoolId, 31);
     } catch (err) {
       await transaction.rollback();
-      return console.log(err);
+      return logger.error(err);
     }
 
     await transaction.commit();
@@ -481,7 +481,6 @@ async function submitConfirmAmount(req, res) {
   const errors = confirmAmountValidator.validateConfirmAmountDetails(req);
 
   if (errors && (errors.sortCode || errors.bankAcc)) {
-    console.log('err');
     return res.json({ errors });
   }
 

@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function ClassOrderInstructions(sequelize, Sequelize) {
   const ClassOrderInstruction = sequelize.define('classOrderInstruction', {
 
     id: {
@@ -42,4 +42,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return ClassOrderInstruction;
-};
+}
+
+module.exports = ClassOrderInstructions;

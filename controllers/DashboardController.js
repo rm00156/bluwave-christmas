@@ -274,7 +274,6 @@ async function loadScreen(req, res) {
                     type: models.sequelize.QueryTypes.SELECT,
                   },
                 ).then((currentStatus) => {
-                  console.log(currentStatus);
                   res.render('organiserDashboard2', {
                     user: req.user,
                     orderedPercentage,

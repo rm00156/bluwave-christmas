@@ -75,7 +75,6 @@ async function getCreateOrderInstructionJob(req, res) {
     const reason = job.failedReason;
     const instructionPath = job.returnvalue === null ? undefined : job.returnvalue.pdfPath;
     const { process } = job.data;
-    console.log(job.returnvalue);
     res.json({
       id,
       state,

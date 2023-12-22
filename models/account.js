@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function Accounts(sequelize, Sequelize) {
   const Account = sequelize.define('account', {
 
     id: {
@@ -73,4 +73,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return Account;
-};
+}
+
+module.exports = Accounts;

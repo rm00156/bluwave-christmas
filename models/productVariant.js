@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function ProductVariants(sequelize, Sequelize) {
   const ProductVariant = sequelize.define('productVariant', {
 
     id: {
@@ -59,4 +59,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return ProductVariant;
-};
+}
+
+module.exports = ProductVariants;

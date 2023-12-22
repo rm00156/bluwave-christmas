@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function ProductItemGroups(sequelize, Sequelize) {
   const ProductItemGroup = sequelize.define(
     'productItemGroup',
     {
@@ -27,4 +27,6 @@ module.exports = function (sequelize, Sequelize) {
   );
 
   return ProductItemGroup;
-};
+}
+
+module.exports = ProductItemGroups;

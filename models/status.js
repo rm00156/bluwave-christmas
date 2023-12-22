@@ -1,4 +1,4 @@
-module.exports = function (sequelize, Sequelize) {
+function Statuses(sequelize, Sequelize) {
   const Status = sequelize.define('status', {
 
     id: {
@@ -37,4 +37,6 @@ module.exports = function (sequelize, Sequelize) {
   });
 
   return Status;
-};
+}
+
+module.exports = Statuses;

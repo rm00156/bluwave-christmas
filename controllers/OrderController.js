@@ -3,6 +3,8 @@ const stripe = require('stripe')(process.env.stripe_server);
 const { endpointSecret } = process.env;
 const aws = require('aws-sdk');
 
+const logger = require('pino')();
+
 const models = require('../models');
 const queueController = require('./QueueController');
 const schoolUtility = require('../utility/school/schoolUtility');
@@ -158,7 +160,6 @@ async function purchase(req, res) {
     cancel_url: `${url}/basket`,
   });
 
-  console.log(session.id);
   res.json({ session });
 }
 
@@ -170,7 +171,7 @@ async function sessionCompleted(req, res) {
   try {
     event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
@@ -188,7 +189,7 @@ async function sessionCompleted(req, res) {
     try {
       await orderUtility.setPurchaseBasketToCompleted(now, purchaseBasketId);
     } catch (err) {
-      console.log(err);
+      logger.error(err);
       await transaction.rollback();
 
       throw new Error(
@@ -225,8 +226,6 @@ async function sessionCompleted(req, res) {
       time,
     );
 
-    console.log(total);
-    console.log(time);
     return res.json({ received: true });
   }
 

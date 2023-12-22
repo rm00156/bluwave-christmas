@@ -1,4 +1,5 @@
 const validator = require('validator');
+const logger = require('pino')();
 const accountUtility = require('../utility/account/accountUtility');
 const schoolUtility = require('../utility/school/schoolUtility');
 
@@ -6,12 +7,12 @@ function validateCreateUserFields(req) {
   const errors = {};
   if (req.body.email !== undefined && !validator.isEmail(req.body.email)) {
     errors.email = 'Please use a valid email address';
-    console.log('Please use a valid email address');
+    logger.error('Please use a valid email address');
   }
 
   if (req.body.reEmail !== undefined && req.body.email !== req.body.reEmail) {
     errors.email = "Email addresses don't match";
-    console.log("Email addresses don't match");
+    logger.error("Email addresses don't match");
   }
 
   if (
@@ -19,14 +20,14 @@ function validateCreateUserFields(req) {
     && !validator.isAscii(req.body.password)
   ) {
     errors.password = 'Invalid characters in password';
-    console.log('Invalid characters in password');
+    logger.error('Invalid characters in password');
   }
   if (
     req.body.password !== undefined
     && !validator.isLength(req.body.password, { min: 5, max: 25 })
   ) {
     errors.password = 'Please ensure that the password length is at least 5 characters long and no more than 25';
-    console.log(
+    logger.error(
       'Please ensure that the password length is at least 5 characters long and no more than 25',
     );
   }
@@ -36,7 +37,7 @@ function validateCreateUserFields(req) {
     && req.body.rePassword !== req.body.password
   ) {
     errors.password = "Passwords don't match";
-    console.log("Passwords don't match");
+    logger.error("Passwords don't match");
   }
 
   if (
@@ -44,7 +45,7 @@ function validateCreateUserFields(req) {
     && !validator.isLength(req.body.telephoneNo, { min: 11, max: 50 })
   ) {
     errors.telephoneNo = 'Please enter a valid phone number (eg 11 digits)';
-    console.log('Please enter a valid phone number (eg 11 digits)');
+    logger.error('Please enter a valid phone number (eg 11 digits)');
   }
 
   if (
@@ -52,7 +53,7 @@ function validateCreateUserFields(req) {
     && !validator.isNumeric(req.body.telephoneNo)
   ) {
     errors.telephoneNo = 'Please enter a valid phone number (eg 11 digits)';
-    console.log('Please enter a valid phone number (eg 11 digits)');
+    logger.error('Please enter a valid phone number (eg 11 digits)');
   }
 
   // change to regex to include white spaces with a-zA-Z
@@ -62,7 +63,7 @@ function validateCreateUserFields(req) {
     && !validator.isLength(req.body.postCode, { min: 5, max: 8 })
   ) {
     errors.postCode = 'Please enter a valid post code';
-    console.log('Please enter a valid post code');
+    logger.error('Please enter a valid post code');
   }
 
   if (
@@ -110,7 +111,7 @@ async function validateUser(req) {
   if (user !== null) {
     // user already exists
     errors.email = 'An account with this email already exists. Please log in';
-    console.log('An account with this email already exists. Please log in');
+    logger.error('An account with this email already exists. Please log in');
   }
 
   return errors;
@@ -142,7 +143,7 @@ function validateOrganiserUserFields(req) {
   const errors = {};
   if (req.body.email !== undefined && !validator.isEmail(req.body.email)) {
     errors.email = 'Please use a valid email address';
-    console.log('Please use a valid email address');
+    logger.error('Please use a valid email address');
   }
 
   if (
@@ -150,7 +151,7 @@ function validateOrganiserUserFields(req) {
     && !validator.isAscii(req.body.password)
   ) {
     errors.password = 'Invalid characters in password';
-    console.log('Invalid characters in password');
+    logger.error('Invalid characters in password');
   }
 
   if (
@@ -158,7 +159,7 @@ function validateOrganiserUserFields(req) {
     && !validator.isLength(req.body.password, { min: 5, max: 25 })
   ) {
     errors.password = 'Please ensure that the password length is at least 5 characters long and no more than 25';
-    console.log(
+    logger.error(
       'Please ensure that the password length is at least 5 characters long and no more than 25',
     );
   }
@@ -168,7 +169,7 @@ function validateOrganiserUserFields(req) {
     && req.body.rePassword !== req.body.password
   ) {
     errors.password = "Passwords don't match";
-    console.log("Passwords don't match");
+    logger.error("Passwords don't match");
   }
 
   if (
@@ -176,7 +177,7 @@ function validateOrganiserUserFields(req) {
     && !validator.isLength(req.body.telephoneNo, { min: 11, max: 50 })
   ) {
     errors.telephoneNo = 'Please enter a valid phone number (eg 11 digits)';
-    console.log('Please enter a valid phone number (eg 11 digits)');
+    logger.error('Please enter a valid phone number (eg 11 digits)');
   }
 
   if (
@@ -184,7 +185,7 @@ function validateOrganiserUserFields(req) {
     && !validator.isNumeric(req.body.telephoneNo)
   ) {
     errors.telephoneNo = 'Please enter a valid phone number (eg 11 digits)';
-    console.log('Please enter a valid phone number (eg 11 digits)');
+    logger.error('Please enter a valid phone number (eg 11 digits)');
   }
 
   if (
@@ -192,7 +193,7 @@ function validateOrganiserUserFields(req) {
     && !validator.isLength(req.body.postCode, { min: 5, max: 8 })
   ) {
     errors.postCode = 'Please enter a valid post code';
-    console.log('Please enter a valid post code');
+    logger.error('Please enter a valid post code');
   }
 
   if (

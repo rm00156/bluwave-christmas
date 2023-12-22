@@ -1,4 +1,5 @@
 const hbs = require('handlebars');
+const logger = require('pino')();
 const path = require('path');
 const fs = require('fs-extra');
 const moment = require('moment');
@@ -68,7 +69,7 @@ async function uploadBodyToS3Bucket(buffer, s3FileLocation) {
   const s3UploadPromise = new Promise((resolve, reject) => {
     s3.upload(params, (err, uploadData) => {
       if (err) {
-        console.log(err);
+        logger.error(err);
         reject(err);
       } else {
         resolve(uploadData);
@@ -88,10 +89,9 @@ async function deleteS3Folder(folderPrefix) {
     };
     // List all objects in the specified prefix
     const objects = await s3.listObjectsV2(params).promise();
-    // console.log(objects)
     // Check if there are any objects to delete
     if (objects.Contents.length === 0) {
-      console.log('Folder is already empty.');
+      logger.error('Folder is already empty.');
       return;
     }
 
@@ -105,10 +105,10 @@ async function deleteS3Folder(folderPrefix) {
     try {
       await s3.deleteObjects(deleteParams).promise();
     } catch (err) {
-      console.log(err);
+      logger.error(err);
     }
   } catch (error) {
-    console.log('Error:', error.message);
+    logger.error('Error:', error.message);
   }
 }
 

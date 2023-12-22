@@ -1,4 +1,10 @@
-const accountUtility = require('../utility/account/accountUtility');
+const {
+  getNumberOfCustomers, getNumberOfSignUpsToday, getAllAccountTypes,
+  searchAccounts, getAccountById, getAccountByNumber, getAccountTypeById,
+  getAccountsWithBasketItemsAndNoPurchaseBasket, getAccountsWithBasketItemsWithPurchaseBasketPending,
+  getAccountsLinkedToSchoolWithNoOrder,
+  getAccountsLinkedToSchoolWithNoOrderButUploadedPicture,
+} = require('../utility/account/accountUtility');
 const schoolUtility = require('../utility/school/schoolUtility');
 const basketUtility = require('../utility/basket/basketUtility');
 const orderUtility = require('../utility/order/orderUtility');
@@ -10,7 +16,7 @@ const classUtility = require('../utility/class/classUtility');
 
 async function getAdminDashboardPage(req, res) {
   const orderDetails = await orderUtility.getTotalOrderDetails();
-  const numberOfCustomers = await accountUtility.getNumberOfCustomers();
+  const numberOfCustomers = await getNumberOfCustomers();
   const giveBackDetails = await schoolUtility.getGiveBackAmount();
   const numberOfSchools = await schoolUtility.getNumberOfSchools();
   const schoolDashboardStatus = await schoolUtility.getSchoolDashboardStatus();
@@ -22,7 +28,7 @@ async function getAdminDashboardPage(req, res) {
   const schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
   const subTotalToday = await orderUtility.getSubTotalOfAllOrdersToday();
   const averageTimeFromSignUpToPurchaseInMinutes = await orderUtility.getAverageTimeFromSignUpToPurchaseInMinutes();
-  const numberOfSignUpsToday = await accountUtility.getNumberOfSignUpsToday();
+  const numberOfSignUpsToday = await getNumberOfSignUpsToday();
   const numberOfOrdersToday = await orderUtility.getNumberOfOrdersToday();
 
   res.render('adminDashboard', {
@@ -46,7 +52,7 @@ async function getAdminDashboardPage(req, res) {
 }
 
 async function getAdminAccountPage(req, res) {
-  const accountTypes = await accountUtility.getAllAccountTypes();
+  const accountTypes = await getAllAccountTypes();
   const backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
   const notShippedOrders = await orderUtility.getOrdersNotShipped();
   const schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
@@ -60,12 +66,12 @@ async function getAdminAccountPage(req, res) {
   });
 }
 
-async function searchAccounts(req, res) {
+async function searchForAccounts(req, res) {
   const {
     name, email, accountType, createdFromDt, createdToDt, phoneNumber, accountNumber,
   } = req.body;
 
-  const accounts = await accountUtility.searchAccounts(name, email, accountType, phoneNumber, createdFromDt, createdToDt, accountNumber);
+  const accounts = await searchAccounts(name, email, accountType, phoneNumber, createdFromDt, createdToDt, accountNumber);
   res.json({ result: accounts });
 }
 
@@ -75,7 +81,7 @@ async function getProductItemScreen(req, res) {
   const product = await productUtility.getProductById(productItem.productId);
   const productVariants = await productUtility.getProductVariantsForProductItemGroupId(productItem.productItemGroupFk);
   const productVariant = await productUtility.getProductVariantDetailsById(productItem.productVariantFk);
-  const account = await accountUtility.getAccountById(productItem.accountFk);
+  const account = await getAccountById(productItem.accountFk);
 
   let kid = null;
   let schoolClass = null;
@@ -110,10 +116,10 @@ async function getProductItemScreen(req, res) {
 
 async function getAccountDetailsPage(req, res) {
   const { number } = req.query;
-  const account = await accountUtility.getAccountByNumber(number);
+  const account = await getAccountByNumber(number);
   const productItems = await productItemUtility.getProductItemsForAccountNumber(number);
   const orders = await orderUtility.getOrdersForAccountId(account.id);
-  const accountType = await accountUtility.getAccountTypeById(account.accountTypeFk);
+  const accountType = await getAccountTypeById(account.accountTypeFk);
 
   const basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
 
@@ -271,9 +277,9 @@ async function getAccountsWithBasketItems(req, res) {
   const schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
   const accounts = [];
-  const accountWithNoPurchaseBasket = await accountUtility.getAccountsWithBasketItemsAndNoPurchaseBasket();
+  const accountWithNoPurchaseBasket = await getAccountsWithBasketItemsAndNoPurchaseBasket();
 
-  const accountsWithPurchaseBasketPending = await accountUtility.getAccountsWithBasketItemsWithPurchaseBasketPending();
+  const accountsWithPurchaseBasketPending = await getAccountsWithBasketItemsWithPurchaseBasketPending();
   accounts.push(...accountWithNoPurchaseBasket, ...accountsWithPurchaseBasketPending);
 
   const outstandingBalanceNoPurchaseBasket = await basketUtility.getOutstandingBalanceOfBasketItemsWithNoPurchaseBasket();
@@ -296,7 +302,7 @@ async function getAccountsLinkedNoOrder(req, res) {
   const notShippedOrders = await orderUtility.getOrdersNotShipped();
   const schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
-  const accounts = await accountUtility.getAccountsLinkedToSchoolWithNoOrder();
+  const accounts = await getAccountsLinkedToSchoolWithNoOrder();
   res.render('accountsLinkedNoOrders', {
     user: req.user,
     schoolsRequiringGiveBackAction,
@@ -311,7 +317,7 @@ async function getAccountsLinkedNoOrderButUploadedPicture(req, res) {
   const notShippedOrders = await orderUtility.getOrdersNotShipped();
   const schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
-  const accounts = await accountUtility.getAccountsLinkedToSchoolWithNoOrderButUploadedPicture();
+  const accounts = await getAccountsLinkedToSchoolWithNoOrderButUploadedPicture();
 
   res.render('accountsLinkedNoOrdersButUploadedPicture', {
     user: req.user,
@@ -349,7 +355,7 @@ module.exports = {
   getRevenueChartScreen,
   getRevenues,
   ordersNotShipped,
-  searchAccounts,
+  searchForAccounts,
   searchKidsResults,
   searchOrdersResults,
   setBackground,

@@ -1,3 +1,4 @@
+const logger = require('pino')();
 const models = require('../../models');
 
 const generalUtility = require('../general/generalUtility');
@@ -94,7 +95,7 @@ async function createProductItemObjectNoKid(
   try {
     productItem = await createProductItem(object);
   } catch (err) {
-    console.log(err);
+    logger.error(err);
     return t.rollback();
   }
 
@@ -140,7 +141,7 @@ async function createProductItemObject(
   try {
     productItem = await createProductItem(object);
   } catch (err) {
-    console.log(err);
+    logger.error(err);
 
     // throw an exception
     return t.rollback();
@@ -648,12 +649,14 @@ async function handleLinkKid(name, years, months, classId, account, job) {
   return { productItem: productItems[0], product };
 }
 
-async function setClassIdForProductItem(classId, productItemId) {
+async function setClassIdForProductItems(classId, productItemIds) {
   await models.productItem.update({
     classFk: classId,
   }, {
     where: {
-      id: productItemId,
+      id: {
+        [models.Sequelize.Op.in]: productItemIds,
+      },
     },
   });
 }
@@ -686,5 +689,5 @@ module.exports = {
   getDefaultDisplayOptionsForKid,
   setPdfPathForProductItemById,
   getProductItemGroupById,
-  setClassIdForProductItem,
+  setClassIdForProductItems,
 };
