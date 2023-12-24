@@ -1,1 +1,0 @@
-ALTER TABLE accounts ADD firstLoginFl BOOLEAN DEFAULT 1;

@@ -1,32 +1,72 @@
-const productUtility = require('../../utility/product/productUtility');
-const productItemUtility = require('../../utility/product/productItemUtility');
+const productTestHelper = require("../helper/productTestHelper");
+const {
+  createProductItemGroup,
+  createProductItemObjectNoKid,
+  createProductItemByVariantAccountAndKid,
+} = require("../../utility/product/productItemUtility");
+const {
+  getProductVariantsForProductId,
+} = require("../../utility/product/productUtility");
 
-async function generateProductItem(account, kid, productVariantTypeId, templates, productType) {
-    const template = await productUtility.createTemplate(templates, '', '', '', 1, 1, '');
-    
-    const product = await productUtility.createProduct('12345', productType.id, '4', '', '', false, false);
-    const productVariant = await productUtility.createProductVariant(productType.type, 1, product.id, productVariantTypeId, '22', template.id, '');
+async function generateProductItem(
+  account,
+  kid,
+  productVariantTypeId,
+  templates,
+  productType,
+  productName
+) {
+  const productVariant =
+    await productTestHelper.createProductVariantWithProductName(
+      templates,
+      productType,
+      productVariantTypeId,
+      1,
+      productName
+    );
+  const productItemGroup = await createProductItemGroup();
+  return createProductItemByVariantAccountAndKid(
+    productVariant,
+    productItemGroup,
+    account,
+    kid
+  );
+}
 
-    const productItemGroup = await productUtility.createProductItemGroup();
-    const productItemNumber = await productItemUtility.getNewProductItemNumber();
-    var object = {
-        productItemNumber: productItemNumber,
-        productVariantFk: productVariant.id,
-        productItemGroupFk: productItemGroup.id,
-        pdfPath: 's3Path',
-        displayItem1: false,
-        displayItem2: false,
-        displayItem3: false,
-        accountFk: account.id,
-        kidFk: kid.id,
-        classFk: kid.classFk,
-        deleteFl: false,
-        versionNo: 1
-    };
-    const productItem = await productItemUtility.createProductItem(object);
-    return productItem;
+async function generateProductItemNoKid(
+  account,
+  productVariantTypeId,
+  templates,
+  productType,
+  productName
+) {
+  const productVariant =
+    await productTestHelper.createProductVariantWithProductName(
+      templates,
+      productType,
+      productVariantTypeId,
+      1,
+      productName
+    );
+  const productItemGroup = await createProductItemGroup();
+  const productId = productVariant.productFk;
+
+  const productVariants = await getProductVariantsForProductId(productId);
+  const productVariantItem = productVariants[0];
+  const data = {
+    picture1: "picture1",
+    accountId: account.id
+  };
+  return createProductItemObjectNoKid(
+    productVariantItem,
+    data,
+    "s3Path",
+    productItemGroup,
+    productItemGroup
+  );
 }
 
 module.exports = {
-    generateProductItem
-}
+  generateProductItem,
+  generateProductItemNoKid,
+};

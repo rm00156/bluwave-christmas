@@ -1,33 +1,33 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var Year = sequelize.define('year', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
- 
-        year: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
-        
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+function Years(sequelize, Sequelize) {
+  const Year = sequelize.define('year', {
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
-    },{
-        timestamps:false
-    });
- 
-    return Year;
- 
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
+
+    year: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+  }, {
+    timestamps: false,
+  });
+
+  return Year;
 }
+
+module.exports = Years;

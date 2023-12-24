@@ -1,30 +1,32 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var ProductItemGroup = sequelize.define('productItemGroup', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.MEDIUMINT
-        },
+function ProductItemGroups(sequelize, Sequelize) {
+  const ProductItemGroup = sequelize.define(
+    'productItemGroup',
+    {
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+      id: {
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.MEDIUMINT,
+      },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
+      deleteFl: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+
+      versionNo: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+      },
     },
     {
-        timestamps:false
-    }
-);
- 
-    return ProductItemGroup;
- 
+      timestamps: false,
+    },
+  );
+
+  return ProductItemGroup;
 }
+
+module.exports = ProductItemGroups;

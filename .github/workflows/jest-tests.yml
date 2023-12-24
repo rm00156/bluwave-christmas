@@ -11,6 +11,11 @@ env:
   password:
   database_host: localhost
   database_dialect: mysql
+  region: ${{ secrets.REGION }}
+  s3BucketPath: ${{ secrets.S3BUCKETPATH }}
+  bucketName: ${{ secrets.BUCKETNAME }}
+  accessKeyId: ${{ secrets.ACCESSKEYID }}
+  secretAccessKey: ${{ secrets.SECRETACCESSKEY }}
 
 jobs:
   jest_tests:

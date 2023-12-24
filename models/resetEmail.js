@@ -1,51 +1,49 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var ResetEmail = sequelize.define('resetEmail', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
- 
-        email: {
-            type: Sequelize.STRING,
-            allowNull:false,
-            unique:true
-        },
+function ResetEmails(sequelize, Sequelize) {
+  const ResetEmail = sequelize.define('resetEmail', {
 
-        fromDttm: {
-            type: Sequelize.DATE,
-            allowNull:false
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-       
-        toDttm: {
-            type: Sequelize.DATE,
-            allowNull:false
-        },
-        
-        usedFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull:false,
-            default:false
-        },
-        
-        deleteFl: {
-            type: Sequelize.BOOLEAN,
-            allowNull: false
-        },
+    email: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+    },
 
-        versionNo: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        }
-  
-    },{
-        timestamps:false
-    }
-);
- 
-    return ResetEmail;
- 
+    fromDttm: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
+
+    toDttm: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
+
+    usedFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      default: false,
+    },
+
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return ResetEmail;
 }
+
+module.exports = ResetEmails;

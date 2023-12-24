@@ -1,134 +1,132 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var ProductItem = sequelize.define('productItem', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
+function ProductItems(sequelize, Sequelize) {
+  const ProductItem = sequelize.define('productItem', {
 
-        productItemNumber: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
-        
-        productVariantFk:{
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        productItemGroupFk: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
+    productItemNumber: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        picture1Path:{
-            type: Sequelize.STRING,
-            allowNull: true
-        },
+    productVariantFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        picture2Path:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    productItemGroupFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        picture3Path:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    picture1Path: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        picture4Path:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    picture2Path: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        picture5Path:{
-            type:Sequelize.STRING,
-            allowNull:true
-        },
+    picture3Path: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        pdfPath: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+    picture4Path: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        samplePath: {
-            type: Sequelize.STRING,
-            allowNull: true
-        },
+    picture5Path: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        accountFk:{
-            type:Sequelize.INTEGER,
-            allowNull:false
-        },
+    pdfPath: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        displayItem1:{
-            type:Sequelize.BOOLEAN,
-            allowNull:false
-        },
+    samplePath: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        displayItem2:{
-            type:Sequelize.BOOLEAN,
-            allowNull:false
-        },
+    accountFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        displayItem3:{
-            type:Sequelize.BOOLEAN,
-            allowNull:false
-        },
+    displayItem1: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
 
-        classFk: {
-            type:Sequelize.INTEGER,
-            allowNull: true
-        },
+    displayItem2: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
 
-        text1: {
-            type: Sequelize.STRING,
-            allowNull: true
-        },
+    displayItem3: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
 
-        text2: {
-            type: Sequelize.STRING,
-            allowNull: true
-        },
+    classFk: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
 
-        text3: {
-            type: Sequelize.STRING,
-            allowNull: true
-        },
+    text1: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        text4: {
-            type: Sequelize.STRING,
-            allowNull: true
-        },
+    text2: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        text5: {
-            type: Sequelize.STRING,
-            allowNull: true
-        },
-        
-        kidFk:{
-            type: Sequelize.INTEGER,
-            allowNull: true
-        },
+    text3: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        deleteFl: {
-            type: Sequelize.BOOLEAN,
-            allowNull: false
-        },
+    text4: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
 
-        versionNo: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        }
-        
-        
-    },{
-        timestamps:false
-    }
-);
- 
-    return ProductItem;
- 
+    text5: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+
+    kidFk: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return ProductItem;
 }
+
+module.exports = ProductItems;

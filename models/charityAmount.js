@@ -1,56 +1,58 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var CharityAmount = sequelize.define('charityAmount', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.MEDIUMINT
-        },
- 
-        schoolFk: {
-            type: Sequelize.INTEGER,
-            allowNull:false
-        },
+function CharityAmounts(sequelize, Sequelize) {
+  const CharityAmount = sequelize.define(
+    'charityAmount',
+    {
 
-        amount:{
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+      id: {
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.MEDIUMINT,
+      },
 
-        confirmedFl: {
-            type:Sequelize.BOOLEAN,
-            allowNull:false
-        },
+      schoolFk: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
 
-        createdDttm:{
-            type:Sequelize.DATE,
-            allowNull:false,
-            default:Date.now()
-        },
+      amount: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
 
-        confirmedDttm:{
-            type:Sequelize.DATE,
-            allowNull:true
-        },
+      confirmedFl: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+      },
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+      createdDttm: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        default: Date.now(),
+      },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
+      confirmedDttm: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+
+      deleteFl: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+
+      versionNo: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+      },
     },
     {
-        timestamps:false
-    }
-);
- 
-    return CharityAmount;
- 
+      timestamps: false,
+    },
+  );
+
+  return CharityAmount;
 }
+
+module.exports = CharityAmounts;

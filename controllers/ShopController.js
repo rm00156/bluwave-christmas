@@ -1,19 +1,23 @@
-const models = require('../models');
-const productController = require('../controllers/ProductController');
 const basketUtility = require('../utility/basket/basketUtility');
+const productUtility = require('../utility/product/productUtility');
 
-exports.shop = async function (req, res) {
-    const account = req.user;
-    const basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
+async function shop(req, res) {
+  const account = req.user;
+  const basketItemsDetails = await basketUtility.getCurrentBasketItemsDetailsForAccountId(account.id);
 
-    var category = req.query.category;
-    var productType;
-    if (category != undefined)
-        productType = await productController.getProductTypeByName(category);
+  const { category } = req.query;
+  let productType;
+  if (category !== undefined) productType = await productUtility.getProductTypeByType(category);
 
-    if (productType == null)
-        productType = (await models.sequelize.query('select * from productTypes order by id asc limit 1', { type: models.Sequelize.QueryTypes.SELECT }))[0];
+  const productTypes = await productUtility.getAllProductTypes();
+  if (productType == null) productType = productTypes[0];
 
-    var products = await productController.getAllProductsByProductTypeId(productType.id);
-    res.render('shop2', { user: account, basketItemsDetails: basketItemsDetails, products: products, productType: productType });
+  const products = await productUtility.getAllProductsByProductTypeId(productType.id);
+  res.render('shop2', {
+    user: account, basketItemsDetails, products, productType,
+  });
 }
+
+module.exports = {
+  shop,
+};

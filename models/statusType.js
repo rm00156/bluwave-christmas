@@ -1,39 +1,39 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var StatusType = sequelize.define('statusType', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
- 
-        type: {
-            type: Sequelize.STRING,
-            allowNull: false
-        },
+function StatusTypes(sequelize, Sequelize) {
+  const StatusType = sequelize.define('statusType', {
 
-        nextTypeFk:{
-            type: Sequelize.INTEGER,
-            allowNull: true
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+    type: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
-        
-    },{
-        timestamps:false
-    });
- 
-    return StatusType;
- 
+    nextTypeFk: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return StatusType;
 }
+
+module.exports = StatusTypes;

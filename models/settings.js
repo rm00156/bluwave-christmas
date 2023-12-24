@@ -1,45 +1,47 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var Setting = sequelize.define('setting', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.MEDIUMINT
-        },
- 
-        name: {
-            type: Sequelize.STRING,
-            allowNull:false,
-        },
+function Settings(sequelize, Sequelize) {
+  const Setting = sequelize.define(
+    'setting',
+    {
 
-        value: {
-            type: Sequelize.STRING,
-            allowNull:false,
-        },
+      id: {
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.MEDIUMINT,
+      },
 
-        accountFk: {
-            type: Sequelize.INTEGER,
-            allowNull:false,
-        },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
 
-        deleteFl:{
-            type: Sequelize.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
+      value: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
 
-        versionNo:{
-            type: Sequelize.INTEGER,
-            allowNull: false,
-            defaultValue: 1
-        }
+      accountFk: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+
+      deleteFl: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+
+      versionNo: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+      },
     },
     {
-        timestamps:false
-    }
-);
- 
-    return Setting;
- 
+      timestamps: false,
+    },
+  );
+
+  return Setting;
 }
+
+module.exports = Settings;

@@ -1,48 +1,47 @@
-module.exports = function(sequelize, Sequelize) {
- 
-    var ClassOrderInstruction = sequelize.define('classOrderInstruction', {
- 
-        id: {
-            autoIncrement: true,
-            primaryKey: true,
-            type: Sequelize.INTEGER
-        },
- 
-        classFk: {
-            type: Sequelize.INTEGER,
-            allowNull:false
-        },
+function ClassOrderInstructions(sequelize, Sequelize) {
+  const ClassOrderInstruction = sequelize.define('classOrderInstruction', {
 
-        deadLineDttm:{
-            type:Sequelize.DATE,
-            allowNull:false
-        },
+    id: {
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
 
-        pdfPath:{
-            type:Sequelize.STRING,
-            allowNull:false 
-        },
+    classFk: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
 
-        createdDttm: {
-            type:Sequelize.DATE,
-            allowNull:false
-        },
+    deadLineDttm: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
 
-        versionNo: {
-            type: Sequelize.INTEGER,
-            allowNull: false
-        },
+    pdfPath: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
 
-        deleteFl: {
-            type: Sequelize.BOOLEAN,
-            allowNull: false
-        }
-        
-    },{
-        timestamps:false
-    }
-);
- 
-    return ClassOrderInstruction;
- 
+    createdDttm: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
+
+    versionNo: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
+
+    deleteFl: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+    },
+
+  }, {
+    timestamps: false,
+  });
+
+  return ClassOrderInstruction;
 }
+
+module.exports = ClassOrderInstructions;

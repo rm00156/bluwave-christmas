@@ -1,0 +1,34 @@
+name: Eslint 
+
+on:
+  pull_request:
+    branches:
+      - master
+
+# jobs:
+#   linting:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 21
+      
+#       - name: Install dependencies
+#         run: npm install
+
+jobs:
+    eslint:
+        name: runner / eslint
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v3
+              with:
+                node-version: "21"
+            - run: npm install
+            - uses: reviewdog/action-eslint@v1
