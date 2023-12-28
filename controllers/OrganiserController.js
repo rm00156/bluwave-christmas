@@ -43,7 +43,7 @@ exports.classOrders = function(req,res)
                                     models.sequelize.query('select distinct k.*, kh.* from kids k ' + 
                                     ' inner join classes c on k.classFk = c.id ' + 
                                     ' inner join schools s on c.schoolFk = s.id ' + 
-                                    ' inner join basketitems b on b.kidFk = k.id ' + 
+                                    ' inner join basketItems b on b.kidFk = k.id ' + 
                                     ' inner join kidorderhistories kh on kh.kidFk = k.id ' + 
                                     ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                                     ' where c.id = :classId '+ 
@@ -151,7 +151,7 @@ exports.classParticipants = function(req,res)
                                     models.sequelize.query('select distinct k.*, kh.* from kids k ' + 
                                     ' inner join classes c on k.classFk = c.id ' + 
                                     ' inner join schools s on c.schoolFk = s.id ' + 
-                                    ' inner join basketitems b on b.kidFk = k.id ' + 
+                                    ' inner join basketItems b on b.kidFk = k.id ' + 
                                     ' inner join kidorderhistories kh on kh.kidFk = k.id ' + 
                                     ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                                     ' where c.id = :classId '+ 

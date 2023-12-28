@@ -93,7 +93,7 @@ async function getPriceForBasketItemId(id)
 exports.getBasketItemsDetailsForPurchaseBasketId = async function (purchaseBasketId)
 {
     var basketItems = await models.sequelize.query('select pv.price, a.email, pi.productItemNumber as code, concat( pv.name, " - ", p.name) as productVariantName, b.id as basketItemId, b.* , ' +
-    ' pi.text1 as kidName, if(pi.displayItem3=true,:yes,:no) as displayAge,if(pi.displayItem2=true,:yes,:no) as displayClass,if(pi.displayItem1=true,:yes,:no) as displaySchool, FORMAT(b.cost,2) as cost, pi.classFk, pi.id as productItemId from  basketitems b ' + 
+    ' pi.text1 as kidName, if(pi.displayItem3=true,:yes,:no) as displayAge,if(pi.displayItem2=true,:yes,:no) as displayClass,if(pi.displayItem1=true,:yes,:no) as displaySchool, FORMAT(b.cost,2) as cost, pi.classFk, pi.id as productItemId from  basketItems b ' + 
     ' inner join productItems pi on b.productItemFk = pi.id ' +
     ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
     ' inner join products p on pv.productFk = p.id ' +

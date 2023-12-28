@@ -45,7 +45,7 @@ exports.getOrderDetailsForAllKidsFromClassId = async function(classId, totalKids
 
 async function getOrderDetailsForAllKidsFromClassId(classId, totalKids)
 {
-    var orders = await models.sequelize.query('select count(distinct pb.id) as orderCount from purchasebaskets pb ' +
+    var orders = await models.sequelize.query('select count(distinct pb.id) as orderCount from purchaseBaskets pb ' +
             ' inner join basketItems b on b.purchaseBasketFk = pb.id ' +
             ' inner join productItems pi on b.productItemFk = pi.id ' +
             ' inner join classes c on pi.classFk = c.id ' +

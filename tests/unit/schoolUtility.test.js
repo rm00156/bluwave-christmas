@@ -838,7 +838,7 @@ describe('school utility tests', () => {
         expect(deadline.deadLineDttm).toBe('2023-05-20');
     })
 
-    it('get all deadlines ', async () => {
+    it('get all deadLines ', async () => {
 
         for(var i = 0; i < 3; i++) {
             const schoolAccount = await schoolTestHelper.createNewSchoolWithAccount();
@@ -849,8 +849,8 @@ describe('school utility tests', () => {
             await schoolUtility.createDeadlineForSchoolId(school.id, deadlineDttm, verificationCode);
         }
         
-        const deadlines = await schoolUtility.getAllDeadlines();
-        expect(deadlines.length).toBe(3);
+        const deadLines = await schoolUtility.getAllDeadlines();
+        expect(deadLines.length).toBe(3);
     });
 
     it('get the givebackamount and details for a school by id', async () => {

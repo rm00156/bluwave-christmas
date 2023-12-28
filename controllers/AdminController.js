@@ -385,7 +385,7 @@ exports.getRevenueChartScreen = async function(req,res)
 
 exports.getRevenues = async function(req,res)
 {
-    var revenues = await models.sequelize.query('select distinct cast(purchaseDttm as date) as dates, sum(subtotal) as subTotal from purchasebaskets ' +
+    var revenues = await models.sequelize.query('select distinct cast(purchaseDttm as date) as dates, sum(subtotal) as subTotal from purchaseBaskets ' +
             ' where status = :completed ' +
             ' group by dates having sum(subtotal) > 0 ',
             {replacements:{completed:'Completed'}, type: models.sequelize.QueryTypes.SELECT});
@@ -398,11 +398,11 @@ exports.getAccountsWithBasketItems = async function(req,res)
     var ordersNotShipped = await orderUtility.getOrdersNotShipped();
     var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
-    var accounts = await models.sequelize.query('select distinct a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at from basketitems b ' +
+    var accounts = await models.sequelize.query('select distinct a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at from basketItems b ' +
                         ' inner join accounts a on b.accountFk = a.id  where purchaseBasketfk is null ' +
                         ' order by a.created_at ', {type:models.sequelize.QueryTypes.SELECT});
                     
-    var accounts2 = await models.sequelize.query('select distinct a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at from basketitems b ' +
+    var accounts2 = await models.sequelize.query('select distinct a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at from basketItems b ' +
                         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                         ' inner join accounts a on b.accountFk = a.id ' +
                         ' where pb.status = :pending ', 
@@ -410,11 +410,11 @@ exports.getAccountsWithBasketItems = async function(req,res)
     accounts.push(...accounts2);
 
     console.log(accounts);
-    var result = await models.sequelize.query('select sum(b.cost) as outstandingAmount from basketitems b ' +
-                ' where purchaseBasketfk is null ', {type:models.sequelize.QueryTypes.SELECT}); 
+    var result = await models.sequelize.query('select sum(b.cost) as outstandingAmount from basketItems b ' +
+                ' where purchaseBasketFk is null ', {type:models.sequelize.QueryTypes.SELECT}); 
     
     var outstandingAmount = result[0].outstandingAmount == null ? 0 : result[0].outstandingAmount;
-    result = await models.sequelize.query('select sum(b.cost) as outstandingAmount from basketitems b ' +
+    result = await models.sequelize.query('select sum(b.cost) as outstandingAmount from basketItems b ' +
                 ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id where pb.status = :pending ', 
                 {replacements:{pending: 'Pending'},type:models.sequelize.QueryTypes.SELECT}); 
     outstandingAmount = parseFloat(outstandingAmount) + parseFloat(result[0].outstandingAmount == null ? 0 : result[0].outstandingAmount);
@@ -430,12 +430,12 @@ exports.getAccountsLinkedNoOrder = async function(req,res)
     var ordersNotShipped = await orderUtility.getOrdersNotShipped();
     var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
-    var accounts = await models.sequelize.query('select distinct s.name as school, a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at  from productitems pi ' +
+    var accounts = await models.sequelize.query('select distinct s.name as school, a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at  from productItems pi ' +
         ' inner join accounts a on pi.accountFk = a.id ' + 
         ' inner join classes c on c.id = pi.classFk ' +
         ' inner join schools s on c.schoolFk = s.id ' +
-        ' where accountFk not in (select b.accountFk from purchasebaskets pb ' +
-        ' inner join basketitems b on b.purchasebasketFk = pb.id ' +
+        ' where accountFk not in (select b.accountFk from purchaseBaskets pb ' +
+        ' inner join basketItems b on b.purchasebasketFk = pb.id ' +
         ' where pb.status = :completed )', {replacements:{completed:'Completed'},type:models.sequelize.QueryTypes.SELECT});
 
     res.render('accountsLinkedNoOrders', {user:req.user,schoolsRequiringGiveBackAction:schoolsRequiringGiveBackAction,
@@ -448,10 +448,10 @@ exports.getAccountsLinkedNoOrderButUploadedPicture = async function(req,res)
     var ordersNotShipped = await orderUtility.getOrdersNotShipped();
     var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
-    var accounts = await models.sequelize.query('select distinct a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at  from productitems pi ' +
+    var accounts = await models.sequelize.query('select distinct a.*, DATE_FORMAT(a.created_at, "%Y-%m-%d %H:%i:%s") as created_at  from productItems pi ' +
             ' inner join accounts a on pi.accountFk = a.id where classFk is not null ' +
-            ' and accountFk not in (select b.accountFk from purchasebaskets pb ' +
-            ' inner join basketitems b on b.purchasebasketFk = pb.id ' +
+            ' and accountFk not in (select b.accountFk from purchaseBaskets pb ' +
+            ' inner join basketItems b on b.purchasebasketFk = pb.id ' +
             ' where pb.status = :completed ) and pi.picture1Path != :defaultPic ', {replacements:{completed:'Completed', defaultPic:'https://kidscards4christmas.s3.eu-west-2.amazonaws.com/Pictures/1665963540329_191.png'},
             type:models.sequelize.QueryTypes.SELECT});
 

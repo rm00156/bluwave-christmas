@@ -107,7 +107,7 @@ exports.getProductTypeByName = async function (name) {
 }
 
 exports.getAllProductsByProductTypeId = async function (productTypeId) {
-    // var result = await models.sequelize.query('select distinct p.*, pi.productItemNumber, pv.price, pv.id as productVariantId from producttypes pt ' +
+    // var result = await models.sequelize.query('select distinct p.*, pi.productItemNumber, pv.price, pv.id as productVariantId from productTypes pt ' +
     //     ' inner join products p on p.productTypeFk = pt.id ' +
     //     ' inner join productVariants pv on pv.productFk = p.id ' +
     //     ' inner join productItems pi on pi.productVariantFk = pv.id ' +
@@ -121,7 +121,7 @@ exports.getAllProductsByProductTypeId = async function (productTypeId) {
     // if(result.length != 0)
     //     return result;
 
-    return await models.sequelize.query('select distinct p.*, pv.price, pv.id as productVariantId from producttypes pt ' +
+    return await models.sequelize.query('select distinct p.*, pv.price, pv.id as productVariantId from productTypes pt ' +
         ' inner join products p on p.productTypeFk = pt.id ' +
         ' inner join productVariants pv on pv.productFk = p.id ' +
         ' where pt.id = :productTypeId ' +

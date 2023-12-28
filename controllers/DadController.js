@@ -53,19 +53,19 @@ exports.sendFailedEmails = async function(req,res)
     // await workerQueue.add({process:'parent3DaysToDeadline'});
     // console.log('Parent 3 Days To Deadline recurring task starting');
 
-    var purchasebaskets = await models.sequelize.query('SELECT distinct pb.* FROM emails e ' +
+    var purchaseBaskets = await models.sequelize.query('SELECT distinct pb.* FROM emails e ' +
     ' inner join accounts a on e.accountFk = a.id  ' +
-    ' inner join basketitems b on b.accountfk = a.id ' +
-    ' inner join purchasebaskets pb on b.purchasebasketFk = pb.id ' +
+    ' inner join basketItems b on b.accountfk = a.id ' +
+    ' inner join purchaseBaskets pb on b.purchasebasketFk = pb.id ' +
     ' where e.status = :failed and e.emailTypeFk = 18 ' +
     ' and pb.status = :completed ',{
       replacements:{failed:'Failed',
                     completed:'Completed'},type:models.sequelize.QueryTypes.SELECT
     });
 
-    purchasebaskets.forEach(async purchaseBasket=>{
+    purchaseBaskets.forEach(async purchaseBasket=>{
 
-      models.sequelize.query('select b.*, k.name, k.age,k.code, a.email, if(s.name = "Individuals","", s.name) as school,s.postCode, p.name as packageName, if(k.displayAge=true,:yes,:no) as displayAge,if(k.displayClass=true,:yes,:no) as displayClass,if(k.displaySchool=true,:yes,:no) as displaySchool, FORMAT(b.cost,2) as cost from basketitems b ' + 
+      models.sequelize.query('select b.*, k.name, k.age,k.code, a.email, if(s.name = "Individuals","", s.name) as school,s.postCode, p.name as packageName, if(k.displayAge=true,:yes,:no) as displayAge,if(k.displayClass=true,:yes,:no) as displayClass,if(k.displaySchool=true,:yes,:no) as displaySchool, FORMAT(b.cost,2) as cost from basketItems b ' + 
       ' inner join kids k on b.kidFk = k.id ' + 
       ' inner join classes c on k.classFk = c.id ' +
       ' inner join schools s on c.schoolFk = s.id ' +
@@ -665,7 +665,7 @@ exports.generatePrintForm = function(req,res)
   models.sequelize.query('select b.quantity, FORMAT(b.cost,2) as cost, if(b.displayAge=true,:yes,:no) as displayAge, ' + 
     ' if(b.displaySchool=true,:yes,:no) as displaySchool,if(b.displayClass=true,:yes,:no) as displayClass,k.name as kidName, ' + 
     ' k.code, b.picture from purchaseBaskets pb ' + 
-    ' inner join basketitems b on b.purchaseBasketFk = pb.id ' + 
+    ' inner join basketItems b on b.purchaseBasketFk = pb.id ' + 
     ' inner join productItems pi on b.productItemFk = pi.id ' +
     ' inner join kids k on pi.kidFk = k.id ' + 
     ' inner join classes c on k.classFk = c.id ' + 
@@ -747,7 +747,7 @@ exports.sendMissingEmail = function(req,res)
     }
   }).then(purchaseBasket=>{
 
-    models.sequelize.query('select b.*, k.name, k.age,k.code, a.email,s.name as school,s.postCode, p.name as packageName, if(k.displayAge=true,:yes,:no) as displayAge,if(k.displayClass=true,:yes,:no) as displayClass,if(k.displaySchool=true,:yes,:no) as displaySchool, FORMAT(b.cost,2) as cost from basketitems b ' + 
+    models.sequelize.query('select b.*, k.name, k.age,k.code, a.email,s.name as school,s.postCode, p.name as packageName, if(k.displayAge=true,:yes,:no) as displayAge,if(k.displayClass=true,:yes,:no) as displayClass,if(k.displaySchool=true,:yes,:no) as displaySchool, FORMAT(b.cost,2) as cost from basketItems b ' + 
     ' inner join kids k on b.kidFk = k.id ' + 
     ' inner join classes c on k.classFk = c.id ' +
     ' inner join schools s on c.schoolFk = s.id ' +
@@ -804,11 +804,11 @@ const asyncForEachPurchase = async function(basketItems, callback)
 
 exports.getOrder = function(req,res)
 {
-  // return basketitems attached to purchasebasket
+  // return basketItems attached to purchasebasket
   var id = req.query.id;
   // console.log(id);
   models.sequelize.query('select distinct k.*,b.*, s.name as schoolName, c.name as className, p.name as packageName,pb.total,p.price,pb.purchaseDttm,pb.shippedFl,pb.shippingAddressFk, DATE_FORMAT(pb.shippedDttm, "%Y-%m-%d %H:%i:%s") as shippedDttm from purchaseBaskets pb ' + 
-      ' inner join basketitems b on b.purchaseBasketFk = pb.id ' +
+      ' inner join basketItems b on b.purchaseBasketFk = pb.id ' +
       ' inner join kids k on b.kidFk = k.id ' +
       ' inner join packages p on b.packageFk = p.id ' + 
       ' inner join classes c on k.classFk = c.id ' +
@@ -1739,7 +1739,7 @@ exports.getSchoolScreen = async function(req, res)
                                     models.sequelize.query('select distinct k.* from kids k ' + 
                                     ' inner join classes c on k.classFk = c.id ' + 
                                     ' inner join schools s on c.schoolFk = s.id ' + 
-                                    ' inner join basketitems b on b.kidFk = k.id ' + 
+                                    ' inner join basketItems b on b.kidFk = k.id ' + 
                                     ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                                     ' where s.id = :schoolId ' + 
                                     ' and pb.status = :completed '+
@@ -1770,7 +1770,7 @@ exports.getSchoolScreen = async function(req, res)
                                                   ' inner join schools s on c.schoolFk = s.id ' +
                                                   ' inner join years y on c.yearFk = y.id ' +
                                                   ' inner join kids k on k.classFk = c.id ' +
-                                                  ' inner join basketitems b on b.kidFk = k.id ' +
+                                                  ' inner join basketItems b on b.kidFk = k.id ' +
                                                   ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                                                   ' where s.id = :schoolId ' + 
                                                   ' and pb.status = :completed ' +
@@ -1919,7 +1919,7 @@ exports.getAccount = function(req,res)
         }
       }).then(kids=>{
 
-        models.sequelize.query('select distinct pb.* from basketitems b ' + 
+        models.sequelize.query('select distinct pb.* from basketItems b ' + 
                           ' inner join accounts a on b.accountFk = a.id ' + 
                           ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                           ' where pb.status = :completed ' +
@@ -2296,7 +2296,7 @@ exports.generatePurchasedCards = function(req,res)
 {
     var classId = req.query.classId;
 
-     models.sequelize.query('select distinct b.* from basketitems b ' + 
+     models.sequelize.query('select distinct b.* from basketItems b ' + 
               ' inner join kids k on b.kidFk = k.id ' + 
               ' inner join classes c on k.classFk = c.id ' + 
               ' inner join purchaseBaskets p on b.purchaseBasketFk = p.id ' +

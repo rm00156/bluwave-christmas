@@ -396,7 +396,7 @@ async function uploadAndGenerate(productItemId, pictureNumber, productId, files,
     progress++;
     job.progress(progress);
     
-    // regenerate the productitems pdf and update the value
+    // regenerate the productItems pdf and update the value
     var kid = await kidController.getKidById(kidId);
     await productController.generateUpdateProductItem(kid, productId, accountId);
     
@@ -516,8 +516,8 @@ async function noPurchaseMadeSinceSignUp()
 {
    models.sequelize.query('select distinct a2.* from accounts a2 ' + 
             ' where a2.id not in (select a.id from accounts a ' +
-            ' inner join basketitems b on b.accountfk = a.id ' +
-            ' inner join purchasebaskets pb on b.purchasebasketfk = pb.id ' + 
+            ' inner join basketItems b on b.accountfk = a.id ' +
+            ' inner join purchaseBaskets pb on b.purchasebasketfk = pb.id ' + 
             ' where pb.status= :completed ) and a2.accountTypeFk = 2 ' +
             ' and a2.id not in (select accountFk from emails where emailTypeFk = 19) ',
             {replacements:{completed:'Completed'}, type:models.sequelize.QueryTypes.SELECT})
@@ -561,7 +561,7 @@ async function parent1DayToDeadline()
 
   models.sequelize.query('select distinct a2.*, d.deadLineDttm, s.name from accounts a2 ' +
   ' inner join schools s on s.organiserAccountFk = a2.id ' +
-  ' inner join deadlines d on d.schoolFk = s.id ' +
+  ' inner join deadLines d on d.schoolFk = s.id ' +
   ' where a2.id not in (select distinct e.accountFk from emails e where e.emailTypeFk = 15 and e.status= :status) ' +
   ' and subdate(d.deadLineDttm , 1 ) <= current_date()   ',
   {replacements:{ status:'Success'},type:models.sequelize.QueryTypes.SELECT})
@@ -577,7 +577,7 @@ async function parent3DaysToDeadline()
 
   var results = await models.sequelize.query('select distinct a2.*, d.deadLineDttm, s.name from accounts a2 ' +
       ' inner join schools s on s.organiserAccountFk = a2.id ' +
-      ' inner join deadlines d on d.schoolFk = s.id ' +
+      ' inner join deadLines d on d.schoolFk = s.id ' +
       ' where a2.id not in (select distinct e.accountFk from emails e where e.emailTypeFk = 15 and e.status= :status) ' +
       ' and subdate(d.deadLineDttm , 3 ) <= current_date()  ',
     {replacements:{status:'Success'},type:models.sequelize.QueryTypes.SELECT})
@@ -890,7 +890,7 @@ async function noDeadlineResponse()
 
   var schools = await models.sequelize.query('select s.*, d.emailSentDttm from schools s ' +
     ' inner join statuses st on st.schoolFk = s.id ' + 
-    ' inner join deadlines d on d.schoolFk = s.id ' + 
+    ' inner join deadLines d on d.schoolFk = s.id ' + 
     ' where st.id = (select st2.id from statuses st2 where st2.schoolFk = s.id order by st2.createdDttm desc LIMIT 1) ' + 
     ' and st.statusTypeFk = 5 ' + 
     ' and d.continueFl is false ' +
@@ -930,7 +930,7 @@ async function forEachNoResponseDeadline(schools, callback)
 
 async function charity()
 {
-  var schools = await models.sequelize.query('select distinct s.*, st.createdDttm from basketitems b ' +
+  var schools = await models.sequelize.query('select distinct s.*, st.createdDttm from basketItems b ' +
   ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
   ' inner join productItems pi on b.productItemFk = pi.id ' + 
   ' inner join classes c on pi.classFk = c.id ' + 
@@ -1066,7 +1066,7 @@ async function eachPurchaseSchool(array,callback)
 async function delayRecurringTask()
 {
   var schools = await models.sequelize.query('select s.* from schools s ' + 
-                  ' inner join deadlines d on d.schoolFk = s.id ', {type:models.sequelize.QueryTypes.SELECT});
+                  ' inner join deadLines d on d.schoolFk = s.id ', {type:models.sequelize.QueryTypes.SELECT});
 
   for(var i = 0; i < schools.length; i++)
   {
@@ -1099,7 +1099,7 @@ async function delayRecurringTask()
 }
 
 async function deadlineRecurringTask() {
-  var deadlines = await models.sequelize.query('select d.* from deadlines d ' +
+  var deadLines = await models.sequelize.query('select d.* from deadLines d ' +
               ' inner join schools s on d.schoolFk = s.id ' + 
               ' where d.emailSentFl = false ' + 
               ' and concat(date(d.deadLineDttm ), :beforeMidnight)< now() ' + 
@@ -1108,8 +1108,8 @@ async function deadlineRecurringTask() {
                 console.log(err)
               })
 
-  for( var i = 0; i < deadlines.length; i++) {
-    var deadline = deadlines[i];
+  for( var i = 0; i < deadLines.length; i++) {
+    var deadline = deadLines[i];
   
     var schoolId = deadline.schoolFk;
 
@@ -2918,7 +2918,7 @@ const printForm  = async function(data, i,template)
 
 async function sendOrdersNotShippedReminder()
 {
-  var orderNumbers = await models.sequelize.query('select pb.orderNumber from purchasebaskets pb ' +
+  var orderNumbers = await models.sequelize.query('select pb.orderNumber from purchaseBaskets pb ' +
         ' inner join shippingAddresses sa on pb.shippingAddressFk = sa.id where pb.status = :completed ' +
         ' and pb.shippedFl is false ', {replacements:{completed:'Completed'}, type: models.sequelize.QueryTypes.SELECT});
 

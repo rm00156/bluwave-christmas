@@ -67,7 +67,7 @@ const loadScreen = async function (req, res) {
                     models.sequelize.query('select distinct k.* from kids k ' +
                         ' inner join classes c on k.classFk = c.id ' +
                         ' inner join schools s on c.schoolFk = s.id ' +
-                        ' inner join basketitems b on b.kidFk = k.id ' +
+                        ' inner join basketItems b on b.kidFk = k.id ' +
                         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                         ' where s.id = :schoolId ' +
                         ' and pb.status = :completed ' +
@@ -85,7 +85,7 @@ const loadScreen = async function (req, res) {
                                 }
                             }).then(kid => {
 
-                                models.sequelize.query('select p.price, b.quantity from  basketitems b ' +
+                                models.sequelize.query('select p.price, b.quantity from  basketItems b ' +
                                     ' inner join packages p on b.packageFk = p.id ' +
                                     ' where b.accountFk = :accountId ' +
                                     ' and purchaseBasketFk is null', {
@@ -99,7 +99,7 @@ const loadScreen = async function (req, res) {
                                         subTotal = subTotal + parseFloat(basketItem.price) * basketItem.quantity;
                                     });
 
-                                    models.sequelize.query('select p.price, b.quantity from basketitems b ' +
+                                    models.sequelize.query('select p.price, b.quantity from basketItems b ' +
                                         ' inner join packages p on b.packageFk = p.id ' +
                                         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                                         ' where b.accountFk = :accountId ' +
@@ -243,7 +243,7 @@ const parentScreen = async function(req,res, account, pageToRender)
           // need to extract to a method
          let packages = await dadController.viewPackages2();
 
-         let result = await models.sequelize.query('select p.price, b.quantity from  basketitems b ' + 
+         let result = await models.sequelize.query('select p.price, b.quantity from  basketItems b ' + 
          ' inner join packages p on b.packageFk = p.id ' +
          ' where b.accountFk = :accountId ' + 
          ' and purchaseBasketFk is null'  , {replacements:{
@@ -257,7 +257,7 @@ const parentScreen = async function(req,res, account, pageToRender)
             });
 
             
-           return models.sequelize.query('select p.price, b.quantity from basketitems b ' + 
+           return models.sequelize.query('select p.price, b.quantity from basketItems b ' + 
             ' inner join packages p on b.packageFk = p.id ' +
             ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
             ' where b.accountFk = :accountId ' + 
@@ -282,7 +282,7 @@ const parentScreen = async function(req,res, account, pageToRender)
             }
         }).then(kid=>{
             
-            models.sequelize.query('select b.quantity,  b.cost, p.name, p.price, pb.purchaseDttm from basketitems b ' + 
+            models.sequelize.query('select b.quantity,  b.cost, p.name, p.price, pb.purchaseDttm from basketItems b ' + 
                 ' inner join packages p on b.packageFk = p.id ' +
                 ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                 ' where b.accountFk = :accountId ' + 
@@ -308,7 +308,7 @@ const parentScreen = async function(req,res, account, pageToRender)
                             kidIds.push(kid.id);
                         })
 
-                        models.sequelize.query('select distinct sum(d.cost) as cost from basketitems b ' +
+                        models.sequelize.query('select distinct sum(d.cost) as cost from basketItems b ' +
                                                ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                                                ' inner join shippingAddresses s on pb.shippingAddressFk = s.id ' + 
                                                ' inner join deliveryCosts d on pb.deliveryCostFk = d.id ' +
@@ -410,7 +410,7 @@ exports.addToBasket2 = async function(req,res)
                                 }
                             }).then(basketItems=>{
             
-                                models.sequelize.query('select * from basketitems b ' + 
+                                models.sequelize.query('select * from basketItems b ' + 
                                 ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                                 ' where b.accountFk = :accountId ' + 
                                 ' and pb.status = :pending' , {replacements:{
@@ -473,7 +473,7 @@ exports.addToBasket2 = async function(req,res)
                 //             }
                 //         }).then(basketItems=>{
         
-                //             models.sequelize.query('select * from basketitems b ' + 
+                //             models.sequelize.query('select * from basketItems b ' + 
                 //             ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                 //             ' where b.accountFk = :accountId ' + 
                 //             ' and pb.status = :pending' , {replacements:{
@@ -593,7 +593,7 @@ exports.addToBasket = function(req,res)
                             }
                         }).then(basketItems=>{
         
-                            models.sequelize.query('select * from basketitems b ' + 
+                            models.sequelize.query('select * from basketItems b ' + 
                             ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                             ' where b.accountFk = :accountId ' + 
                             ' and pb.status = :pending' , {replacements:{
@@ -652,7 +652,7 @@ exports.addToBasket = function(req,res)
                             }
                         }).then(basketItems=>{
         
-                            models.sequelize.query('select * from basketitems b ' + 
+                            models.sequelize.query('select * from basketItems b ' + 
                             ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                             ' where b.accountFk = :accountId ' + 
                             ' and pb.status = :pending' , {replacements:{
@@ -709,7 +709,7 @@ exports.linkKid =async function(req,res)
 
             var displayParentSection = kid == null ? false : true; 
 
-            models.sequelize.query('select * from basketitems b ' + 
+            models.sequelize.query('select * from basketItems b ' + 
                         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                         ' where b.accountFk = :accountId ' + 
                         ' and pb.status = :pending' , {replacements:{
@@ -927,7 +927,7 @@ const viewCards = async function(cards,req,res, pageToRender)
         }
     }).then(basketItems=>{
 
-        return models.sequelize.query('select * from basketitems b ' + 
+        return models.sequelize.query('select * from basketItems b ' + 
                         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                         ' where b.accountFk = :accountId ' + 
                         ' and pb.status = :pending' , {replacements:{
@@ -1266,7 +1266,7 @@ exports.shop = async function(req,res)
         }
     }).then(basketItems=>{
 
-        models.sequelize.query('select * from basketitems b ' + 
+        models.sequelize.query('select * from basketItems b ' + 
         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
         ' where b.accountFk = :accountId ' + 
         ' and pb.status = :pending' , {replacements:{
@@ -1336,7 +1336,7 @@ exports.getOrderHistory = function(req,res)
         }
     }).then(basketItems=>{
 
-        models.sequelize.query('select * from basketitems b ' + 
+        models.sequelize.query('select * from basketItems b ' + 
         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
         ' where b.accountFk = :accountId ' + 
         ' and pb.status = :pending' , {replacements:{
@@ -1355,7 +1355,7 @@ exports.getOrderHistory = function(req,res)
 
             var numberOfBasketItems = basketItems.length + basketItems2.length;
 
-            models.sequelize.query('select b.quantity,  b.cost, p.name, p.price, pb.purchaseDttm from basketitems b ' + 
+            models.sequelize.query('select b.quantity,  b.cost, p.name, p.price, pb.purchaseDttm from basketItems b ' + 
                 ' inner join packages p on b.packageFk = p.id ' +
                 ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                 ' where b.accountFk = :accountId ' + 
@@ -1381,7 +1381,7 @@ exports.getOrderHistory = function(req,res)
                         //     kidIds.push(kid.id);
                         // })
 
-                        models.sequelize.query('select distinct sum(d.cost) as cost from basketitems b ' +
+                        models.sequelize.query('select distinct sum(d.cost) as cost from basketItems b ' +
                                                ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                                                ' inner join shippingAddresses s on pb.shippingAddressFk = s.id ' + 
                                                ' inner join deliveryCosts d on pb.deliveryCostFk = d.id ' +
@@ -1452,7 +1452,7 @@ exports.getProductItem = function(req,res)
 //                             }
 //                         }).then(basketItems=>{
         
-//                             models.sequelize.query('select * from basketitems b ' + 
+//                             models.sequelize.query('select * from basketItems b ' + 
 //                             ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
 //                             ' where b.accountFk = :accountId ' + 
 //                             ' and pb.status = :pending' , {replacements:{
@@ -1555,7 +1555,7 @@ exports.createProof = async function(req,res)
         ' inner join cards cd on cd.kidFk = k.id ' + 
         ' inner join schools s on c.schoolFk  = s.id ' +
         ' inner join years y on c.yearFk = y.id ' +
-        ' inner join deadlines d on d.schoolFk = s.id ' +
+        ' inner join deadLines d on d.schoolFk = s.id ' +
         ' where k.id = :kidId ' +
         ' and k.deleteFl = false ' ,
         {replacements:{kidId:kidId}, type: models.sequelize.QueryTypes.SELECT})
@@ -1607,7 +1607,7 @@ exports.createProofsForClass = async function(req,res)
         ' inner join cards cd on cd.kidFk = k.id ' + 
         ' inner join schools s on c.schoolFk  = s.id ' +
         ' inner join years y on c.yearFk = y.id ' +
-        ' inner join deadlines d on d.schoolFk = s.id ' +
+        ' inner join deadLines d on d.schoolFk = s.id ' +
         ' where c.id = :classId ' +
         ' and k.deleteFl = false ' ,
         {replacements:{classId:classId}, type: models.sequelize.QueryTypes.SELECT})
@@ -1761,7 +1761,7 @@ exports.kid = async function(req,res)
                     }
                 }).then( async basketItems=>{
             
-                    models.sequelize.query('select * from basketitems b ' + 
+                    models.sequelize.query('select * from basketItems b ' + 
                         ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                         ' where b.accountFk = :accountId ' + 
                         ' and pb.status = :pending' , {replacements:{
@@ -1788,7 +1788,7 @@ exports.kid = async function(req,res)
                                 models.sequelize.query('select distinct k.*, kh.* from kids k ' + 
                                                 ' inner join classes c on k.classFk = c.id ' + 
                                                 ' inner join schools s on c.schoolFk = s.id ' + 
-                                                ' inner join basketitems b on b.kidFk = k.id ' + 
+                                                ' inner join basketItems b on b.kidFk = k.id ' + 
                                                 ' inner join kidorderhistories kh on kh.kidFk = k.id ' + 
                                                 ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
                                                 ' where k.id = :kidId '+ 
@@ -1849,7 +1849,7 @@ exports.kid = async function(req,res)
                 }).then( async basketItems=>{
             
 
-                    models.sequelize.query('select * from basketitems b ' + 
+                    models.sequelize.query('select * from basketItems b ' + 
                     ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' + 
                     ' where b.accountFk = :accountId ' + 
                     ' and pb.status = :pending' , {replacements:{
