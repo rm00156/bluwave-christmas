@@ -63,7 +63,7 @@ exports.getOrdersForClassId = async function(classId)
     ' inner join classes c on k.classFk = c.id ' + 
     ' inner join schools s on c.schoolFk = s.id ' + 
     ' inner join productItems pi on pi.kidFk = k.id ' +
-    ' inner join basketitems b on b.productItemFk = pi.id ' + 
+    ' inner join basketItems b on b.productItemFk = pi.id ' + 
     ' inner join purchaseBaskets pb on b.purchaseBasketFk = pb.id ' +
     ' where c.id = :classId ' + 
     ' and k.deleteFl = false ' +
@@ -387,7 +387,7 @@ exports.getOrderDetailsGroupByTypeForId = async function(purchaseBasketId, job)
     var progress = 1;
     job.progress(progress);
 
-    var calendars = await models.sequelize.query('select distinct b.* from purchasebaskets pb ' +
+    var calendars = await models.sequelize.query('select distinct b.* from purchaseBaskets pb ' +
                     ' inner join basketItems b on b.purchaseBasketFk = pb.id ' +
                     ' inner join productItems pi on b.productItemFk = pi.id ' +
                     ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
@@ -398,7 +398,7 @@ exports.getOrderDetailsGroupByTypeForId = async function(purchaseBasketId, job)
                     ' and pb.id = :id ', {replacements:{completed:'Completed', id: purchaseBasketId, calendars: 'Calendars'},
                     type: models.sequelize.QueryTypes.SELECT});
     
-    var cards = await models.sequelize.query('select distinct b.* from purchasebaskets pb ' +
+    var cards = await models.sequelize.query('select distinct b.* from purchaseBaskets pb ' +
                     ' inner join basketItems b on b.purchaseBasketFk = pb.id ' +
                     ' inner join productItems pi on b.productItemFk = pi.id ' +
                     ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
@@ -546,7 +546,7 @@ exports.getSearchOrders = async function(req,res)
     var date = req.body.date;
 
     var result = await models.sequelize.query('select distinct p.id, DATE_FORMAT(p.purchaseDttm, "%Y-%m-%d %H:%i:%s") as purchaseDttm, p.orderNumber,p.total, k.name, k.code, s.name as schoolName, c.name as className from purchaseBaskets p ' + 
-    ' inner join basketitems b on b.purchaseBasketFk = p.id ' + 
+    ' inner join basketItems b on b.purchaseBasketFk = p.id ' + 
     ' inner join productItems pi on b.productItemFk = pi.id ' +
     ' inner join kids k on  pi.kidFk = k.id ' + 
     ' inner join classes c on k.classFk = c.id ' + 
@@ -570,7 +570,7 @@ exports.getSearchOrders = async function(req,res)
     },type:models.sequelize.QueryTypes.SELECT});
 
     var result2s = await models.sequelize.query('select distinct p.id, DATE_FORMAT(p.purchaseDttm, "%Y-%m-%d %H:%i:%s") as purchaseDttm,p.total, p.orderNumber, k.name, k.code, s.name as schoolName, c.name as className from purchaseBaskets p ' + 
-      ' inner join basketitems b on b.purchaseBasketFk = p.id ' + 
+      ' inner join basketItems b on b.purchaseBasketFk = p.id ' + 
       ' inner join productItems pi on b.productItemFk = pi.id ' +
       ' inner join kids k on pi.kidFk = k.id ' + 
       ' inner join classes c on k.classFk = c.id ' + 
@@ -599,7 +599,7 @@ exports.getSearchOrders = async function(req,res)
     })
 
     var result3s = await models.sequelize.query('select distinct p.id,  DATE_FORMAT(p.purchaseDttm, "%Y-%m-%d %H:%i:%s") as purchaseDttm,p.total, p.orderNumber from purchaseBaskets p ' + 
-          ' inner join basketitems b on b.purchaseBasketFk = p.id ' + 
+          ' inner join basketItems b on b.purchaseBasketFk = p.id ' + 
           ' inner join productItems pi on b.productItemFk = pi.id ' +
           ' where p.status = :completed ' + 
           ' and p.purchaseDttm like :date ' + 
@@ -632,8 +632,8 @@ exports.getSubTotalOfAllOrdersToday = async function()
 exports.getAverageTimeFromSignUpToPurchaseInMinutes = async function()
 {
     var result = await models.sequelize.query('select avg(TIMESTAMPDIFF(minute, a.created_at, pb.purchaseDttm)) as average from accounts a ' +
-        ' inner join basketitems b on b.accountFk = a.id ' +
-        ' inner join purchasebaskets pb on b.purchasebasketFk = pb.id ' +
+        ' inner join basketItems b on b.accountFk = a.id ' +
+        ' inner join purchaseBaskets pb on b.purchasebasketFk = pb.id ' +
         ' where pb.status = :completed ',
         {replacements:{completed:'Completed'}, type:models.sequelize.QueryTypes.SELECT});
 
@@ -642,7 +642,7 @@ exports.getAverageTimeFromSignUpToPurchaseInMinutes = async function()
 
 exports.getNumberOfOrdersToday = async function()
 {
-    var result = await models.sequelize.query('select distinct count(id) as numberOfOrdersToday from purchasebaskets where status = :completed ' +
+    var result = await models.sequelize.query('select distinct count(id) as numberOfOrdersToday from purchaseBaskets where status = :completed ' +
             ' and purchaseDttm > curdate()',
             {replacements:{completed:'Completed'}, type:models.sequelize.QueryTypes.SELECT});
 

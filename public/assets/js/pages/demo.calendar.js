@@ -43,12 +43,12 @@
             //         return { title: e.innerText, className: l(e).data("class") };
             //     },
             // });
-            var deadlines = JSON.parse($('#deadlines').val());
+            var deadLines = JSON.parse($('#deadlines').val());
             var array = new Array();
 
-            for(var i = 0; i < deadlines.length; i++)
+            for(var i = 0; i < deadLines.length; i++)
             {
-                var deadline = deadlines[i];
+                var deadline = deadLines[i];
                 var url = "new_school_details?number=" + deadline.schoolNumber;
                 var item = {title: deadline.name + (deadline.delayFl ? ' Delayed 3 Days' :''), start: new Date(deadline.deadLine), end:new Date(deadline.deadLine), className: (deadline.delayFl ? "bg-danger" : "bg-success"), draggable: false, url:url };
                 array.push(item);

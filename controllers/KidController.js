@@ -15,10 +15,10 @@ const adminUtility = require('../utility/admin/adminUtility');
 exports.getKidsFromAccountId = async function(accountId)
 {
     var kids1 =  await models.sequelize.query('select distinct k.*, pi.*, p.productNumber, pi.productItemNumber, pi.productVariantFk as productVariantId from kids k ' +
-                        ' inner join productitems pi on pi.kidfk = k.id ' +
+                        ' inner join productItems pi on pi.kidfk = k.id ' +
                         ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
                         ' inner join products p on pv.productFk = p.id ' +
-                        ' where pi.id = (select pi2.id from productitems pi2 inner join productVariants pv on pi2.productVariantFk = pv.id where pi2.kidFk = k.id and pv.orderNo =1 limit 1) ' +
+                        ' where pi.id = (select pi2.id from productItems pi2 inner join productVariants pv on pi2.productVariantFk = pv.id where pi2.kidFk = k.id and pv.orderNo =1 limit 1) ' +
                         ' and pi.accountFk = :accountId', {replacements:{accountId:accountId},
                 type:models.sequelize.QueryTypes.SELECT});
 
@@ -28,10 +28,10 @@ exports.getKidsFromAccountId = async function(accountId)
 exports.getKidsFromAccountIdAndProductId = async function(accountId, productId)
 {
     var kids1 =  await models.sequelize.query('select distinct k.*, pi.*, p.productNumber, pi.productItemNumber, pi.productVariantFk as productVariantId from kids k ' +
-                        ' inner join productitems pi on pi.kidfk = k.id ' +
+                        ' inner join productItems pi on pi.kidfk = k.id ' +
                         ' inner join productVariants pv on pi.productVariantFk = pv.id ' +
                         ' inner join products p on pv.productFk = p.id ' +
-                        ' where pi.id = (select pi2.id from productitems pi2 inner join productVariants pv on pi2.productVariantFk = pv.id where pi2.kidFk = k.id and pv.orderNo =1 limit 1) ' +
+                        ' where pi.id = (select pi2.id from productItems pi2 inner join productVariants pv on pi2.productVariantFk = pv.id where pi2.kidFk = k.id and pv.orderNo =1 limit 1) ' +
                         ' and pi.accountFk = :accountId ' +
                         ' and p.id = :productId ', {replacements:{accountId:accountId, productId:productId},
                 type:models.sequelize.QueryTypes.SELECT});

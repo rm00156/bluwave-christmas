@@ -182,13 +182,13 @@ exports.getGiveBacksScreen = async function (req, res) {
 exports.getDeadlinesScreen = async function (req, res) {
     var backgroundSetting = await adminUtility.getBackgroundSetting(req.user.id);
     var ordersNotShipped = await orderUtility.getOrdersNotShipped();
-    var deadlines = await schoolUtility.getAllDeadlines();
+    var deadLines = await schoolUtility.getAllDeadlines();
 
     var schoolsRequiringGiveBackAction = await schoolUtility.getSchoolsRequiringGiveBackAction();
 
     res.render('deadlines', {
         user: req.user, schoolsRequiringGiveBackAction: schoolsRequiringGiveBackAction,
-        backgroundSetting: backgroundSetting, deadlines: deadlines, ordersNotShipped: ordersNotShipped
+        backgroundSetting: backgroundSetting, deadLines: deadLines, ordersNotShipped: ordersNotShipped
     });
 }
 
