@@ -276,8 +276,8 @@ exports.signupPage = async function(req,res)
 
 exports.signupOrganiserPage = function(req,res)
 {
-    // res.render('signupOrganiser3',{errors:{}});
-    res.redirect('/login');
+    res.render('signupOrganiser3',{errors:{}});
+    // res.redirect('/login');
 }
 
 exports.signUpAdmin = function(req,res)
