@@ -8,8 +8,8 @@
     "heroku-postbuild": "mkdir ./.cache && mv /app/.cache/puppeteer ./.cache"
   },
   "engines": {
-    "node": "^17.3.0",
-    "yarn": "^1.0.1"
+    "node": "^20.1.0",
+    "npm": "^9.6.4"
   },
   "author": "",
   "license": "ISC",
@@ -18,7 +18,7 @@
     "aws-sdk": "^2.1163.0",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",
-    "bootstrap": "^4.6.1",
+    "bootstrap": "^5.3.3",
     "bootstrap-select": "^1.13.18",
     "bull": "^4.8.4",
     "connect-flash": "^0.1.1",
@@ -46,13 +46,13 @@
     "node-fetch": "^2.6.7",
     "node-schedule": "^1.3.3",
     "nodemailer": "^6.7.5",
-    "nodemailer-express-handlebars": "^3.3.0",
-    "passport": "^0.4.1",
+    "nodemailer-express-handlebars": "^6.1.2",
+    "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "path": "^0.12.7",
     "pdf-merge": "^1.2.0",
-    "pug": "^2.0.4",
-    "puppeteer": "^21.5.2",
+    "pug": "^3.0.3",
+    "puppeteer": "^22.8.2",
     "qrcode": "^1.5.0",
     "querystring": "^0.2.1",
     "raw-body": "^2.5.1",
