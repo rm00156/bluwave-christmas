@@ -231,7 +231,7 @@ const {hasOrganiserOrAdminAuth,redirectToDashboard,isLoggedIn, hasAdminAuth,
     router.get('/new_school_details', isLoggedIn,hasDefaultPasswordAuth, hasAdminAuth, schoolController.getSchoolPage);
     router.get('/adminDashboard', isLoggedIn,hasDefaultPasswordAuth, hasAdminAuth, adminController.getAdminDashboardPage);
     router.get('/new_accounts_admin', isLoggedIn,hasDefaultPasswordAuth, hasAdminAuth, adminController.getAdminAccountPage);
-    // router.get('/signup_organiser', signUpController.signupOrganiserPage);
+    router.get('/signup_organiser', signUpController.signupOrganiserPage);
     router.get('/school_details',isLoggedIn, organiserController.getSchoolDetailsPage);
     router.post('/edit_school_details', isLoggedIn, organiserController.editSchoolDetails);
     router.post('/uploadAndGenerate', isLoggedIn, productController.uploadAndGenerate);
