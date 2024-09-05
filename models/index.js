@@ -6,7 +6,12 @@ var env = process.env.NODE_ENV || "development";
 var sequelize = new Sequelize(env == "test" ? process.env.test_database : process.env.database, process.env.username, process.env.password, {
     host: process.env.database_host,
     dialect: process.env.database_dialect,
-    logging: env != 'test'
+    logging: env != 'test',
+    pool: {
+        max: 12,
+        min: 0,
+        idle: 10000,
+      },
 });
 var db = {};
 
