@@ -15,7 +15,7 @@ const hbs = require('handlebars');
 const PDFMerge = require('pdf-merge');
 const nodeMailer = require('nodemailer');
 // Connect to a local redis intance locally, and the Heroku-provided URL in production
-let REDIS_URL = /*process.env.REDIS_URL*/ process.env.STACKHERO_REDIS_URL_TLS || "redis://127.0.0.1:6379";
+let REDIS_URL = /*process.env.REDIS_URL*/ process.env.AH_REDIS_STACKHERO_AMBER_URL_TLS || "redis://127.0.0.1:6379";
 const env = process.env.NODE_ENV || "development";
 const urlPrefix = env == 'development' ? 'http://localhost:4000' : process.env.website;
 const productController = require('./controllers/ProductController.js');
