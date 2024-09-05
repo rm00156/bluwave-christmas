@@ -275,12 +275,17 @@ exports.getKidProductItemsScreen = async function(req,res)
 
 exports.handleLinkKid = async function(name, years, months, classId, account, job)
 {
-    var kid = await createKid(name, years, months, classId, account);
-    var product = await productController.getProductByName('Create Your Own Card');
-    var productItems = await productController.createProductItems(product,kid.code,account);
-    job.progress(1);
-
-    return {productItem:productItems[0], product:product};
+    try {
+        var kid = await createKid(name, years, months, classId, account);
+        var product = await productController.getProductByName('Create Your Own Card');
+        var productItems = await productController.createProductItems(product,kid.code,account);
+        job.progress(1);
+    
+        return {productItem:productItems[0], product:product};
+    } catch(err) {
+        console.log(err)
+    }
+    
 }
 
 exports.linkKidJob = async function(req,res)
