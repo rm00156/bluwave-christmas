@@ -8,8 +8,8 @@
     "heroku-postbuild": "mkdir ./.cache && mv /app/.cache/puppeteer ./.cache"
   },
   "engines": {
-    "node": "^20.1.0",
-    "npm": "^9.6.4"
+    "node": "^21.2.0",
+    "npm": "^10.2.3"
   },
   "author": "",
   "license": "ISC",
@@ -45,7 +45,7 @@
     "mysql2": "^3.6.5",
     "node-fetch": "^2.6.7",
     "node-schedule": "^1.3.3",
-    "nodemailer": "^6.7.5",
+    "nodemailer": "^6.9.15",
     "nodemailer-express-handlebars": "^6.1.2",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
