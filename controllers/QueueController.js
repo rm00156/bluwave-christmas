@@ -1,5 +1,5 @@
 const Queue = require('bull');
-const REDIS_URL = /*process.env.REDIS_URL*/ process.env.STACKHERO_REDIS_URL_TLS  || 'redis://127.0.0.1:6379';
+const REDIS_URL = /*process.env.REDIS_URL*/ process.env.AH_REDIS_STACKHERO_AMBER_URL_TLS  || 'redis://127.0.0.1:6379';
 const redis = require('redis');
 
 const redisUrlParse = require('redis-url-parse');
