@@ -1,12 +1,12 @@
 const models = require('../../models');
-const generalUtility = require('../general/generalUtility')
+const {makeCode} = require('../general/generalUtility')
 
 async function createProductItem(details) {
     return models.productItem.create(details);
 }
 
 async function getNewProductItemNumber() {
-    var number = generalUtility.makeCode();
+    var number = makeCode();
 
     var productItem = await getProductItemByNumber(number);
 

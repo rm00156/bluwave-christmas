@@ -113,6 +113,7 @@ exports.signup = async (req, res, next)=>{
 
         const t = await models.sequelize.transaction()
         var accountNumber = await accountUtility.getNewAccountCode();
+        let newAccount;
         try {
 
             const accountDetail = {
@@ -124,7 +125,7 @@ exports.signup = async (req, res, next)=>{
                 telephoneNumber: req.body.telephoneNo,
                 defaultPassword: false
             }
-            const newAccount = await accountUtility.createAccount(accountDetail);
+            newAccount = await accountUtility.createAccount(accountDetail);
 
             var schoolNumber = await schoolUtility.generateSchoolNumber();
 
@@ -261,9 +262,11 @@ exports.login = function( req,res,next)
 
 exports.logout = function(req, res, next)
 {
-    req.logout();
-    req.session.destroy();
-    res.redirect('/');
+    req.logout(() => {
+        req.session.destroy();
+        res.redirect('/');
+    });
+    
 }
 
 exports.signupPage = async function(req,res)
